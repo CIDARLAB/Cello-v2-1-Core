@@ -21,11 +21,13 @@ brew install yosys
 
 ## Usage:
 CELLO-V3 takes the following parameters, and you can modify them in the __main__ function for celloAlgo.py, for example:
+
+(rememebr to put the verilog files and all UCF files you want to work with in the 'input_folder')
 ```
 vname = 'g92_boolean'
 ucfname = 'SC1C1G1T1'
 inpath = '/home/user/example/path/to/input_folder'
-outpath = '/home/user/example/path/to/input_folder'
+outpath = '/home/user/example/path/to/output_folder'
 ```
 Then to run Cello:
 
