@@ -1,3 +1,19 @@
+'''
+Copyright 2023 CIDAR LAB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+'''
+
 import json
 from logic_synthesis import *
 from netlist_class import Netlist
@@ -173,29 +189,13 @@ class CELLO3:
                         elif circuit_score == bestscore:
                             bestgraphs.append((circuit_score, graph))
                         
-        print(f'\nCOUNTed: {count:,} iterations')
-        
-        
-        # temp
-        # circuit_score = self.score_circuit(graph)
-        # print(f'circuit score: {circuit_score}')
-        # bestgraphs = [graph]   
-        # end temp    
+        print(f'\nCOUNTed: {count:,} iterations')   
         
         return bestgraphs
     
-    # NOTE: this function calculates CIRCUIT SCORE
-    # NOTE: modify it if you want circuit score to be caldulated differently
+    
     def score_circuit(self, graph: AssignGraph, verbose=True):
         # NOTE: PLEASE ENSURE ALL FUTURE UCF FILES FOLLOW THE SAME FORAMT AS ORIGINALS
-        # (THAT'S THE ONLY TO GET THIS TO WORK)
-        
-        # NOTE: RETURNS circuit_score
-        # NOTE: this is the core mapping from UCF
-        
-        # NOTE: use one gate from each group only!
-        # NOTE: try every gate from each group (graph.gates.gate_id = group name)
-        # print(graph.gates)
         
         '''
         Pseudo code:
@@ -224,9 +224,7 @@ class CELLO3:
             for each individual gate assignment:
                 traverse circuit from inputs (input composition is mostly x1+x2)
                 evaluate output
-
         '''
-        
         
         # First, make sure that all inputs use the same 'sensor_response' function
         # This has to do with UCF formatting
@@ -260,7 +258,6 @@ class CELLO3:
         # for g in gate_ids:
         #     print(g)
         # print()  
-        
         
         gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
         gate_id_names = [i[1]+'_model' for i in gate_ids]
