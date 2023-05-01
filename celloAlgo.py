@@ -8,9 +8,6 @@ sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from cello_helpers import *
 from gate_assignment import *
 
-#temp
-# from tqdm import tqdm
-
 # CELLO arguments:
 # 1. verilog name
 # 2. ucf name (could be made optional)
@@ -18,7 +15,7 @@ from gate_assignment import *
 # 4. path-for-output
 # 5. options (optional)
 
-# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices, 
+# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices (currently), 
 # therefore so far it is the only one that will work for 2-output circuits
 # TODO: fix the UCFs with syntax errors
 class CELLO3:
