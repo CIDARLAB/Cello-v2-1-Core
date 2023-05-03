@@ -80,6 +80,7 @@ class CELLO3:
                             print(rnl_out, str(g_out))
                         print(f'unit_conversion = {graph.outputs[0].function}')
                         print()
+                        # with open(f'{self.outpath}/{self.vrlgname}')
                     
         return
         
@@ -435,8 +436,8 @@ if __name__ == '__main__':
     # ucflist = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
     # problem_ucfs = ['Eco1C2G2T2', 'Eco2C1G6T1']
     
-    # vname = 'and'
     vname = 'and'
+    # vname = 'nand'
     # vname = 'xor'
     # vname = 'priorityDetector'
     # vname = 'chat_3x2'
@@ -445,10 +446,10 @@ if __name__ == '__main__':
     # vname = 'g92_boolean'
     
     # (3in, 1out, 7gategroups)
-    # ucfname = 'Bth1C1G1T1'
+    ucfname = 'Bth1C1G1T1'
     
     # (4in, 1out, 12gategroups)
-    ucfname = 'Eco1C1G1T1'
+    # ucfname = 'Eco1C1G1T1'
     
     # (7in, 1out, 6gategroups)
     # ucfname = 'Eco2C1G3T1'
@@ -460,8 +461,8 @@ if __name__ == '__main__':
     # ucfname = 'SC1C1G1T1'
     
     # TODO: source UCF files from CELLO-UCF instead
-    inpath = '../../IO/inputs' # (contiains the verilog files, and UCF files)
-    outpath = '../../IO/cello_demo' # (any path to a local folder)
+    inpath = '../IO/inputs' # (contiains the verilog files, and UCF files)
+    outpath = '../IO/cello_demo' # (any path to a local folder)
     
     Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': True})
     
