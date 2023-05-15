@@ -17,7 +17,7 @@ YOSYS is the only required package to run Cello-v3-Core! Please check YOSYS inst
 brew install yosys
 ```
 
-(Note: Using a venv is recommended)
+(Note: Python venv is not needed for Cello-v3-Core, but is recommended)
 
 ## Usage:
 CELLO-V3 takes the following parameters, and you can modify them in the __main__ function for celloAlgo.py, for example:
