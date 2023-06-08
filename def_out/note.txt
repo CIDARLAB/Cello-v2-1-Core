@@ -1,0 +1,1 @@
+this folder is a temporary placeholder for where your Cello outputs will go, you can change this if you want.

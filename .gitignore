@@ -2,7 +2,9 @@
 .ipynb_checkpoints
 *.rdb
 venv/
+cello-v3-env/
 *.egg-info/
 test/
 __pycache__/
 .vscode/
+def_out/*

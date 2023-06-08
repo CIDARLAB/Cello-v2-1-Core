@@ -52,7 +52,7 @@ class UCF:
                 for o in out:
                     try:
                         ucf_name = o[0]['collection']
-                        print(f' - {ucf_name}')
+                        print(f' - name at collection[0]: {ucf_name}')
                     except Exception as e:
                         debug_print(f'FAILED TO PRINT UCF file\ndump: {o}')
                 print()
