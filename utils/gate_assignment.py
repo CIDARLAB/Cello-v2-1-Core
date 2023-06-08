@@ -1,6 +1,15 @@
 # import networkx as nx
 # import matplotlib.pyplot as plt
 from ucf_class import *
+
+def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):
+    table = []
+    for i in range(2**num_in):
+        row = [(i >> j) & 1 for j in range(num_in-1, -1, -1)] + ([None] * num_in) + ([None] * num_gates) * 2 + ([None] * num_out) * 2
+        table.append(row)
+    # labels = [i.name for i in in_list] + [g.gate_id for g in gate_list] + [o.name for o in out_list] 
+    labels = [f'{i.name}_I/O' for i in in_list] + [i.name for i in in_list] + [f'{g.gate_id}_I/O' for g in gate_list] + [g.gate_id for g in gate_list] + [f'{o.name}_I/O' for o in out_list] + [o.name for o in out_list] 
+    return (table, labels)
     
 class IO:
     def __init__(self, name, id):
@@ -24,37 +33,45 @@ class Input(IO):
     def __init__(self, name, id):
         super().__init__(name, id)
         self.function = None
+        self.params = {}
         self.ymax = None
         self.ymin = None
-        self.state = []
-        self.out_scores = [0]
+        self.states = {'high': 1, 'low': 0}
+        self.out_scores = {'high': -1, 'low': -1}
+        self.score_in_use = None
+        
+    def switch_onoff(self, state):
+        if int(state) == 0:
+            self.score_in_use = 'low'
+        else:
+            self.score_in_use = 'high'
             
     def add_eval_params(self, function, params):
         try:
             self.function = function
+            self.params = params
             self.ymax = params['ymax']
             self.ymin = params['ymin']
-            rounding = 2 # adjust to make it more or less precise
-            step_size = 10**(-1 * rounding)
-            self.state = [round(self.ymin + i * step_size, rounding) for i in range(int((self.ymax - self.ymin) / step_size) + 1)]
-            self.out_scores = []
-            try:
+            # comment out below two lines to make STATE 0/1
+            # self.states['high'] = self.ymax
+            # self.states['low'] = self.ymin
+            try: 
                 for p in params.keys():
                     locals()[p] = params[p]
-                for s in self.state:
-                    STATE = s
-                    self.out_scores.append(round(eval(self.function), rounding+1))
+                for (lvl, val) in self.states.items():
+                    STATE = val
+                    self.out_scores[lvl] = eval(self.function)
             except Exception as e:
                 debug_print(f'ERROR calculating input score for {str(self)}, with function {self.function}\n{e}')
         except Exception as e:
             debug_print(f'Error adding evaluation parameters to {str(self)}\n{function} | {params}')
-        
+    
     
     def __str__(self):
         if self.function is None:
             return f'input {self.name} {self.id}'
         else:
-            return f'input {self.name} {self.id} with ymax:{self.ymax} and ymin:{self.ymin}'
+            return f'input {self.name} {self.id} with ymax: {self.ymax} and ymin: {self.ymin}'
 
 class Output(IO):
     def __init__(self, name, id):
@@ -83,7 +100,7 @@ class Output(IO):
         if self.function is None:
             return f'output {self.name} {self.id}'
         else:
-            return f'output {self.name} {self.id} with c:{self.unit_conversion} and outscore={self.out_score}'
+            return f'output {self.name} {self.id} with c: {self.unit_conversion} and outscore={self.out_score}'
     
     
 class Gate:
@@ -112,6 +129,7 @@ class Gate:
             gate_scores = []
             for gname in self.gate_params.keys():
                 gate_scores.append(self.eval_gate(gname, in_comp))
+                # NOTE: this eval function needs to be modified
             best_score = max(gate_scores)
             self.gate_in_use = best_score[1]
             self.best_score = best_score[0]
@@ -127,7 +145,7 @@ class Gate:
     def __str__(self):
         if self.hill_response is not None:
             if self.gate_in_use is not None:
-                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and individual gates {list(self.gate_params.keys())}, best_gate={self.gate_in_use} with score {self.best_score}'
+                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and individual gates {list(self.gate_params.keys())}, best_gate = {self.gate_in_use} with score {self.best_score}'
             else:
                 return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and individual gates {list(self.gate_params.keys())}'
         else:
@@ -154,6 +172,7 @@ class AssignGraph:
         self.inputs = inputs
         self.outputs = outputs
         self.gates = gates
+        self.in_binary = {}
         
     def add_input(self, input):
         self.inputs.append(input)
@@ -172,6 +191,10 @@ class AssignGraph:
         
     def remove_output(self, output):
         self.outputs.remove(output)
+        
+    def switch_input_ios(self, truth_row, indexes):
+        # NOTE: this is where the inputs get 
+        self.in_binary = dict(zip(indexes, truth_row))
         
     def find_prev(self, node):
         if type(node) == Output:
@@ -221,12 +244,19 @@ class AssignGraph:
         
         
     # NOTE: needs modification
-    def get_score(self, node):
+    def get_score(self, node, verbose=False):
         if type(node) == Input:
-            return max(node.out_scores)
+            if node.score_in_use is not None:
+                if verbose: debug_print(f'{node.name} {node.out_scores[node.score_in_use]}', padding=False)
+                return node.out_scores[node.score_in_use]
+            else:
+                print('this should not happen')
+                return max(node.out_scores.values())
         elif type(node) == Output:
             input_score = self.get_score(self.find_prev(node))
-            return node.eval_output(input_score)
+            output_score = node.eval_output(input_score=input_score)
+            if verbose: debug_print(f'{node.name} {output_score}', padding=False)
+            return output_score
         elif type(node) == Gate:
             if node.gate_type == 'NOT':
                 input_score = self.get_score(self.find_prev(node))
@@ -240,12 +270,14 @@ class AssignGraph:
                 # there shouldn't be gates other than NOR/NOT
                 raise(Exception)
             # below tries to calculate scores for a gate (the best gate choice in this case)
-            return node.eval_gates(x)
+            gate_score = node.eval_gates(x)
+            if verbose: debug_print(f'{node.gate_in_use} {gate_score}', padding=False)
+            return gate_score
         else:
             raise(Exception)
         
     def __repr__(self):
-        return f"Inputs: {self.inputs}, Outputs: {self.outputs}, Gates: {self.gates}"
+        return f"Inputs: {self.inputs}, Gates: {self.gates}, Outputs: {self.outputs}"
 
 # NOTE: used to initialize all permuations of gate assignments from UCF to netlist
 class GraphParser:
@@ -325,10 +357,8 @@ class GraphParser:
     #         for input_node in gate.inputs:
     #             G.add_edge(input_node, gate_name)
     #         G.add_node(gate.output, type='output')
-    #         G.add_edge(gate_name, gate.output)
-            
-
-        return G
+    #     G.add_edge(gate_name, gate.output)
+    #   return G
             
     def __str__(self):
         gates_str = "\n".join(str(gate) for gate in self.gates)

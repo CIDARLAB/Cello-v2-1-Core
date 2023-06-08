@@ -1,28 +1,16 @@
-'''
-Copyright 2023 CIDAR LAB
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-'''
-
 import json
 from logic_synthesis import *
 from netlist_class import Netlist
 from ucf_class import UCF
 import sys
 import itertools
+import math
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from cello_helpers import *
 from gate_assignment import *
+
+# temp
+# from tqdm import tqdm
 
 # CELLO arguments:
 # 1. verilog name
@@ -31,56 +19,84 @@ from gate_assignment import *
 # 4. path-for-output
 # 5. options (optional)
 
-# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices (currently), 
+# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices, 
 # therefore so far it is the only one that will work for 2-output circuits
-# TODO: fix the UCFs with syntax errors
+# TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1')
 class CELLO3:
     def __init__(self, vname, ucfname, inpath, outpath, options=None):
-        self.verbose = True
+        self.verbose = True 
+        
         if options is not None:
             yosys_cmd_choice = options['yosys_choice']
             self.verbose = options['verbose']
         else:
             yosys_cmd_choice = 1  
+            
         self.inpath = inpath
         self.outpath = outpath
         self.vrlgname = vname
         self.ucfname = ucfname
+        
         print_centered(['CELLO V3', self.vrlgname + ' + ' + self.ucfname], padding=True)
+        
         cont = call_YOSYS(inpath, outpath, vname, yosys_cmd_choice) # yosys command set 1 seems to work best after trial & error
+        
         print_centered('End of Logic Synthesis', padding=True)
         if not cont:
             return # break if run into problem with yosys, call_YOSYS() will show the error.
+        
         self.ucf = UCF(inpath, ucfname) # initialize UCF from file
         if self.ucf.valid == False:
             return # breaks early if UCF file has errors
+        
         self.rnl = self.__load_netlist() # initialize RG from netlist JSON output from Yosys
-        valid, iter = self.check_conditions(verbose=self.verbose)
-        if self.verbose: print(f'\nCondition check passed? {valid}\n')
+        
+        valid, iter = self.check_conditions(verbose=True)
+        print()
+        print(f'Condition check passed? {valid}')
+        
         if valid:
-            cont = input('Continue to evaluation? y/n ')
+            cont = input('\nContinue to evaluation? y/n ')
             if (cont == 'Y' or cont == 'y') and valid:
                     best_result = self.techmap(iter) # Executing the algorithm if things check out
-                    graph = best_result[1]
-                    graph_inputs_for_printing = list(zip(self.rnl.inputs, graph.inputs))
-                    graph_gates_for_printing = list(zip(self.rnl.gates, graph.gates))
-                    graph_outputs_for_printing = list(zip(self.rnl.outputs, graph.outputs))
-                    debug_print(f'final result for {self.vrlgname}.v+{self.ucfname}: \n{best_result}')
-                    if self.verbose:
-                        print('reconstructing netlist: ')
-                        for rnl_in, g_in in graph_inputs_for_printing:
-                            print(f'{rnl_in} {str(g_in)} and max composition of {max(g_in.out_scores)}')
-                            # print(g_in.out_scores)
-                        print(f'input_response = {graph.inputs[0].function}')
-                        for rnl_g, g_g in graph_gates_for_printing:
-                            print(rnl_g, str(g_g))
-                        print(f'hill_response = {graph.gates[0].hill_response}')
-                        print(f'input_composition = {graph.gates[0].input_composition}')
-                        for rnl_out, g_out in graph_outputs_for_printing:
-                            print(rnl_out, str(g_out))
-                        print(f'unit_conversion = {graph.outputs[0].function}')
-                        print()
-                        # with open(f'{self.outpath}/{self.vrlgname}')
+
+                    # NOTE: best_result = tuple(circuit_score, graph_obj, truth_table)
+                    best_score = best_result[0]
+                    best_graph = best_result[1]
+                    truth_table = best_result[2]
+                    
+                    graph_inputs_for_printing = list(zip(self.rnl.inputs, best_graph.inputs))
+                    graph_gates_for_printing = list(zip(self.rnl.gates, best_graph.gates))
+                    graph_outputs_for_printing = list(zip(self.rnl.outputs, best_graph.outputs))
+                    
+                    debug_print(f'final result for {self.vrlgname}.v+{self.ucfname}: {best_result[0]}', padding=False)
+                    debug_print(best_result[1], padding=False)
+                    print()
+                    
+                    # if self.verbose:
+                    print_centered('RESULTS:')
+                    print()
+                    
+                    for rnl_in, g_in in graph_inputs_for_printing:
+                        print(f'{rnl_in} {str(g_in)} with max sensor output of {str(list(g_in.out_scores.items()))}')
+                        # print(g_in.out_scores)
+                    print(f'in_eval: input_response = {best_graph.inputs[0].function}\n')
+                    
+                    for rnl_g, g_g in graph_gates_for_printing:
+                        print(rnl_g, str(g_g))
+                    print(f'gate_eval: hill_response = {best_graph.gates[0].hill_response}')
+                    print(f'gate_eval: input_composition = {best_graph.gates[0].input_composition}\n')
+                    
+                    for rnl_out, g_out in graph_outputs_for_printing:
+                        print(rnl_out, str(g_out))
+                    print(f'output_eval: unit_conversion = {best_graph.outputs[0].function}\n')
+                    
+                    
+                    debug_print('Truth Table: ', padding=False)
+                    # TODO: get and print tb label here
+                    for r in truth_table:
+                        print(r)
+                    print()
                     
         return
         
@@ -170,33 +186,57 @@ class CELLO3:
                     # Check if inputs, outputs, and gates are unique and the correct number
                     if len(set(I_comb + O_comb + G_comb)) == i+o+g:
                         count += 1
+                        if self.verbose: print_centered(f'beginning iteration {count}:')
                         # Output the combination
                         map_helper = lambda l, c: list(map(lambda x, y: (x, y), l, c))
                         newI = map_helper(I_comb, netgraph.inputs)
                         newG = map_helper(G_comb, netgraph.gates)
                         newO = map_helper(O_comb, netgraph.outputs)
                         # print(f"Inputs: {newI}, Gates: {newG}, Outputs: {newO}")
-                        # TODO: Make each gate assign
                         newI = [Input(i[0], i[1].id) for i in newI]
                         newO = [Output(o[0], o[1].id) for o in newO]
                         newG = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in newG]
                         
                         graph = AssignGraph(newI, newO, newG)
-                        circuit_score = self.score_circuit(graph, verbose=False)
-                        print(f'iteration {count} : intermediate circuit score = {circuit_score}', end='\r')
+                        
+                        # TODO: Make each gate assign
+                        (circuit_score, tb) = self.score_circuit(graph, verbose=self.verbose)
+                        
+                        # print(f'iteration {count} : intermediate circuit score = {circuit_score}', end='\r')
+                        if self.verbose: 
+                            # print()
+                            print_centered(f'end of iteration {count} : intermediate circuit score = {circuit_score}', padding=True)
+                            # print()
+                        
                         if circuit_score > bestscore:
                             bestscore = circuit_score
-                            bestgraphs = [(circuit_score, graph)]
+                            bestgraphs = [(circuit_score, graph, tb)]
                         elif circuit_score == bestscore:
-                            bestgraphs.append((circuit_score, graph))
+                            bestgraphs.append((circuit_score, graph, tb))
                         
-        print(f'\nCOUNTed: {count:,} iterations')   
+        print(f'\nCOUNTed: {count:,} iterations')
+        
+        
+        # temp
+        # circuit_score = self.score_circuit(graph)
+        # print(f'circuit score: {circuit_score}')
+        # bestgraphs = [graph]   
+        # end temp    
         
         return bestgraphs
     
-    
+    # NOTE: this function calculates CIRCUIT SCORE
+    # NOTE: modify it if you want circuit score to be caldulated differently
     def score_circuit(self, graph: AssignGraph, verbose=True):
         # NOTE: PLEASE ENSURE ALL FUTURE UCF FILES FOLLOW THE SAME FORAMT AS ORIGINALS
+        # (THAT'S THE ONLY TO GET THIS TO WORK)
+        
+        # NOTE: RETURNS circuit_score
+        # NOTE: this is the core mapping from UCF
+        
+        # NOTE: use one gate from each group only!
+        # NOTE: try every gate from each group (graph.gates.gate_id = group name)
+        # print(graph.gates)
         
         '''
         Pseudo code:
@@ -258,7 +298,7 @@ class CELLO3:
         # print(f'Gate mappings: ')
         # for g in gate_ids:
         #     print(g)
-        # print()  
+        # print()
         
         gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
         gate_id_names = [i[1]+'_model' for i in gate_ids]
@@ -315,26 +355,75 @@ class CELLO3:
             if repr(goutput) in output_params:
                 goutput.add_eval_params(output_function_str, output_params[repr(goutput)])
                 
-        # adding parameters to gates
+        # adding parameters and invividual gates to gates
         for (ggroup, gname) in gate_ids:
             gprams = gate_params[gname]
             for ggate in graph.gates:
                 if ggate.gate_id == ggroup:
                     ggate.add_eval_params(hill_response_equation, linear_input_composition, gname, gprams)
-                  
-        circuit_scores = []  
-        for goutput in graph.outputs:
-            # NOTE: add funtion to test whether goutput is intermediate or final
-            output_name = goutput.name
-            output_score = graph.get_score(goutput)
-            circuit_scores.append((output_score, output_name))
-
+        
+        # NOTE: creating a truth table for each graph assignment
+        num_inputs = len(graph.inputs)
+        num_outputs = len(graph.outputs)
+        num_gates = len(graph.gates)
+        (truth_table, truth_table_labels) = generate_truth_table(num_inputs, num_gates, num_outputs, graph.inputs, graph.gates, graph.outputs)
+        # truth_table_labels = [i.name for i in graph.inputs] + [g.gate_in_use for g in graph.gates] + [o.name for o in graph.outputs]
+        if verbose:
+            print('generating truth table...')
+            print(truth_table_labels)
+            print()
+        # TODO: fix finding indexes for labels for truth table
+        
+        circuit_scores = []
+        for r in range(len(truth_table)):
+            IO_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
+            IO_names = [x.split('_')[:-1] for x in truth_table_labels if x.split('_')[-1] == 'I/O']
+            
+            if verbose: print(f'row{r} {truth_table[r]}')
+            
+            # TODO: fix the indexing here:
+            for (input_name, input_onoff) in list(dict(zip(truth_table_labels[:num_inputs], truth_table[r][:num_inputs])).items()):
+                input_name = input_name[:input_name.rfind('_')]
+                for grinput in graph.inputs:
+                    if repr(grinput) == input_name:
+                        # switch input on/off
+                        grinput.switch_onoff(input_onoff)
+                        
+            for goutput in graph.outputs:
+                # NOTE: add funtion to test whether goutput is intermediate or final
+                output_name = goutput.name
+                goutput_idx = truth_table_labels.index(output_name)
+                output_score = graph.get_score(goutput, verbose=verbose)
+                truth_table[r][goutput_idx] = output_score
+                circuit_scores.append((output_score, output_name))
+                
+            for grgate in graph.gates:
+                grgate_idx = truth_table_labels.index(grgate.gate_id)
+                truth_table[r][grgate_idx] = grgate.best_score
+            
+            if verbose: 
+                print(circuit_scores)
+                print(truth_table_labels)
+                print(f'row{r} {truth_table[r]}\n')
+        
+        # this part does this: (all_inputs_on==max) – min(partial/all_inputs_off)
+        truth_tested_output_values = {}
+        # output_idx_start = num_inputs + num_gates
+        output_idx_start = truth_table_labels.index(graph.outputs[0].name)
+        for i in range(output_idx_start, len(truth_table_labels)):
+            output_scores = []
+            for r in range(len(truth_table)):
+                output_scores.append(truth_table[r][i])
+            max_output_score = max([i for i in output_scores if i is not None])
+            min_output_score = min([i for i in output_scores if i is not None])
+            # truth_tested_output_values[truth_table_labels[i]] = max_output_score - min_output_score
+            truth_tested_output_values[truth_table_labels[i]] = math.log((max_output_score / min_output_score))
 
         graph_inputs_for_printing = list(zip(self.rnl.inputs, graph.inputs))
         graph_gates_for_printing = list(zip(self.rnl.gates, graph.gates))
         graph_outputs_for_printing = list(zip(self.rnl.outputs, graph.outputs))
         if verbose:
-            print('reconstructing netlist: ')
+            print('\nreconstructing netlist: ')
             for rnl_in, g_in in graph_inputs_for_printing:
                 print(f'{rnl_in} {str(g_in)} and max composition of {max(g_in.out_scores)}')
                 # print(g_in.out_scores)
@@ -344,8 +433,20 @@ class CELLO3:
                 print(rnl_out, str(g_out))
             print()
         
-        # NOTE: this part needs to be modified, to return the lower-scored output
-        return max(circuit_scores)[0]
+        # truth_table_labels = [i.name for i in graph.inputs] + [g.gate_in_use for g in graph.gates] + [o.name for o in graph.outputs]
+        truth_table_vis = f'{truth_table_labels}\n'
+        for r in truth_table:
+            truth_table_vis += str(r) + '\n'
+        if verbose: 
+            print(truth_table_vis)
+            print(truth_tested_output_values)
+        # take the output colums of the truth table, and calculate the outputs
+        
+        # NOTE: return the lower-scored output
+        score = min(truth_tested_output_values.values()), truth_table
+        if verbose:
+            print(score)
+        return score
     
     
     def check_conditions(self, verbose=True):
@@ -358,32 +459,38 @@ class CELLO3:
             netlist_valid = self.rnl.is_valid_netlist()
         if verbose: print(f'isvalid: {netlist_valid}')
 
-        num_ucf_input_sensors = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors'))
+        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
+        num_ucf_input_sensors = len(in_sensors)
         num_ucf_input_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
         num_ucf_input_models = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
         num_ucf_input_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts'))
         num_netlist_inputs = len(self.rnl.inputs) if netlist_valid else 99999
+        inputs_match = (num_ucf_input_sensors == num_ucf_input_models == num_ucf_input_structures == num_ucf_input_parts) and (num_ucf_input_parts >= num_netlist_inputs)
         if verbose: print('\nINPUTS:')
         if verbose: print(f'num IN-SENSORS in {ucfname} in-UCF: {num_ucf_input_sensors}')
         if verbose: print(f'num IN-STRUCTURES in {ucfname} in-UCF: {num_ucf_input_structures}')
         if verbose: print(f'num IN-MODELS in {ucfname} in-UCF: {num_ucf_input_models}')
         if verbose: print(f'num IN-PARTS in {ucfname} in-UCF: {num_ucf_input_parts}')
         if verbose: print(f'num IN-NODES in {vname} netlist: {num_netlist_inputs}')
-        inputs_match = (num_ucf_input_sensors == num_ucf_input_models == num_ucf_input_structures == num_ucf_input_parts) and (num_ucf_input_parts >= num_netlist_inputs)
+        
+        if verbose: print([i['name'] for i in in_sensors])
         if verbose: print(('Valid' if inputs_match else 'NOT valid') + ' input match!')
         
-        num_ucf_output_sensors = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices'))
+        out_sensors = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
+        num_ucf_output_sensors = len(out_sensors)
         num_ucf_output_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures'))
         num_ucf_output_models = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'))
         num_ucf_output_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'parts'))
         num_netlist_outputs = len(self.rnl.outputs) if netlist_valid else 99999
+        outputs_match = (num_ucf_output_sensors == num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and (num_ucf_output_parts >= num_netlist_outputs)
         if verbose: print('\nOUTPUTS:')
         if verbose: print(f'num OUT-SENSORS in {ucfname} out-UCF: {num_ucf_output_sensors}')
         if verbose: print(f'num OUT-STRUCTURES in {ucfname} out-UCF: {num_ucf_output_structures}')
         if verbose: print(f'num OUT-MODELS in {ucfname} out-UCF: {num_ucf_output_models}')
         if verbose: print(f'num OUT-PARTS in {ucfname} out-UCF: {num_ucf_output_parts}')
         if verbose: print(f'num OUT-NODES in {vname} netlist: {num_netlist_outputs}')
-        outputs_match = (num_ucf_output_sensors == num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and (num_ucf_output_parts >= num_netlist_outputs)
+        
+        if verbose: print([out['name'] for out in out_sensors])
         if verbose: print(('Valid' if outputs_match else 'NOT valid') + ' output match!')
         
         numStructs = self.ucf.collection_count['structures']
@@ -391,11 +498,15 @@ class CELLO3:
         numGates = self.ucf.collection_count['gates']
         numParts = self.ucf.collection_count['parts']
         ucf_gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
+        gate_names = []
         G_list = []
+        # gate_dict = {}
         for gate in ucf_gates:
             # G_list.append((gate['name'], gate['gate_type']))
             # NOTE: below assumes that all gates in our UCFs are 'NOR' gates
+            gate_names.append(gate['name'])
             G_list.append(gate['group'])
+            # gate_dict[gate['group']] = list
         G_list = list(set(G_list))
         num_groups = len(G_list)
         # numFunctions = len(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions'))
@@ -414,6 +525,11 @@ class CELLO3:
         if verbose: print(f'num GATE USES: {num_gates_availabe}')
         num_netlist_gates = len(self.rnl.gates) if netlist_valid else 99999
         if verbose: print(f'num GATES in {vname} netlist: {num_netlist_gates}')
+        
+        
+        if verbose: print(sorted(G_list))
+        if verbose: print(sorted(gate_names))
+        
         gates_match = (numStructs == numModels == numGates) and (numGates >= num_netlist_gates)
         if verbose: print(('Valid' if gates_match else 'NOT valid') + ' intermediate match!')
         
@@ -433,11 +549,12 @@ class CELLO3:
         return pass_check, max_iterations
     
 if __name__ == '__main__':
-    # ucflist = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
+    ucflist = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
     # problem_ucfs = ['Eco1C2G2T2', 'Eco2C1G6T1']
     
-    vname = 'and'
+    
     # vname = 'nand'
+    # vname = 'and'
     # vname = 'xor'
     # vname = 'priorityDetector'
     # vname = 'chat_3x2'
@@ -445,8 +562,17 @@ if __name__ == '__main__':
     # vname = 'g77_boolean'
     # vname = 'g92_boolean'
     
+    vname = input('which verilog to test, without the .v? (hint, ___.v from your folder) \nname=')
+    print()
+    ucfname = input(f'which ucf to use? \n{list(zip(range(len(ucflist)), ucflist))} \nselect an index=')
+    try:
+        ucfname = ucflist[int(ucfname)]
+    except Exception as e:
+        ucfname = 'Eco1C1G1T1'
+        
+    
     # (3in, 1out, 7gategroups)
-    ucfname = 'Bth1C1G1T1'
+    # ucfname = 'Bth1C1G1T1'
     
     # (4in, 1out, 12gategroups)
     # ucfname = 'Eco1C1G1T1'
@@ -461,10 +587,15 @@ if __name__ == '__main__':
     # ucfname = 'SC1C1G1T1'
     
     # TODO: source UCF files from CELLO-UCF instead
-    inpath = '../IO/inputs' # (contiains the verilog files, and UCF files)
-    outpath = '../IO/cello_demo' # (any path to a local folder)
+    inpath = '../../IO/inputs' # (contiains the verilog files, and UCF files)
+    outpath = '../../IO/cello_demo' # (any path to a local folder)
     
-    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': True})
+    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False})
+    
+    # print(truth_table_labels)
+    # tb = generate_truth_table(3, 4)
+    # for i in tb:
+    #     print(i)
     
     # it goes: gates -> models -> structures -> functions -> score -> parts
     # but what about circuit_rules, device_rules, and motif_library (which I think are useless)
