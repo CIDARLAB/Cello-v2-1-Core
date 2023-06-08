@@ -12,7 +12,9 @@ cd Cello-v3-Core/
 #
 # Setup Instructions
 ### Install Packages:
-YOSYS is the only required package to run Cello-v3-Core! Please check YOSYS installation guide for platforms other than MacOS.
+YOSYS is the only required package to run Cello-v3-Core! Please check [YOSYS installation guide](https://formulae.brew.sh/formula/yosys) for platforms other than MacOS.
+
+To install Yosys, the easiest way is through [Homebrew](https://brew.sh).
 ```
 brew install yosys
 ```
@@ -27,28 +29,33 @@ inpath = '/home/user/example/path/to/input_folder'
 outpath = '/home/user/example/path/to/output_folder'
 ```
 
-Note: 
-- by default, the ```inpath``` is the [sample_inputs](/sample_inputs/) folder, and the ```outpath``` is the [def_out](/def_out/) folder, so users can use Cello without having to specify the paths.
+By default, the ```inpath``` is the [sample_inputs](/sample_inputs/) folder, and the ```outpath``` is the [def_out](/def_out/) folder, so users can use Cello without having to specify the paths.
 
 
-**Then, to run Cello, type in terminal:**
+**To run Cello, type in terminal:**
 
 ```
 python celloAlgo.py
 ```
-That's it, and you can now find the results and the optimized design in the *outpath* folder!
+
+Simply follow the prompts when it asks for which Verilog and UCF you would like to use.
+
+That's it, and you will see the results and the optimized design in the *outpath* folder!
+
+Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
 ### Note: 
 The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole]() to parition the design into smaller circuits, and the feed them into CELLO-3.0. 
 
 #
 ## Sample Inputs
-Can be found in the [sample_inputs](sample_inputs/) folder. This includes the UCF files for Cello, as well as a few dozen Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello, but make sure that they are organized correctly.
+Can be found in the [sample_inputs](sample_inputs/) folder. This includes the UCF files for Cello, as well as a few dozen Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different a different folder to store them by speifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
 
-To use the sample inputs, simply put all the contents into your "inpath" folder as you specified earlier. Or, you can use ```pwd``` to show the location of your 
+#
+## Example Output
+Here is an example of what the result from Cello looks like in the terminal. It uses the and.v circuit paried with Bth1C1G1T1 UCF. After running this experiment, you will see other files generated in the output folder as well. The important takeways are the *circuit score* and the *design*, which will be returned in the terminal. Because additional convenience features are on the backlog, it is important to check the terminal for the *circuit score* and the *design* Cello made.
 
-
-
+![example output](assets/ExampleOutput_And+BTH.png)
 
 #
 ## Contributing
