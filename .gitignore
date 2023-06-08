@@ -7,3 +7,4 @@ cello-v3-env/
 test/
 __pycache__/
 .vscode/
+def_out/*

@@ -22,22 +22,33 @@ brew install yosys
 ## Usage:
 CELLO-V3 takes the following parameters, and you can modify them in the __main__ function for celloAlgo.py, for example:
 
-(rememebr to put the verilog files and all UCF files you want to work with in the 'input_folder')
 ```
-vname = 'g92_boolean'
-ucfname = 'SC1C1G1T1'
 inpath = '/home/user/example/path/to/input_folder'
 outpath = '/home/user/example/path/to/output_folder'
 ```
-Then to run Cello:
+
+Note: 
+- by default, the ```inpath``` is the [sample_inputs](/sample_inputs/) folder, and the ```outpath``` is the [def_out](/def_out/) folder, so users can use Cello without having to specify the paths.
+
+
+**Then, to run Cello, type in terminal:**
 
 ```
 python celloAlgo.py
 ```
-That's it, and you can find the results and the optimized design in the *outpath* folder!
+That's it, and you can now find the results and the optimized design in the *outpath* folder!
 
 ### Note: 
 The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole]() to parition the design into smaller circuits, and the feed them into CELLO-3.0. 
+
+#
+## Sample Inputs
+Can be found in the [sample_inputs](sample_inputs/) folder. This includes the UCF files for Cello, as well as a few dozen Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello, but make sure that they are organized correctly.
+
+To use the sample inputs, simply put all the contents into your "inpath" folder as you specified earlier. Or, you can use ```pwd``` to show the location of your 
+
+
+
 
 #
 ## Contributing
