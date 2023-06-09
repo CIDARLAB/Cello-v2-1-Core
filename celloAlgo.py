@@ -588,7 +588,7 @@ if __name__ == '__main__':
     
     # TODO: source UCF files from CELLO-UCF instead
     inpath = 'sample_inputs/' # (contiains the verilog files, and UCF files)
-    outpath = 'def_out/' # (any path to a local folder)
+    outpath = 'temp_out/' # (any path to a local folder)
     
     Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False})
     
