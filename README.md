@@ -1,6 +1,6 @@
-# CELLO-V3-CORE
+# Cello-v3-Core
 
-CELLO-V3-CORE is a streamlined algorithm for designing genetic circuits based on logic gate designs written in the Verilog format. It executes through the command-line interface by calling the 'celloAlgo.py' script. CELLO-3.0 is capable of efficiently handling single-cellular partitioning with multiple-output support, gerenating results saved in a local directory on your machine, with verbose logging.
+This software package is a streamlined algorithm for designing genetic circuits based on logic gate designs written in the Verilog format. It executes through the command-line interface by calling the 'celloAlgo.py' script. CELLO-3.0 is capable of efficiently handling single-cellular (with multi-cellular support coming soon) partitioning with multiple-output support, gerenating results saved in a local directory on your machine, with verbose logging, ang with GUI interface coming soon.
 
 ## Cloning the repo
 
@@ -9,15 +9,16 @@ git clone https://github.com/CIDARLAB/Cello-v3-Core.git
 cd Cello-v3-Core/
 ```
 
-#
 # Setup Instructions
 ### Install Packages:
-YOSYS is the only required package to run Cello-v3-Core! Please check [YOSYS installation guide](https://formulae.brew.sh/formula/yosys) for platforms other than MacOS.
+YOSYS is the only required package to run Cello-v3-Core! Please check [YOSYS installation guide](https://yosyshq.net/yosys/documentation.html) for platforms other than MacOS.
 
 To install Yosys, the easiest way is through [Homebrew](https://brew.sh).
 ```
+pip install graphviz
 brew install yosys
 ```
+you may need to install Graphviz. Please check [YOSYS installation guide](https://yosyshq.net/yosys/documentation.html) for platforms other than MacOS.
 
 (Note: Python venv is not needed for Cello-v3-Core, but is recommended)
 
@@ -45,7 +46,7 @@ That's it, and you will see the results and the optimized design in the *outpath
 Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
 ### Note: 
-The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole]() to parition the design into smaller circuits, and the feed them into CELLO-3.0. 
+The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole](https://github.com/CIDARLAB/genetic-circuit-partitioning-new.git) to parition the design into smaller circuits, and the feed them into CELLO-3.0. 
 
 #
 ## Sample Inputs
@@ -64,7 +65,7 @@ We welcome contributions from the community! If you'd like to contribute to CELL
 
 ## Credits
 
-CELLO-3.0 was developed by [Weiqi Ji](https://ginomcfino.github.io) at [CIDAR LAB](https://www.cidarlab.org) under [Douglas Densmore](https://www.cidarlab.org/doug-densmore). It was inspired by the [CELLO-V2](https://github.com/CIDARLAB/Cello-v2.git) software package developed by [CIDAR LAB](https://www.cidarlab.org) under [Douglas Densmore](https://www.cidarlab.org/doug-densmore) and [other contributors](https://github.com/CIDARLAB).
+CELLO-3.0 was developed by [Weiqi Ji](https://ginomcfino.github.io) at [CIDAR LAB](https://www.cidarlab.org) under [Douglas Densmore](https://www.cidarlab.org/doug-densmore). It was inspired by the original [Cello](https://github.com/CIDARLAB/cello) and [CELLO-V2](https://github.com/CIDARLAB/Cello-v2.git) software package developed by [CIDAR LAB](https://www.cidarlab.org) under [Douglas Densmore](https://www.cidarlab.org/doug-densmore) and [other contributors](https://github.com/CIDARLAB).
 
 ## License
 
