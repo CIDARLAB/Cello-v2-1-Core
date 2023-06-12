@@ -56,7 +56,16 @@ Can be found in the [sample_inputs](sample_inputs/) folder. This includes the UC
 ## Example Output
 Here is an example of what the result from Cello looks like in the terminal. It uses the and.v circuit paried with Bth1C1G1T1 UCF. After running this experiment, you will see other files generated in the output folder as well. The important takeways are the *circuit score* and the *design*, which will be returned in the terminal. Because additional convenience features are on the backlog, it is important to check the terminal for the *circuit score* and the *design* Cello made.
 
-![example output](assets/ExampleOutput_And+BTH.png)
+**Note**: this represents a work-in-progress, two things still need to be done to produce correct circuit scores:
+
+1. Fill out the IO values of each gate and output, and use the "min on" and "max off" values for the output instead of max / min from the outputs.
+2. modify the recursive ```get_score``` function in gate_assignment.py to compount gate scores for each gate in gate group in each recursive step, rather than taking the best gate at each step.
+
+After these changes are complete, the correct (ie. most optimized) designs will be produced by this software. The following is a work-in-progress which shows partially correct results.
+
+![example output](assets/ExampleOutput_And+Eco_(WIP).png)
+
+Please check the [assets](assets/) folder for further supplementary information.
 
 #
 ## Contributing
