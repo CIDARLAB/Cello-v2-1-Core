@@ -4,7 +4,6 @@ input: netlist JSON from YOSYS output
 (under development)
 '''
 import sys
-sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from cello_helpers import *
 
 
