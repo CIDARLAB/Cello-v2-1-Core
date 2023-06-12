@@ -1,7 +1,6 @@
 import os
 import json
 import sys
-sys.path.insert(0, 'utils/')
 from cello_helpers import *
 
 # Work in progress

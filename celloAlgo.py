@@ -2,12 +2,12 @@ import json
 import sys
 import itertools
 # import math
-from logic_synthesis import *
-from netlist_class import Netlist
-from ucf_class import UCF
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from cello_helpers import *
 from gate_assignment import *
+from logic_synthesis import *
+from netlist_class import Netlist
+from ucf_class import UCF
 
 # temp
 # from tqdm import tqdm
