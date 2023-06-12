@@ -1,10 +1,10 @@
 import json
+import sys
+import itertools
+# import math
 from logic_synthesis import *
 from netlist_class import Netlist
 from ucf_class import UCF
-import sys
-import itertools
-import math
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from cello_helpers import *
 from gate_assignment import *
@@ -64,6 +64,7 @@ class CELLO3:
                     best_score = best_result[0]
                     best_graph = best_result[1]
                     truth_table = best_result[2]
+                    truth_table_labels = best_result[3]
                     
                     graph_inputs_for_printing = list(zip(self.rnl.inputs, best_graph.inputs))
                     graph_gates_for_printing = list(zip(self.rnl.gates, best_graph.gates))
@@ -94,8 +95,11 @@ class CELLO3:
                     
                     debug_print('Truth Table: ', padding=False)
                     # TODO: get and print tb label here
-                    for r in truth_table:
-                        print(r)
+                    tb = [truth_table_labels] + truth_table
+                    # print(truth_table_labels)
+                    print_table(tb)
+                    # for r in truth_table:
+                    #     print(r)
                     print()
                     
         return
@@ -200,7 +204,7 @@ class CELLO3:
                         graph = AssignGraph(newI, newO, newG)
                         
                         # TODO: Make each gate assign
-                        (circuit_score, tb) = self.score_circuit(graph, verbose=self.verbose)
+                        (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose)
                         
                         # print(f'iteration {count} : intermediate circuit score = {circuit_score}', end='\r')
                         if self.verbose: 
@@ -210,9 +214,9 @@ class CELLO3:
                         
                         if circuit_score > bestscore:
                             bestscore = circuit_score
-                            bestgraphs = [(circuit_score, graph, tb)]
+                            bestgraphs = [(circuit_score, graph, tb, tb_labels)]
                         elif circuit_score == bestscore:
-                            bestgraphs.append((circuit_score, graph, tb))
+                            bestgraphs.append((circuit_score, graph, tb_labels))
                         
         print(f'\nCOUNTed: {count:,} iterations')
         
@@ -417,7 +421,9 @@ class CELLO3:
             max_output_score = max([i for i in output_scores if i is not None])
             min_output_score = min([i for i in output_scores if i is not None])
             # truth_tested_output_values[truth_table_labels[i]] = max_output_score - min_output_score
-            truth_tested_output_values[truth_table_labels[i]] = math.log((max_output_score / min_output_score))
+            # truth_tested_output_values[truth_table_labels[i]] = math.log((max_output_score / min_output_score))
+            truth_tested_output_values[truth_table_labels[i]] = max_output_score / min_output_score
+            
 
         graph_inputs_for_printing = list(zip(self.rnl.inputs, graph.inputs))
         graph_gates_for_printing = list(zip(self.rnl.gates, graph.gates))
@@ -443,7 +449,7 @@ class CELLO3:
         # take the output colums of the truth table, and calculate the outputs
         
         # NOTE: return the lower-scored output
-        score = min(truth_tested_output_values.values()), truth_table
+        score = min(truth_tested_output_values.values()), truth_table, truth_table_labels
         if verbose:
             print(score)
         return score
@@ -590,7 +596,7 @@ if __name__ == '__main__':
     inpath = 'sample_inputs/' # (contiains the verilog files, and UCF files)
     outpath = 'temp_out/' # (any path to a local folder)
     
-    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False})
+    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': True})
     
     # print(truth_table_labels)
     # tb = generate_truth_table(3, 4)

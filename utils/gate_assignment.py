@@ -52,7 +52,7 @@ class Input(IO):
             self.params = params
             self.ymax = params['ymax']
             self.ymin = params['ymin']
-            # comment out below two lines to make STATE 0/1
+            # comment out below two lines to change STATE from 0/1
             # self.states['high'] = self.ymax
             # self.states['low'] = self.ymin
             try: 
