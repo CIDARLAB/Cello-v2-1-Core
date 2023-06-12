@@ -53,7 +53,7 @@ class CELLO3:
         
         valid, iter = self.check_conditions(verbose=True)
         print()
-        print(f'Condition check passed? {valid}')
+        print(f'Condition check passed? {valid}\n')
         
         if valid:
             cont = input('\nContinue to evaluation? y/n ')
@@ -96,10 +96,12 @@ class CELLO3:
                     debug_print('Truth Table: ', padding=False)
                     # TODO: get and print tb label here
                     tb = [truth_table_labels] + truth_table
-                    # print(truth_table_labels)
+                    
                     print_table(tb)
-                    # for r in truth_table:
-                    #     print(r)
+                    print()
+                    debug_print("Truth Table (same as before, simpler format):", padding=False)
+                    for r in tb:
+                        print(r)
                     print()
                     
         return
@@ -536,7 +538,7 @@ class CELLO3:
         if verbose: print(sorted(G_list))
         if verbose: print(sorted(gate_names))
         
-        gates_match = (numStructs == numModels == numGates) and (numGates >= num_netlist_gates)
+        gates_match = (numStructs == numModels == numGates) and (num_gates_availabe[0] >= num_netlist_gates)
         if verbose: print(('Valid' if gates_match else 'NOT valid') + ' intermediate match!')
         
         pass_check = netlist_valid and inputs_match and outputs_match and gates_match

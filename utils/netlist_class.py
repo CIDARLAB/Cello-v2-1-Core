@@ -3,7 +3,6 @@ NETLIST class
 input: netlist JSON from YOSYS output
 (under development)
 '''
-import sys
 from cello_helpers import *
 
 
