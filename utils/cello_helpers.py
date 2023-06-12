@@ -93,3 +93,36 @@ def query_helper(dictList, key, vals):
             if d[key] in vals:
                 out.append(d)
     return out
+
+def print_table(table):
+    if not table:
+        print("Table is empty.")
+        return
+    
+    num_columns = len(table[0])
+    column_widths = [max(len(str(row[column])) if row[column] is not None else 0 for row in table) for column in range(num_columns)]
+    
+    # Print table header
+    print_separator(column_widths)
+    print_row(table[0], column_widths)
+    print_separator(column_widths)
+    
+    # Print table body
+    for row in table[1:]:
+        print_row(row, column_widths)
+    print_separator(column_widths)
+
+def print_row(row, column_widths):
+    formatted_row = "|"
+    for i, item in enumerate(row):
+        if item is None:
+            item = ""
+        formatted_row += f" {str(item):<{column_widths[i]}} |"
+    print(formatted_row)
+
+def print_separator(column_widths):
+    separator = "+"
+    for width in column_widths:
+        separator += f"{'-' * (width + 2)}+"
+    print(separator)
+
