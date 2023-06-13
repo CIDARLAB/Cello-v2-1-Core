@@ -63,7 +63,7 @@ Here is an example of what the result from Cello looks like in the terminal. It 
 
 After these changes are complete, the correct (ie. most optimized) designs will be produced by this software. The following is a work-in-progress which shows partially correct results.
 
-![example output](assets/ExampleOutput_And+Eco_(WIP).png)
+![example output](assets/ExampleOutput_And+Eco111.png)
 
 Please check the [assets](assets/) folder for further supplementary information.
 

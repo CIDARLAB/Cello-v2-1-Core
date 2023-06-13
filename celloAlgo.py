@@ -379,12 +379,18 @@ class CELLO3:
             print(truth_table_labels)
             print()
         # TODO: fix finding indexes for labels for truth table
+        IO_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
+        IO_names = ['_'.join(x.split('_')[:-1]) for x in truth_table_labels if x.split('_')[-1] == 'I/O']
+        print()
+        print(IO_indexes)
+        print(IO_names)
+        print()
+        
+        def get_tb_IO_index(node_name):
+            return truth_table_labels.index(node_name + '_I/O')
         
         circuit_scores = []
         for r in range(len(truth_table)):
-            IO_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
-            IO_names = [x.split('_')[:-1] for x in truth_table_labels if x.split('_')[-1] == 'I/O']
-            
             if verbose: print(f'row{r} {truth_table[r]}')
             
             # TODO: fix the indexing here:
@@ -394,7 +400,83 @@ class CELLO3:
                     if repr(grinput) == input_name:
                         # switch input on/off
                         grinput.switch_onoff(input_onoff)
+                        ginput_idx = truth_table_labels.index(input_name)
+                        truth_table[r][ginput_idx] = grinput.out_scores[grinput.score_in_use]
                         
+            # NOTE: filling out truth table IO values in this part
+            def set_tb_IO(node_name, IO_val):
+                tb_index = get_tb_IO_index(node_name)
+                truth_table[r][tb_index] = IO_val
+            
+            def get_tb_IO_val(node_name):
+                tb_index = get_tb_IO_index(node_name)
+                return truth_table[r][tb_index]
+            
+            def fill_truth_table_IO(graph_node):
+                if type(graph_node) == Gate:
+                    gate_inputs = graph.find_prev(graph_node)
+                    gate_type = graph_node.gate_type
+                    gate_IO = None
+                    if gate_type == 'NOR':  # gate_type is either 'NOR' or 'NOT'
+                        IOs = []
+                        for gate_input in gate_inputs: # should be exactly 2 inputs
+                            input_IO = get_tb_IO_val(repr(gate_input))
+                            if input_IO is None:
+                                # this might happen if the gate_input is a gate
+                                fill_truth_table_IO(gate_input)
+                            input_IO = get_tb_IO_val(repr(gate_input))
+                            IOs.append(input_IO)
+                        if len(IOs) == 2 and sum(IOs) == 0:
+                            gate_IO = 1
+                        else:
+                            gate_IO = 0
+                    else: # (gate_type == 'NOT')
+                        input_IO = get_tb_IO_val(repr(gate_inputs))
+                        if input_IO is None:
+                            fill_truth_table_IO(gate_inputs)
+                        input_IO = get_tb_IO_val(repr(gate_inputs))
+                        if input_IO == 0:
+                            gate_IO = 1
+                        elif input_IO == 1:
+                            gate_IO = 0
+                        else:
+                            raise RecursionError
+                    # finally, update the truth table for this gate 
+                    set_tb_IO(repr(graph_node), gate_IO)
+                    graph_node.IO = gate_IO
+                elif type(graph_node) == Output:
+                    input_gate = graph.find_prev(graph_node)
+                    gate_IO = get_tb_IO_val(repr(input_gate))
+                    if gate_IO == None:
+                        fill_truth_table_IO(input_gate)
+                    gate_IO = get_tb_IO_val(repr(input_gate))
+                    set_tb_IO(repr(graph_node), gate_IO) # output just carries the gate I/O
+                    graph_node.IO = gate_IO
+                elif type(graph_node) == Input:
+                    raise NameError('not suppose to recurse to input to fill truth table')
+                else:
+                    raise RecursionError
+                
+            for gout in graph.outputs:
+                fill_truth_table_IO(gout)
+            
+            
+            # def IO_filler(graph_node):
+            #     if graph_node == Input:
+            #         return get_tb_IO_val(graph_node.name)
+            #     elif graph_node == Gate:
+            #         gate_inputs = graph_node.inputs
+            #         connected_to_input = False
+            #         # graph.inputs
+            #         for i in gate_inputs:
+            #             pass
+            #     elif graph_node == Output:
+            #         # basically the IO of the gate that connects to it
+            #         pass
+            #     else:
+            #         # this is not supposed to happen
+            #         pass
+                 
             for goutput in graph.outputs:
                 # NOTE: add funtion to test whether goutput is intermediate or final
                 output_name = goutput.name
@@ -412,19 +494,30 @@ class CELLO3:
                 print(truth_table_labels)
                 print(f'row{r} {truth_table[r]}\n')
         
-        # this part does this: (all_inputs_on==max) – min(partial/all_inputs_off)
+        # this part does this: for each output, find minOn/maxOff, and find the return scored output device score for the circuit
         truth_tested_output_values = {}
-        # output_idx_start = num_inputs + num_gates
-        output_idx_start = truth_table_labels.index(graph.outputs[0].name)
-        for i in range(output_idx_start, len(truth_table_labels)):
-            output_scores = []
+        
+        for o in graph.outputs:
+            tb_IO_index = get_tb_IO_index(repr(o))
+            tb_index = truth_table_labels.index(repr(o))
+            truth_values = {0: [], 1: []}
             for r in range(len(truth_table)):
-                output_scores.append(truth_table[r][i])
-            max_output_score = max([i for i in output_scores if i is not None])
-            min_output_score = min([i for i in output_scores if i is not None])
-            # truth_tested_output_values[truth_table_labels[i]] = max_output_score - min_output_score
-            # truth_tested_output_values[truth_table_labels[i]] = math.log((max_output_score / min_output_score))
-            truth_tested_output_values[truth_table_labels[i]] = max_output_score / min_output_score
+                o_IO_val = truth_table[r][tb_IO_index]
+                truth_values[o_IO_val].append(truth_table[r][tb_index])
+            truth_tested_output_values[repr(o)] = min(truth_values[1]) / max(truth_values[0])
+        
+        # output_idx_start = num_inputs + num_gates
+        # output_idx_start = truth_table_labels.index(graph.outputs[0].name)
+        # for i in range(output_idx_start, len(truth_table_labels)):
+        #     output_scores = []
+        #     for r in range(len(truth_table)):
+        #         output_scores.append(truth_table[r][i])
+        #     max_output_score = max([i for i in output_scores if i is not None])
+        #     min_output_score = min([i for i in output_scores if i is not None])
+        #     # truth_tested_output_values[truth_table_labels[i]] = max_output_score - min_output_score
+        #     # truth_tested_output_values[truth_table_labels[i]] = math.log((max_output_score / min_output_score))
+            
+        #     truth_tested_output_values[truth_table_labels[i]] = max_output_score / min_output_score
             
 
         graph_inputs_for_printing = list(zip(self.rnl.inputs, graph.inputs))
