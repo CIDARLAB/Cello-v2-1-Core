@@ -80,6 +80,7 @@ class Output(IO):
         self.unit_conversion = None
         self.out_score = None
         self.params = []
+        self.IO = None
         
     def add_eval_params(self, function, params):
         try:
@@ -116,6 +117,7 @@ class Gate:
         self.input_composition = None
         self.gate_in_use = None
         self.best_score = None
+        self.IO = None
         
     def add_eval_params(self, hill_response, input_composition, gname, params):
         self.hill_response = hill_response
@@ -193,7 +195,7 @@ class AssignGraph:
         self.outputs.remove(output)
         
     def switch_input_ios(self, truth_row, indexes):
-        # NOTE: this is where the inputs get 
+        # NOTE: this is where the inputs get (unused)
         self.in_binary = dict(zip(indexes, truth_row))
         
     def find_prev(self, node):

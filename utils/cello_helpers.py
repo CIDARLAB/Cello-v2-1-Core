@@ -53,6 +53,8 @@ disadvantage: not guaranteed to reach global optima
 '''
 
 def permute_count_helper(i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf):
+    # print("i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf")
+    # print((i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf))
     factorial = lambda n: 1 if n == 0 else n * factorial(n - 1)
     partial_factorial = lambda n, k: 1 if n <= k else n * partial_factorial(n - 1, k)
     # check it thrice
@@ -113,12 +115,30 @@ def print_table(table):
     print_separator(column_widths)
 
 def print_row(row, column_widths):
-    formatted_row = "|"
+    max_lines = 1
     for i, item in enumerate(row):
         if item is None:
             item = ""
-        formatted_row += f" {str(item):<{column_widths[i]}} |"
-    print(formatted_row)
+        item = str(item)
+
+        lines = item.splitlines()
+        max_lines = max(max_lines, len(lines))
+
+        if len(lines) > 1:
+            row[i] = lines
+
+    for line_index in range(max_lines):
+        formatted_row = "|"
+        for i, item in enumerate(row):
+            if isinstance(item, list):
+                if line_index < len(item):
+                    formatted_row += f" {item[line_index]:<{column_widths[i]}} |"
+                else:
+                    formatted_row += f" {'':<{column_widths[i]}} |"
+            else:
+                formatted_row += f" {str(item):<{column_widths[i]}} |"
+        print(formatted_row)
+
 
 def print_separator(column_widths):
     separator = "+"
