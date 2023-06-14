@@ -94,9 +94,7 @@ class CELLO3:
                     
                     
                     debug_print('Truth Table: ', padding=False)
-                    # TODO: get and print tb label here
                     tb = [truth_table_labels] + truth_table
-                    
                     print_table(tb)
                     print()
                     debug_print("Truth Table (same as before, simpler format):", padding=False)
@@ -119,7 +117,7 @@ class CELLO3:
                 
     def techmap(self, iter):
         # NOTE: POE of the CELLO gate assignment simulation & optimization algorithm
-        # TODO: Give it parameter for which evaluative algorithm to use (exhaustive vs simulation)
+        # TODO: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
         print_centered('Beginning GATE ASSIGNMENT', padding=True)
         
         circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
@@ -164,7 +162,7 @@ class CELLO3:
         
         bestassignments = []
         if iter is not None:
-            bestassignments = self.exhaustive_assign(I_list, O_list, G_list, i, o, g, circuit)
+            bestassignments = self.exhaustive_assign(I_list, O_list, G_list, i, o, g, circuit, iter)
         else:
             # TODO: make the other simulation() functions
             bestassignments = self.genetic_simulation(I_list, O_list, G_list, i, o, g, circuit)
@@ -180,7 +178,7 @@ class CELLO3:
         bestassignments = [AssignGraph()]
         return bestassignments
         
-    def exhaustive_assign(self, I_list: list, O_list: list, G_list: list, i: int, o: int, g: int, netgraph: GraphParser):
+    def exhaustive_assign(self, I_list: list, O_list: list, G_list: list, i: int, o: int, g: int, netgraph: GraphParser, iterations: int):
         print_centered('Running EXHAUSTIVE gate-assignment algorithm...', padding=True)
         count = 0
         bestgraphs = []
@@ -205,8 +203,13 @@ class CELLO3:
                         
                         graph = AssignGraph(newI, newO, newG)
                         
-                        # TODO: Make each gate assign
                         (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose)
+                        if not self.verbose:
+                            block = '\u2588'
+                            num_blocks = int(round(count/iterations, 2) * 100)
+                            ph_pb = '_'*100
+                            # print(f'iteration #{count} / {iterations}\n{num_blocks*block}', end='\r')
+                            print(f'{ph_pb}\r{num_blocks*block}', end='\r')
                         
                         # print(f'iteration {count} : intermediate circuit score = {circuit_score}', end='\r')
                         if self.verbose: 
@@ -219,8 +222,10 @@ class CELLO3:
                             bestgraphs = [(circuit_score, graph, tb, tb_labels)]
                         elif circuit_score == bestscore:
                             bestgraphs.append((circuit_score, graph, tb_labels))
-                        
-        print(f'\nCOUNTed: {count:,} iterations')
+
+        if not self.verbose:
+            print()
+        print(f'\nDONE!\nCOUNTed: {count:,} iterations')
         
         
         # temp
@@ -378,13 +383,9 @@ class CELLO3:
             print('generating truth table...')
             print(truth_table_labels)
             print()
-        # TODO: fix finding indexes for labels for truth table
         IO_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
         IO_names = ['_'.join(x.split('_')[:-1]) for x in truth_table_labels if x.split('_')[-1] == 'I/O']
-        print()
-        print(IO_indexes)
-        print(IO_names)
-        print()
+        
         
         def get_tb_IO_index(node_name):
             return truth_table_labels.index(node_name + '_I/O')
@@ -393,7 +394,6 @@ class CELLO3:
         for r in range(len(truth_table)):
             if verbose: print(f'row{r} {truth_table[r]}')
             
-            # TODO: fix the indexing here:
             for (input_name, input_onoff) in list(dict(zip(truth_table_labels[:num_inputs], truth_table[r][:num_inputs])).items()):
                 input_name = input_name[:input_name.rfind('_')]
                 for grinput in graph.inputs:
@@ -524,7 +524,7 @@ class CELLO3:
         graph_gates_for_printing = list(zip(self.rnl.gates, graph.gates))
         graph_outputs_for_printing = list(zip(self.rnl.outputs, graph.outputs))
         if verbose:
-            print('\nreconstructing netlist: ')
+            print('reconstructing netlist: ')
             for rnl_in, g_in in graph_inputs_for_printing:
                 print(f'{rnl_in} {str(g_in)} and max composition of {max(g_in.out_scores)}')
                 # print(g_in.out_scores)
@@ -691,7 +691,7 @@ if __name__ == '__main__':
     inpath = 'sample_inputs/' # (contiains the verilog files, and UCF files)
     outpath = 'temp_out/' # (any path to a local folder)
     
-    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': True})
+    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False})
     
     # print(truth_table_labels)
     # tb = generate_truth_table(3, 4)
