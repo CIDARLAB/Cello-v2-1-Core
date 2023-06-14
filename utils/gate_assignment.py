@@ -267,7 +267,7 @@ class AssignGraph:
                 input_scores = [self.get_score(x) for x in self.find_prev(node)]
                 x1 = input_scores[0]
                 x2 = input_scores[1]
-                x = eval(node.input_composition)
+                x = eval(node.input_composition) # basically x = x1 + x2
             else:
                 # there shouldn't be gates other than NOR/NOT
                 raise(Exception)
