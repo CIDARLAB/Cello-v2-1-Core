@@ -107,6 +107,7 @@ class CELLO3:
         
     def __load_netlist(self):
         netpath = self.outpath + '/' + self.vrlgname + '/' + self.vrlgname + '.json'
+        netpath = os.path.join(*netpath.split('/'))
         netfile = open(netpath, 'r')
         netjson = json.load(netfile)
         netlist = Netlist(netjson)
@@ -208,7 +209,7 @@ class CELLO3:
                             block = '\u2588'
                             num_blocks = int(round(count/iterations, 2) * 100)
                             ph_pb = '_'*100
-                            # print(f'iteration #{count} / {iterations}\n{num_blocks*block}', end='\r')
+                            # print(f'{ph_pb} #{count}/{iterations}\r{num_blocks*block}', end='\r') # this print statement is slower
                             print(f'{ph_pb}\r{num_blocks*block}', end='\r')
                         
                         # print(f'iteration {count} : intermediate circuit score = {circuit_score}', end='\r')

@@ -29,6 +29,7 @@ class UCF:
         return list(set([c['collection'] for c in UCFchoice]))
 
     def __parse_helper(self, filepath, name):
+        filepath = os.path.join(*filepath.split('/'))
         U = os.path.join(filepath, name + '.UCF.json')
         I = os.path.join(filepath, name + '.input.json')
         O = os.path.join(filepath, name + '.output.json')

@@ -7,6 +7,7 @@ import shutil
 def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
     try:
         new_out = os.path.join(out_path, vname)
+        new_out = os.path.join(*new_out.split('/'))
         if os.path.exists(new_out):
             shutil.rmtree(new_out) # this could be switched out for making a new dir path instead
         os.makedirs(new_out)
@@ -20,6 +21,7 @@ def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
         print(new_in)
     else:
         new_in = in_path
+        new_in = os.path.join(*new_in.split('/'))
     verilog = vname + '.v'
     print(verilog)
     print()
