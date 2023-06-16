@@ -11,18 +11,36 @@ cd Cello-v3-Core/
 
 # Setup Instructions
 ### Install Packages:
-YOSYS is the only required package to run Cello-v3-Core! Please check [YOSYS installation guide](https://yosyshq.net/yosys/documentation.html) for platforms other than MacOS.
+[YOSYS](https://yosyshq.net/yosys/download.html) is the only required package to run this Cello-v3-Core repository.
+
+## MacOS
 
 To install Yosys, the easiest way is through [Homebrew](https://brew.sh).
 ```
-pip install graphviz
 brew install yosys
 ```
-you may need to install Graphviz. Please check [YOSYS installation guide](https://yosyshq.net/yosys/documentation.html) for platforms other than MacOS.
 
-(Note: Python venv is not needed for Cello-v3-Core, but is recommended)
+## Windows
 
-## Usage:
+Go to [here](https://github.com/YosysHQ/oss-cad-suite-build/releases/tag/2023-06-16) and download the OSS Cad Suite, remember to select the architecture for your PC.
+
+Move the folder to a location suitable for software packages, such as ```C:\Documents\folder```, click to extract it. You should see a folder named ```oss-cad-suite``` and open up PowerShell:
+
+```
+cd C:\Documents\folder
+oss-cad-suite\environment.bat
+```
+Running the above commands will load the "oss-cad-suite" libraries in your existing shell environment. To open YOSYS with "oss-cad-suite" with a new shell, use:
+
+```
+oss-cad-suite\start.bat
+```
+With yosys loaded in your shell, you can now cd into ```\Cello-v3-Core``` and begin exprimenting.
+
+Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms
+
+
+# Usage:
 CELLO-V3 takes the following parameters, and you can modify them in the __main__ function for celloAlgo.py, for example:
 
 ```
@@ -41,9 +59,9 @@ You can also set the ```verbose``` option as either ```True / False``` in the ``
 python celloAlgo.py
 ```
 
-Simply follow the prompts when it asks for which Verilog and UCF you would like to use.
+Follow the prompts for which Verilog and UCF you would like to use.
 
-That's it, and you will see the results and the optimized design in the *outpath* folder!
+You will see the results and the optimized design in the *outpath* folder.
 
 Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
@@ -71,7 +89,7 @@ We welcome contributions from the community! If you'd like to contribute to CELL
 
 ## Credits
 
-CELLO-3.0 was developed by [Weiqi Ji](https://ginomcfino.github.io) at [CIDAR LAB](https://www.cidarlab.org) under [Douglas Densmore](https://www.cidarlab.org/doug-densmore). It was inspired by the original [Cello](https://github.com/CIDARLAB/cello) and [CELLO-V2](https://github.com/CIDARLAB/Cello-v2.git) software package developed by [CIDAR LAB](https://www.cidarlab.org) under [Douglas Densmore](https://www.cidarlab.org/doug-densmore) and [other contributors](https://github.com/CIDARLAB).
+CELLO-3.0 was developed by [Weiqi Ji](https://ginomcfino.github.io) at [CIDAR LAB](https://www.cidarlab.org) with [Douglas Densmore](https://www.cidarlab.org/doug-densmore), and [other contributors](). It was inspired by the original [Cello](https://github.com/CIDARLAB/cello) and [CELLO-V2](https://github.com/CIDARLAB/Cello-v2.git) software package developed by [CIDAR LAB](https://www.cidarlab.org) with [Douglas Densmore](https://www.cidarlab.org/doug-densmore) and [other contributors](https://github.com/CIDARLAB).
 
 ## License
 
