@@ -22,22 +22,38 @@ brew install yosys
 
 ## Windows
 
+### Graphviz
+First, you will need to manually install Graphviz, required for running Yosys. You can download the latest .exe installer [here](https://www.graphviz.org/download/). Then, follow the instructions for the install dialog box.
+
+Next, you will need to add the graphviz bin folder to your ```Path``` environment variable. Search for "edit environment variables" in the Windows menu, go to the dialog box, and click "Edit" on the variable named ```Path```. Then click "New" once you see the values of the ```Path``` variable. Now you can the path of the Graphviz bin to the list, by default it is ```C:\Program Files\Graphviz\bin```
+
+You will also need to install the Python package for Graphviz by running: ```pip install graphviz```
+
+Now, you should have graphviz installed as an executable command. Test it by trying: ```dot -v```
+
+If no errors show up, Graphviz is correctly installed, and you can setup Yosys next.
+
+### Yosys
 Go to [here](https://github.com/YosysHQ/oss-cad-suite-build/releases/tag/2023-06-16) and download the OSS Cad Suite, remember to select the architecture for your PC.
 
-Move the folder to a location suitable for software packages, such as ```C:\Documents\folder```, click to extract it. You should see a folder named ```oss-cad-suite``` and open up PowerShell:
+Click the downloaded file to extract it, and move the extracted folder to a location suitable for software packages. 
+
+You should see a folder named ```oss-cad-suite```, and move the folder to a location such as ```C:\Documents\folder``` for example, and open up PowerShell:
 
 ```
-cd C:\Documents\folder
-oss-cad-suite\environment.bat
-```
-Running the above commands will load the "oss-cad-suite" libraries in your existing shell environment. To open YOSYS with "oss-cad-suite" with a new shell, use:
-
-```
+cd C:\Documents\folder\
 oss-cad-suite\start.bat
 ```
-With yosys loaded in your shell, you can now cd into ```\Cello-v3-Core``` and begin exprimenting.
+Running the above commands will load the "oss-cad-suite" libraries in your existing shell environment.
 
-Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms
+
+
+
+
+With your shell now set up, you can now cd into ```\Cello-v3-Core``` and begin exprimenting.
+
+
+(Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms)
 
 
 # Usage:
