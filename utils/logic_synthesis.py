@@ -2,6 +2,7 @@
 import subprocess
 import os
 import shutil
+import sys
 
 
 def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
@@ -23,21 +24,29 @@ def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
         new_in = in_path
         new_in = os.path.join(*new_in.split('/'))
     verilog = vname + '.v'
+    v_loc = os.path.join(new_in, verilog)
+
     print(verilog)
+    print(v_loc)
+    print(new_in)
+    print(new_out)
     print()
    
-    v_loc = os.path.join(new_in, verilog)
+    
     if not os.path.isfile(v_loc):
         print(f"ERROR finding {verilog}, please check verilog input.")
         return False
 
+    slash = '/'
+    if sys.platform.startswith('win'):
+        slash = '\\'
 
-    command_start = ["read_verilog {}/{};".format(new_in, verilog)]
+    command_start = ["read_verilog {}{}{};".format(new_in, slash, verilog)]
     command_end = [
-        "show -format pdf -prefix {}/{}_yosys".format(new_out, vname),
-        "write_verilog -noexpr {}/{}".format(new_out, 'struct_'+vname),
-        "write_edif {}/{}.edif;".format(new_out, vname),
-        "write_json {}/{}.json;".format(new_out, vname),
+        "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, vname),
+        "write_verilog -noexpr {}{}{}".format(new_out, slash, 'struct_'+vname),
+        "write_edif {}{}{}.edif;".format(new_out, slash, vname),
+        "write_json {}{}{}.json;".format(new_out, slash, vname),
     ]
     core_commands = [
         [
