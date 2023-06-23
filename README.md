@@ -13,9 +13,9 @@ cd Cello-v3-Core/
 ### Install Packages:
 [YOSYS](https://yosyshq.net/yosys/download.html) is the only required package to run this Cello-v3-Core repository.
 
-## MacOS
+## OSX / Linux
 
-To install Yosys, the easiest way is through [Homebrew](https://brew.sh).
+To install Yosys, the easiest way is through [Homebrew](https://brew.sh). With homebrew installed, you can:
 ```
 brew install yosys
 ```
@@ -46,14 +46,10 @@ oss-cad-suite\start.bat
 ```
 Running the above commands will load the "oss-cad-suite" libraries in your existing shell environment.
 
-
-
-
-
 With your shell now set up, you can now cd into ```\Cello-v3-Core``` and begin exprimenting.
 
-
-(Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms)
+## Other
+Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms
 
 
 # Usage:
@@ -83,6 +79,20 @@ Alternatively, you could make a script to call the ```CELLO3``` process and use 
 
 ### Note: 
 The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole](https://github.com/CIDARLAB/genetic-circuit-partitioning-new.git) to parition the design into smaller circuits, and the feed them into CELLO-3.0. 
+
+### Complexity:
+
+Time Complexity (exhaustive algorithm):
+$$
+O((I)P(i) \cdot (G)P(g) \cdot (O)P(o))
+$$
+Where capital letters represent the available set of Inputs, Gates, and Outputs from the UCF, and lowercase letters represet the set of Inputs, Gates, and Outputs required by the logic circuit.
+
+Space Complexity (exhaustive algorithm):
+$$
+O(2^i \cdot (i+g+o))
+$$
+Only one iteration is stored in the memory at a time in the exhaustive pass. Each iteration has to store a truth table where each row has inputs toggled ON/OFF. The circuit for the intermediate logic circuit design placement is stored in memory with different data for each row.
 
 #
 ## Sample Inputs

@@ -482,9 +482,10 @@ class CELLO3:
                 # NOTE: add funtion to test whether goutput is intermediate or final
                 output_name = goutput.name
                 goutput_idx = truth_table_labels.index(output_name)
-                output_score = graph.get_score(goutput, verbose=verbose)
-                truth_table[r][goutput_idx] = output_score
-                circuit_scores.append((output_score, output_name))
+                if truth_table[r][goutput_idx] == None:
+                    output_score = graph.get_score(goutput, verbose=verbose)
+                    truth_table[r][goutput_idx] = output_score
+                    circuit_scores.append((output_score, output_name))
                 
             for grgate in graph.gates:
                 grgate_idx = truth_table_labels.index(grgate.gate_id)
@@ -498,6 +499,8 @@ class CELLO3:
         # this part does this: for each output, find minOn/maxOff, and find the return scored output device score for the circuit
         truth_tested_output_values = {}
         
+        # print_table([truth_table_labels] + truth_table) #TEMP
+        
         for o in graph.outputs:
             tb_IO_index = get_tb_IO_index(repr(o))
             tb_index = truth_table_labels.index(repr(o))
@@ -505,7 +508,14 @@ class CELLO3:
             for r in range(len(truth_table)):
                 o_IO_val = truth_table[r][tb_IO_index]
                 truth_values[o_IO_val].append(truth_table[r][tb_index])
-            truth_tested_output_values[repr(o)] = min(truth_values[1]) / max(truth_values[0])
+            try:
+                truth_tested_output_values[repr(o)] = min(truth_values[1]) / max(truth_values[0])
+            except:
+                try:
+                    truth_tested_output_values[repr(o)] = max(truth_values[0])
+                except:
+                    truth_tested_output_values[repr(o)] = min(truth_values[1])
+                
         
         # output_idx_start = num_inputs + num_gates
         # output_idx_start = truth_table_labels.index(graph.outputs[0].name)
@@ -692,7 +702,7 @@ if __name__ == '__main__':
     inpath = 'sample_inputs/' # (contiains the verilog files, and UCF files)
     outpath = 'temp_out/' # (any path to a local folder)
     
-    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False})
+    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': True})
     
     # print(truth_table_labels)
     # tb = generate_truth_table(3, 4)
