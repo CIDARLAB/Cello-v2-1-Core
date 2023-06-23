@@ -207,7 +207,7 @@ class CELLO3:
                             ph_pb = '_'*100
                             fmtd_cnt = format(count, ',')
                             fmtd_itr = format(iterations, ',')
-                            print(f'{ph_pb} #{fmtd_cnt}/{fmtd_itr}\r{num_blocks*block}', end='\r')
+                            print(f'{ph_pb} #{fmtd_cnt}/{fmtd_itr} | circuit score: {circuit_score} best: {bestscore}\r{num_blocks*block}', end='\r')
                         
                         if self.verbose: 
                             print_centered(f'end of iteration {count} : intermediate circuit score = {circuit_score}', padding=True)
@@ -486,11 +486,15 @@ class CELLO3:
         if verbose: 
             print(truth_table_vis)
             print(truth_tested_output_values)
+            print()
+            print_table([truth_table_labels] + truth_table)
         # take the output colums of the truth table, and calculate the outputs
         
         # NOTE: **return the lower-scored output of the multiple outputs**
         score = min(truth_tested_output_values.values()), truth_table, truth_table_labels
+        
         if verbose:
+            print('\nscore_circuit returns:')
             print(score)
         return score
     

@@ -147,7 +147,7 @@ class Gate:
     def __str__(self):
         if self.hill_response is not None:
             if self.gate_in_use is not None:
-                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and individual gates {list(self.gate_params.keys())}, best_gate = {self.gate_in_use} with score {self.best_score}'
+                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and best_gate = {self.gate_in_use}'
             else:
                 return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and individual gates {list(self.gate_params.keys())}'
         else:
