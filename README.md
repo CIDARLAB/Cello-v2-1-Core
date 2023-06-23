@@ -83,15 +83,19 @@ The size of the design that CELLO-3.0 can handle is limited by the number of gen
 ### Complexity:
 
 Time Complexity (exhaustive algorithm):
+
 $$
 O((I)P(i) \cdot (G)P(g) \cdot (O)P(o))
 $$
+
 Where capital letters represent the available set of Inputs, Gates, and Outputs from the UCF, and lowercase letters represet the set of Inputs, Gates, and Outputs required by the logic circuit.
 
 Space Complexity (exhaustive algorithm):
+
 $$
 O(2^i \cdot (i+g+o))
 $$
+
 Only one iteration is stored in the memory at a time in the exhaustive pass. Each iteration has to store a truth table where each row has inputs toggled ON/OFF. The circuit for the intermediate logic circuit design placement is stored in memory with different data for each row.
 
 #
