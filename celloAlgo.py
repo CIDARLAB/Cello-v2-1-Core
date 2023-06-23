@@ -346,9 +346,7 @@ class CELLO3:
         num_gates = len(graph.gates)
         (truth_table, truth_table_labels) = generate_truth_table(num_inputs, num_gates, num_outputs, graph.inputs, graph.gates, graph.outputs)
         if verbose:
-            print('generating truth table...')
-            print(truth_table_labels)
-            print()
+            print('generating truth table...\n')
         IO_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
         IO_names = ['_'.join(x.split('_')[:-1]) for x in truth_table_labels if x.split('_')[-1] == 'I/O']
         
@@ -424,7 +422,19 @@ class CELLO3:
                     raise RecursionError
                 
             for gout in graph.outputs:
-                fill_truth_table_IO(gout)
+                try:
+                    fill_truth_table_IO(gout)
+                except:
+                    # NOTE: this happens for something like the sr_latch, it is not currently supported
+                    # NOTE: but with modifications to the truth table, this type of unstable could work
+                    debug_print(f'{self.vrlgname} has unsupported circuit configuration due to flip-flopping.') 
+                    print_table([truth_table_labels] + truth_table)
+                    print()
+                    raise(RecursionError)
+                    
+                
+            # if verbose:
+            #     print_table([truth_table_labels] + truth_table)
                  
             for goutput in graph.outputs:
                 # NOTE: add funtion to test whether goutput is intermediate or final
