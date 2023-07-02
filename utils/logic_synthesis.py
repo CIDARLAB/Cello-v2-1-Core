@@ -5,17 +5,17 @@ import shutil
 import sys
 
 
-def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
+def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0, no_files=False):
     try:
         new_out = os.path.join(out_path, vname)
         new_out = os.path.join(*new_out.split('/'))
         if os.path.exists(new_out):
-            shutil.rmtree(new_out) # this could be switched out for making a new dir path instead
+            shutil.rmtree(new_out)  # this could be switched out for making a new dir path instead
         os.makedirs(new_out)
     except Exception as e:
         print(f"YOSYS output folder for {vname} could not be re-initialized, please double-check. \n{e}") 
         return False
-    print(new_out) # new out_path
+    print(new_out)  # new out_path
     if '/' in vname:
         new_in = os.path.join(in_path, '/'.join(vname.split('/')[:-1]))
         vname = vname.split('/')[-1]
@@ -31,8 +31,7 @@ def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
     print(new_in)
     print(new_out)
     print()
-   
-    
+
     if not os.path.isfile(v_loc):
         print(f"ERROR finding {verilog}, please check verilog input.")
         return False
@@ -42,12 +41,17 @@ def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0):
         slash = '\\'
 
     command_start = ["read_verilog {}{}{};".format(new_in, slash, verilog)]
-    command_end = [
-        "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, vname),
-        "write_verilog -noexpr {}{}{}".format(new_out, slash, 'struct_'+vname),
-        "write_edif {}{}{}.edif;".format(new_out, slash, vname),
-        "write_json {}{}{}.json;".format(new_out, slash, vname),
-    ]
+    if no_files:
+        command_end = [
+            "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, vname)
+        ]
+    else:
+        command_end = [
+            "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, vname),
+            "write_verilog -noexpr {}{}{}".format(new_out, slash, 'struct_'+vname),
+            "write_edif {}{}{}.edif;".format(new_out, slash, vname),
+            "write_json {}{}{}.json;".format(new_out, slash, vname),
+        ]
     core_commands = [
         [
             # Old Cello Yosys commands

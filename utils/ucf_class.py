@@ -67,7 +67,7 @@ class UCF:
         # print the name of the UCF only
         return self.UCFmain[0]['version']
 
-    def list_collection_prarmeters(self, cName):
+    def list_collection_parameters(self, cName):
         # returns the list (set) of parameters found in a collection
         params = []
         for c in self.UCFmain:

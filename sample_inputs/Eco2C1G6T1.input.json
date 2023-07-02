@@ -392,7 +392,7 @@
 			{
 				"name": "in1",
 				"part_type": "promoter"
-			},
+			}
 		],
 		"outputs": [
 			"PRpa_A"
@@ -410,7 +410,7 @@
 				"components": [
 					"RiboRpa_RpaR-AM2_TerRpa"
 				]
-			},
+			}
 		]
 	},
 	{
