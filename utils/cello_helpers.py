@@ -1,5 +1,7 @@
 import json
 import math
+import logging
+from logger import *
 
 '''
 cello gate_assignment algorithm pseudo code:
@@ -67,13 +69,13 @@ def print_centered(text, padding=False):
     length = 88  # Length of the string of slashes
     if padding:
         print()
-    print("/" * length)
+    out.info("/" * length)
     if type(text) == list:
         for t in text:
             print(t.center(length))
     else:
         print(text.center(length))
-    print("/" * length)
+    out.info("/" * length)
     if padding:
         print()
 
@@ -89,12 +91,12 @@ def print_json(chunk):
     print(json.dumps(chunk, indent=4))
     
 def query_helper(dictList, key, vals):
-    out = []
+    out_temp = []
     for d in dictList:
         if key in list(d.keys()):
             if d[key] in vals:
-                out.append(d)
-    return out
+                out_temp.append(d)
+    return out_temp
 
 def print_table(table):
     if not table:

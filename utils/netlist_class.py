@@ -4,6 +4,7 @@ input: netlist JSON from YOSYS output
 (under development)
 '''
 from cello_helpers import *
+# from logger import *
 
 
 # NOTE: pass in a json initialized netlistJSON (dictionary)

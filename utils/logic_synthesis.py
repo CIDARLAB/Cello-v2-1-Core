@@ -3,6 +3,7 @@ import subprocess
 import os
 import shutil
 import sys
+from logger import *
 
 
 def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0, no_files=False):
