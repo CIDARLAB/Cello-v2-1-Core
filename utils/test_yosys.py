@@ -2,6 +2,8 @@ import sys
 sys.path.insert(0, '../')  # Add parent directory to Python path
 from logic_synthesis import *
 import time
+from logger import *
+
 
 # NOTE: This script batch runs YOSYS to a folder you desire to quickly compare results 
 

@@ -39,8 +39,8 @@ def test_all_configs(ucflist: list):
             csv_writer = csv.writer(csvfile)
             for i, v_name in enumerate(v_names):
                 new_row = []
-                for j, ucf_name in enumerate(ucf_names):  # TODO: Change to scan for UCFs?
-                # for ucf_name in ucflist:  # Do *NOT* enable verbose
+                for j, ucf_name in enumerate(ucf_names):
+                    # Do *NOT* enable verbose
                     cello_config_test = CELLO3(v_name, ucf_name, 'sample_inputs/', 'test_all_configs_out/',
                                                options={'yosys_choice': 1, 'verbose': False, 'test_configs': True})
                     if cello_config_test.best_score:
@@ -50,6 +50,7 @@ def test_all_configs(ucflist: list):
                     new_row.append(status + str(cello_config_test.best_score))
                     del cello_config_test
                 csv_writer.writerow(new_row)  # TODO: Check for warnings to better summarize overall status
+
     else:
         out.info('Exiting...')
 

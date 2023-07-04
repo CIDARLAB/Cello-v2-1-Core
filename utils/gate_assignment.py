@@ -1,6 +1,8 @@
 # import networkx as nx
 # import matplotlib.pyplot as plt
 from ucf_class import *
+from logger import *
+
 
 def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):
     table = []
