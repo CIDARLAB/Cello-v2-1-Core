@@ -2,8 +2,7 @@ import os
 import json
 import sys
 from cello_helpers import *
-from logger import *
-
+import log
 
 # Work in progress
 

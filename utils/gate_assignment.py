@@ -1,7 +1,7 @@
 # import networkx as nx
 # import matplotlib.pyplot as plt
 from ucf_class import *
-from logger import *
+import log
 
 
 def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):
@@ -254,7 +254,7 @@ class AssignGraph:
                 if verbose: debug_print(f'{node.name} {node.out_scores[node.score_in_use]}', padding=False)
                 return node.out_scores[node.score_in_use]
             else:
-                print('this should not happen')
+                log.cf.warning('this should not happen')
                 return max(node.out_scores.values())
         elif type(node) == Output:
             input_score = self.get_score(self.find_prev(node))
@@ -336,7 +336,7 @@ class GraphParser:
             for ug in ucf_gates:
                 new_gates.append(Gate(ug['name'], ug['gate_type'], g.inputs, g.output))
         uids = list(set([g.uid for g in new_gates]))
-        # print(uids)
+        # log.cf.info(uids)
         gate_dict = {id: [] for id in uids}
         for g in new_gates:
             gate_dict[g.uid].append(g)

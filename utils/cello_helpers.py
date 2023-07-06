@@ -1,7 +1,6 @@
 import json
 import math
-import logging
-from logger import *
+import log
 
 '''
 cello gate_assignment algorithm pseudo code:
@@ -68,27 +67,28 @@ def permute_count_helper(i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf):
 def print_centered(text, padding=False):
     length = 88  # Length of the string of slashes
     if padding:
-        print()
-    out.info("/" * length)
+        log.cf.info('\n')
+    log.cf.info("/" * length)
     if type(text) == list:
         for t in text:
-            print(t.center(length))
+            log.cf.info(t.center(length))
     else:
-        print(text.center(length))
-    out.info("/" * length)
+        log.cf.info(text.center(length))
+    log.cf.info("/" * length)
+    log.cf.info('\n')
     if padding:
-        print()
+        log.cf.info('\n')
 
 
 def debug_print(msg, padding=True):
     out_msg = f'∫DEBUG∫ {msg}'
     if padding:
         out_msg = '\n' + out_msg + '\n'
-    print(out_msg)
+    log.cf.debug(out_msg)
 
 
 def print_json(chunk):
-    print(json.dumps(chunk, indent=4))
+    log.cf.info(json.dumps(chunk, indent=4))
     
 def query_helper(dictList, key, vals):
     out_temp = []
@@ -96,11 +96,13 @@ def query_helper(dictList, key, vals):
         if key in list(d.keys()):
             if d[key] in vals:
                 out_temp.append(d)
+    if out_temp is []:
+        log.cf.error('Query helper result is invalid...')
     return out_temp
 
 def print_table(table):
     if not table:
-        print("Table is empty.")
+        log.cf.info("Table is empty.")
         return
     
     num_columns = len(table[0])
@@ -139,12 +141,12 @@ def print_row(row, column_widths):
                     formatted_row += f" {'':<{column_widths[i]}} |"
             else:
                 formatted_row += f" {str(item):<{column_widths[i]}} |"
-        print(formatted_row)
+        log.cf.info(formatted_row)
 
 
 def print_separator(column_widths):
     separator = "+"
     for width in column_widths:
         separator += f"{'-' * (width + 2)}+"
-    print(separator)
+    log.cf.info(separator + '\n')
 

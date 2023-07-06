@@ -1,10 +1,11 @@
-'''
+"""
 NETLIST class
 input: netlist JSON from YOSYS output
 (under development)
-'''
+"""
+
 from cello_helpers import *
-# from logger import *
+import log
 
 
 # NOTE: pass in a json initialized netlistJSON (dictionary)
@@ -85,7 +86,7 @@ class Netlist:
                     gate[gate_id]['output'][node_name] += edge_nos
                 except Exception as e:
                     gate[gate_id]['output'][node_name] = edge_nos
-            # print(json.dumps(gate, indent=4))
+            # log.cf.info(json.dumps(gate, indent=4))
             gates.update(gate)
         return gates
 
