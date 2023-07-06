@@ -1,5 +1,7 @@
 import json
 import sys
+import numpy as np
+import scipy
 import itertools
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from cello_helpers import *
@@ -21,11 +23,13 @@ from ucf_class import UCF
 # TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1')
 class CELLO3:
     def __init__(self, vname, ucfname, inpath, outpath, options=None):
-        self.verbose = True 
+        self.verbose = True
+        self.simulated_annealing = False
         
         if options is not None:
             yosys_cmd_choice = options['yosys_choice']
             self.verbose = options['verbose']
+            self.simulated_annealing = options['simulated_annealing']  # Am actually implementing scipy's dual annealing
         else:
             yosys_cmd_choice = 1  
             
@@ -88,8 +92,7 @@ class CELLO3:
                     for rnl_out, g_out in graph_outputs_for_printing:
                         print(rnl_out, str(g_out))
                     print(f'output_eval: unit_conversion = {best_graph.outputs[0].function}\n')
-                    
-                    
+
                     debug_print('Truth Table: ', padding=False)
                     tb = [truth_table_labels] + truth_table
                     print_table(tb)
@@ -158,18 +161,98 @@ class CELLO3:
         # NOTE: ^ This is the input to whatever algorithm to use
         
         bestassignments = []
-        if iter is not None:
-            bestassignments = self.exhaustive_assign(I_list, O_list, G_list, i, o, g, circuit, iter)
-        else:
-            # TODO: make the other simulation() functions
-            bestassignments = self.genetic_simulation(I_list, O_list, G_list, i, o, g, circuit)
+        # if iter is not None:
+        #     bestassignments = self.exhaustive_assign(I_list, O_list, G_list, i, o, g, circuit, iter)
+        # else:
+        #     # TODO: make the other simulation() functions
+        #     bestassignments = self.genetic_simulation(I_list, O_list, G_list, i, o, g, circuit)
+        bestassignments = self.simulated_annealing_assign(I_list, O_list, G_list, i, o, g, circuit)
         
         print_centered('End of GATE ASSIGNMENT', padding=True)
         
         return max(bestassignments, key=lambda x: x[0]) if len(bestassignments) > 0 else bestassignments
-    
-    # NOTE: alternative to exhaustive assignment - simulation
-    def genetic_simulation(self, I_list: list, O_list: list, G_list: list, i: int, o: int, g: int, netgraph: GraphParser):
+
+    def prep_assign_for_scoring(self, x, args):
+
+        bestgraphs = []
+        bestscore = 0
+        iterations = 1000
+        (I_comb, O_comb, G_comb) = x
+        (I_combs, O_combs, G_combs, netgraph, count, i, o, g) = args
+        I_comb = I_combs[math.ceil(I_comb) - 1]
+        O_comb = O_combs[math.ceil(O_comb) - 1]
+        G_comb = G_combs[math.ceil(G_comb) - 1]
+        print(I_comb, G_comb, O_comb)
+
+        if len(set(I_comb + O_comb + G_comb)) == i + o + g:
+            count =+ 1
+            if self.verbose: print_centered(f'beginning iteration {count}:')
+            # Output the combination
+            map_helper = lambda l, c: list(map(lambda x, y: (x, y), l, c))
+            newI = map_helper(I_comb, netgraph.inputs)
+            newG = map_helper(G_comb, netgraph.gates)
+            newO = map_helper(O_comb, netgraph.outputs)
+            newI = [Input(i[0], i[1].id) for i in newI]
+            newO = [Output(o[0], o[1].id) for o in newO]
+            newG = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in newG]
+
+            graph = AssignGraph(newI, newO, newG)
+            (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose)
+            # NOTE: follow the circuit scoring functions
+
+            if not self.verbose:
+                block = '\u2588'
+                num_blocks = int(round(count / iterations, 2) * 100)
+                ph_pb = '_' * 100
+                fmtd_cnt = format(count, ',')
+                fmtd_itr = format(iterations, ',')
+                print(
+                    f'{ph_pb} #{fmtd_cnt}/{fmtd_itr} | circuit score: {circuit_score} best: {bestscore}\r{num_blocks * block}',
+                    end='\r')
+
+            if self.verbose:
+                print_centered(f'end of iteration {count} : intermediate circuit score = {circuit_score}', padding=True)
+
+            if circuit_score > bestscore:
+                bestscore = circuit_score
+                bestgraphs = [(circuit_score, graph, tb, tb_labels)]
+            elif circuit_score == bestscore:
+                bestgraphs.append((circuit_score, graph, tb_labels))
+
+        return bestscore * -1
+
+    # TODO: NOTE: Simulation alternative to exhaustive_assign (being implemented)
+    def simulated_annealing_assign(self, I_list, O_list, G_list, i: int, o: int, g: int, netgraph:GraphParser):
+        print_centered('Running SIMULATED ANNEALING gate-assignment algorithm...', padding=True)
+        count = 0
+        I_combs, O_combs, G_combs = [], [], []
+        for I in itertools.permutations(I_list, i):
+            I_combs.append(I)
+        for O in itertools.permutations(O_list, o):
+            O_combs.append(O)
+        for G in itertools.permutations(G_list, g):
+            G_combs.append(G)
+
+        # DUAL ANNEALING SCIPY FUNCTION
+        func = lambda x: self.prep_assign_for_scoring(x, (I_combs, O_combs, G_combs, netgraph, count, i, o, g))
+        lo = [0, 0, 0]
+        hi = [len(I_combs), len(O_combs), len(G_combs)]
+        bounds = list(zip(lo, hi))
+        ret = scipy.optimize.dual_annealing(func, bounds)  # Default max iterations is 1000
+        bestgraphs = ret.x
+        bestscore = ret.fun
+        print("BEST SCORE IS: ", bestscore)
+
+        if not self.verbose:
+            print()
+        print(f'\nDONE!\nCOUNTed: {count:,} iterations')
+
+        bestassignments = [AssignGraph()]
+        return bestassignments
+
+    # NOTE: Simulation alternative to exhaustive_assign (not yet implemented)
+    def genetic_simulation_assign(self, I_list: list, O_list: list, G_list: list, i: int, o: int, g: int, netgraph:
+    GraphParser):
         # TODO: work on this algorithm
         print_centered('Running GENETIC SIMULATION gate-assignment algorithm...', padding=True)
         debug_print('Too many combinations for exhaustive search, using simulation algorithm instead.')
@@ -185,6 +268,7 @@ class CELLO3:
         for I_comb in itertools.permutations(I_list, i):
             for O_comb in itertools.permutations(O_list, o):
                 for G_comb in itertools.permutations(G_list, g):
+                    print(I_comb, G_comb, O_comb)
                     # Check if inputs, outputs, and gates are unique and the correct number
                     if len(set(I_comb + O_comb + G_comb)) == i+o+g:
                         count += 1
@@ -197,10 +281,10 @@ class CELLO3:
                         newI = [Input(i[0], i[1].id) for i in newI]
                         newO = [Output(o[0], o[1].id) for o in newO]
                         newG = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in newG]
-                        
+
                         graph = AssignGraph(newI, newO, newG)
                         (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose) # NOTE: follow the circuit scoring functions
-                        
+
                         if not self.verbose:
                             block = '\u2588'
                             num_blocks = int(round(count/iterations, 2) * 100)
@@ -208,10 +292,10 @@ class CELLO3:
                             fmtd_cnt = format(count, ',')
                             fmtd_itr = format(iterations, ',')
                             print(f'{ph_pb} #{fmtd_cnt}/{fmtd_itr} | circuit score: {circuit_score} best: {bestscore}\r{num_blocks*block}', end='\r')
-                        
-                        if self.verbose: 
+
+                        if self.verbose:
                             print_centered(f'end of iteration {count} : intermediate circuit score = {circuit_score}', padding=True)
-                        
+
                         if circuit_score > bestscore:
                             bestscore = circuit_score
                             bestgraphs = [(circuit_score, graph, tb, tb_labels)]
@@ -223,8 +307,8 @@ class CELLO3:
         print(f'\nDONE!\nCOUNTed: {count:,} iterations')
         
         return bestgraphs
-    
-    
+
+
     # NOTE: this function calculates CIRCUIT SCORE
     # NOTE: modify it if you want circuit score to be caldulated differently
     def score_circuit(self, graph: AssignGraph, verbose=True):
@@ -507,8 +591,8 @@ class CELLO3:
             print('\nscore_circuit returns:')
             print(score)
         return score
-    
-    
+
+
     def check_conditions(self, verbose=True):
         if verbose: print()
         if verbose: print_centered('condition checks for valid input')
@@ -647,4 +731,4 @@ if __name__ == '__main__':
     inpath = 'sample_inputs/' # (contiains the verilog files, and UCF files)
     outpath = 'temp_out/' # (any path to a local folder)
     
-    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False})
+    Cello3Process = CELLO3(vname, ucfname, inpath, outpath, options={'yosys_choice': 1, 'verbose': False, 'simulated_annealing': True})
