@@ -1,6 +1,5 @@
 import json
 import sys
-import numpy as np  # TODO: Needed?
 import scipy
 import itertools
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
@@ -213,7 +212,8 @@ class CELLO3:
         lo = [0, 0, 0]
         hi = [len(I_perms), len(O_perms), len(G_perms)]
         bounds = list(zip(lo, hi))
-        # TODO: Implement seed
+        # TODO: CK: Implement seed
+        # TODO: CK: Implement toxicity check...
         ret = scipy.optimize.dual_annealing(func, bounds, maxfun=maxfun)
         """
         Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
@@ -235,7 +235,7 @@ class CELLO3:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult  
         """
 
-        # TODO: Capture multiple equivalent optimums
+        # TODO: CK: Capture multiple equivalent optimums
         # self.bestgraphs = ret.x     # solution inputs (already stored in object attribute)
         self.bestscore = -ret.fun   # solution score (reverses inversion from prep_assign_for_scoring)
         # count = ret.nfev     # number of func executions
@@ -281,7 +281,7 @@ class CELLO3:
 
         (I_perm, O_perm, G_perm) = x
         (I_perms, O_perms, G_perms, netgraph, i, o, g, maxfun) = args
-        # TODO: Account for duplicates
+        # TODO: CK: Account for duplicates
         if I_perms and O_perms and G_perms:
             I_perm = I_perms[math.ceil(I_perm) - 1]
             O_perm = O_perms[math.ceil(O_perm) - 1]
