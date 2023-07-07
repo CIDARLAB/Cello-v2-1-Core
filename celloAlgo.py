@@ -199,6 +199,7 @@ class CELLO3:
 
         print_centered('Running SIMULATED ANNEALING gate-assignment algorithm...', padding=True)
         I_perms, O_perms, G_perms = [], [], []
+        # TODO: Optimize permutation arrays
         for I in itertools.permutations(I_list, i):
             I_perms.append(I)
         for O in itertools.permutations(O_list, o):
@@ -328,6 +329,7 @@ class CELLO3:
     # NOTE: this function calculates CIRCUIT SCORE
     # NOTE: modify it if you want circuit score to be calculated differently
     def score_circuit(self, graph: AssignGraph, verbose=True):
+        # TODO: Account for toxicity
         # NOTE: PLEASE ENSURE ALL FUTURE UCF FILES FOLLOW THE SAME FORMAT AS ORIGINALS
         # (THAT'S THE ONLY TO GET THIS TO WORK)
         
