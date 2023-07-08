@@ -81,7 +81,8 @@ def print_centered(text, padding=False):
 
 
 def debug_print(msg, padding=True):
-    out_msg = f'∫DEBUG∫ {msg}'
+    integral = '\u222b'  # str: ∫,   utf-8: '\u222b',   byte: b'\xe2\x88\xab'
+    out_msg = f'{integral}DEBUG{integral} {msg}'
     if padding:
         out_msg = '\n' + out_msg + '\n'
     log.cf.debug(out_msg)

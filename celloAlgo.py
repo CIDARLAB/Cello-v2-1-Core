@@ -21,7 +21,7 @@ import log
 # therefore so far it is the only one that will work for 2-output circuits
 # TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1') (CK: fixed Eco1C2G2T2)
 
-flag_test_all_configs: bool = False  # Runs brief tests of all configs, producing logs and csv summary
+flag_test_all_configs: bool = True  # Runs brief tests of all configs, producing logs and csv summary
 
 
 class CELLO3:
@@ -763,5 +763,5 @@ if __name__ == '__main__':
         Cello3Process = CELLO3(vname, ucfname, inpath, outpath,
                                options={'yosys_cmd_choice': 1,
                                         'verbose': False,
-                                        'test_configs': False,
+                                        'test_configs': True,
                                         'log_overwrite': True})
