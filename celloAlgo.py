@@ -21,7 +21,7 @@ import log
 # therefore so far it is the only one that will work for 2-output circuits
 # TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1') (CK: fixed Eco1C2G2T2)
 
-flag_test_all_configs: bool = True  # Runs brief tests of all configs, producing logs and csv summary
+flag_test_all_configs: bool = False  # Runs brief tests of all configs, producing logs and csv summary
 
 
 class CELLO3:
@@ -673,13 +673,13 @@ class CELLO3:
             f'num MODELS in {self.ucfname} UCF: {numModels}\n'
             f'num GATES in {self.ucfname} UCF: {numGates}\n')
 
-        num_gates_availabe = []
+        num_gates_available = []
         logic_constraints = self.ucf.query_top_level_collection(
             self.ucf.UCFmain, 'logic_constraints')
         for l in logic_constraints:
             for g in l['available_gates']:
-                num_gates_availabe.append(g['max_instances'])
-        if verbose: log.cf.info(f'num GATE USES: {num_gates_availabe}')
+                num_gates_available.append(g['max_instances'])
+        if verbose: log.cf.info(f'num GATE USES: {num_gates_available}')
         num_netlist_gates = len(self.rnl.gates) if netlist_valid else 99999
         if verbose: log.cf.info(f'num GATES in {self.vrlgname} netlist: {num_netlist_gates}')
 
@@ -687,7 +687,7 @@ class CELLO3:
         if verbose: log.cf.info(sorted(gate_names))
 
         gates_match = (numStructs == numModels == numGates) and (
-                num_gates_availabe[0] >= num_netlist_gates)
+                num_gates_available[0] >= num_netlist_gates)
         if verbose: log.cf.info(
             ('Valid' if gates_match else 'NOT valid') + ' intermediate match!')
 
@@ -764,4 +764,4 @@ if __name__ == '__main__':
                                options={'yosys_cmd_choice': 1,
                                         'verbose': False,
                                         'test_configs': False,
-                                        'log_overwrite': False})
+                                        'log_overwrite': True})
