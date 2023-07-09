@@ -19,9 +19,9 @@ import log
 
 # NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices, 
 # therefore so far it is the only one that will work for 2-output circuits
-# TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1') (CK: fixed Eco1C2G2T2)
+# TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1')
 
-flag_test_all_configs: bool = True  # Runs brief tests of all configs, producing logs and csv summary
+flag_test_all_configs: bool = False  # Runs brief tests of all configs, producing logs and csv summary
 
 
 class CELLO3:
@@ -51,7 +51,7 @@ class CELLO3:
 
         # Loggers
         log.config_logger(vname, ucfname, self.log_overwrite)
-        log.reset_counts()
+        log.reset_logs()
 
         print_centered(['CELLO V3', self.vrlgname + ' + ' + self.ucfname],
                        padding=True)
@@ -128,18 +128,14 @@ class CELLO3:
                 log.cf.info('\n')
 
         else:
-            log.cf.warning(f'\nCondition check passed? {valid}\n')
+            log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
 
         return
 
     def __load_netlist(self):
         netpath = self.outpath + '/' + self.vrlgname + '/' + self.vrlgname + '.json'
         netpath = os.path.join(*netpath.split('/'))
-        try:
-            netfile = open(netpath, 'r')
-        except Exception as e:
-            log.cf.error(f'Netfile could not be constructed...\n{e}')
-            return False
+        netfile = open(netpath, 'r')
         netjson = json.load(netfile)
         netlist = Netlist(netjson)
         if not netlist.is_valid_netlist():
@@ -221,6 +217,7 @@ class CELLO3:
                           i: int, o: int, g: int, netgraph: GraphParser,
                           iterations: int):
         print_centered('Running EXHAUSTIVE gate-assignment algorithm...', padding=True)
+        if self.test_configs: print(f'CURRENT ITERATION: {log.iter_num}: {self.vrlgname}+{self.ucfname}')
         count = 0
         bestgraphs = []
         bestscore = 0
@@ -235,7 +232,7 @@ class CELLO3:
                     fmtd_cnt = format(count, ',')
                     fmtd_itr = format(iterations, ',')
 
-                    if self.test_configs and count > 1000:
+                    if self.test_configs and count > 100:
                         return bestgraphs
 
                     # Check if inputs, outputs, and gates are unique and the correct number
@@ -256,10 +253,11 @@ class CELLO3:
                         (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose)  # NOTE: follow the circuit scoring functions
                         if circuit_score is None:
                             log.cf.error('\nProblem with the circuit_score...\n')
-                            return None
+                            # return None
 
                         if not self.verbose:
-                            print(f'\r{ph_pb} #{fmtd_cnt}/{fmtd_itr} | best: {bestscore} circuit score: {circuit_score} \r{num_blocks * block}',
+                            print(f'\r{ph_pb} #{fmtd_cnt}/{fmtd_itr} | best:'
+                                  f' {bestscore} circuit score: {circuit_score} \r{num_blocks * block}',
                                   end='\r')
                             pass
 
@@ -365,18 +363,16 @@ class CELLO3:
 
         ucfmain_functions = self.ucf.query_top_level_collection(
             self.ucf.UCFmain, 'functions')
+        hill_response = query_helper(ucfmain_functions, 'name', ['Hill_response'])[0]
         try:
-            hill_response = query_helper(ucfmain_functions, 'name', ['Hill_response'])[0]
             input_composition = query_helper(ucfmain_functions, 'name', ['linear_input_composition'])[0]
-        except Exception as error:
-            log.cf.error(f'query_helper failed for hill_response or input_composition...\n{error}')
-            return None, None, None
-
+        except Exception as e:
+            raise Exception(f"UCF contains 'tandem' or no input_composition...") from e
         hill_response_equation = hill_response['equation'].replace('^', '**')  # substitute power operator
-        linear_input_composition = input_composition['equation']
+        input_composition_equation = input_composition['equation']
         if verbose:
             log.cf.info(f'hill_response = {hill_response_equation}')
-            log.cf.info(f'linear_input_composition = {linear_input_composition}\n')
+            log.cf.info(f'input_composition_equation = {input_composition_equation}\n')
 
         output_names = [o.name for o in graph.outputs]
         output_model_names = [o + '_model' for o in output_names]
@@ -415,7 +411,7 @@ class CELLO3:
             for ggate in graph.gates:
                 if ggate.gate_id == ggroup:
                     ggate.add_eval_params(hill_response_equation,
-                                          linear_input_composition, gname,
+                                          input_composition_equation, gname,
                                           gprams)
 
         # NOTE: creating a truth table for each graph assignment
@@ -600,7 +596,11 @@ class CELLO3:
         netlist_valid = False
         if self.rnl is not None:
             netlist_valid = self.rnl.is_valid_netlist()
-        if verbose: log.cf.info(f'isvalid: {netlist_valid}')
+        if verbose:
+            if netlist_valid:
+                log.cf.info('Netlist is valid: True')
+            else:
+                log.cf.debug('Netlist is valid: False')
 
         in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
         num_ucf_input_sensors = len(in_sensors)
@@ -623,8 +623,11 @@ class CELLO3:
             f'num IN-NODES in {self.vrlgname} netlist: {num_netlist_inputs}\n')
 
         if verbose: log.cf.info([i['name'] for i in in_sensors])
-        if verbose: log.cf.info(
-            ('Valid' if inputs_match else 'NOT valid') + ' input match!')
+        if verbose:
+            if inputs_match:
+                log.cf.info('Valid input match!')
+            else:
+                log.cf.debug('NOT valid input match!')
 
         out_sensors = self.ucf.query_top_level_collection(self.ucf.UCFout,
                                                           'output_devices')
@@ -648,8 +651,11 @@ class CELLO3:
             f'num OUT-NODES in {self.vrlgname} netlist: {num_netlist_outputs}')
 
         if verbose: log.cf.info([out['name'] for out in out_sensors])
-        if verbose: log.cf.info(
-            ('Valid' if outputs_match else 'NOT valid') + ' output match!')
+        if verbose:
+            if outputs_match:
+                log.cf.info('Valid output match!')
+            else:
+                log.cf.debug('NOT valid output match!')
 
         numStructs = self.ucf.collection_count['structures']
         numModels = self.ucf.collection_count['models']
@@ -688,8 +694,11 @@ class CELLO3:
 
         gates_match = (numStructs == numModels == numGates) and (
                 num_gates_available[0] >= num_netlist_gates)
-        if verbose: log.cf.info(
-            ('Valid' if gates_match else 'NOT valid') + ' intermediate match!')
+        if verbose:
+            if gates_match:
+                log.cf.info('Valid gate match!')
+            else:
+                log.cf.debug('NOT valid gate match!')
 
         pass_check = netlist_valid and inputs_match and outputs_match and gates_match
 
@@ -763,5 +772,5 @@ if __name__ == '__main__':
         Cello3Process = CELLO3(vname, ucfname, inpath, outpath,
                                options={'yosys_cmd_choice': 1,
                                         'verbose': False,
-                                        'test_configs': True,
+                                        'test_configs': False,
                                         'log_overwrite': True})

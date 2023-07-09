@@ -6,15 +6,18 @@ To use the loggers, 'log.cf.[level]' prints to console and log file, and 'log.f.
 Levels include: debug, info, warning, critical and others as specified in Python logging library documentation.
 """
 
-import sys
+import sys, traceback
 import logging.config
 from datetime import datetime
 
 
+iter_num = 0
+iter_validity = "Valid"
 log_counts = {'WARNING': 0, 'ERROR': 0, 'CRITICAL': 0}  # Global issue counts (resets at new cello process)
+last_log = "[None]"
 
 
-# TODO: This approach, though in some ways more elegant, was proving unreliable; will investigate
+# TODO: This approach of redirecting all print statements, though more elegant, was proving unreliable; will investigate
 # class Logger(object):
 #     """
 #     Converts all print statements so they print to both console and the log file.
@@ -46,14 +49,21 @@ def config_logger(vname: str, ucfname: str, ow: bool):
     # sys.stdout = Logger(log_file_name)
 
 
-def reset_counts():
+def reset_logs():
     """
     Resets the issue counts every time a new Cello process object is created.
     :return: void
     """
 
+    global iter_num
     global log_counts
+    global last_log
+    global iter_validity
+
+    iter_num += 1
     log_counts = {'WARNING': 0, 'ERROR': 0, 'CRITICAL': 0}
+    last_log = "[None]"
+    iter_validity = "Valid"
 
 
 class ContextFilter(logging.Filter):
@@ -63,23 +73,34 @@ class ContextFilter(logging.Filter):
 
     def filter(self, record):
         global log_counts
+        global last_log
+        global iter_validity
+
         if record.levelname in ('WARNING', 'ERROR', 'CRITICAL'):
             log_counts[record.levelname] += 1
-            cf.info('  *****  !' + record.levelname + '!  *****  ')
+            last_log = f"Caught exception: {record.msg}"
+            cf.info(f"  *****  !' + record.levelname + '!  *****  \n{traceback.format_exc()}")
+        elif record.levelname is 'DEBUG':  # 'debug' level reserved for invalid configs (e.g. gate mismatch)
+            iter_validity = "Invalid"
         return True
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     """
     Captures unhandled exceptions so they can still be logged (and counted as criticals)
-    :return: void
+    :return:
     """
+
+    global log_counts
+    global last_log
 
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     log_counts['CRITICAL'] += 1
-    cf.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    last_log = f"Uncaught exception: {exc_type}"
+    cf.critical(f"Uncaught exception: {exc_type}: {exc_value}: {exc_traceback}",
+                exc_info=(exc_type, exc_value, exc_traceback))
 
 
 cf = logging.getLogger('both')  # Both print out to console and out to log
