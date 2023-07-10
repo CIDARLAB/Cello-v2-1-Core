@@ -79,7 +79,7 @@ class ContextFilter(logging.Filter):
         if record.levelname in ('WARNING', 'ERROR', 'CRITICAL'):
             log_counts[record.levelname] += 1
             last_log = f"Caught exception: {record.msg}"
-            cf.info(f"  *****  !' + record.levelname + '!  *****  \n{traceback.format_exc()}")
+            cf.info(f"*****  !{record.levelname}!  *****\n{traceback.format_exc()}")
         elif record.levelname is 'DEBUG':  # 'debug' level reserved for invalid configs (e.g. gate mismatch)
             iter_validity = "Invalid"
         return True
