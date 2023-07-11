@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import itertools
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
@@ -88,8 +89,7 @@ class CELLO3:
                     for rnl_out, g_out in graph_outputs_for_printing:
                         print(rnl_out, str(g_out))
                     print(f'output_eval: unit_conversion = {best_graph.outputs[0].function}\n')
-                    
-                    
+
                     debug_print('Truth Table: ', padding=False)
                     tb = [truth_table_labels] + truth_table
                     print_table(tb)
@@ -98,7 +98,9 @@ class CELLO3:
                     for r in tb:
                         print(r)
                     print()
-                    
+
+                    self.eugene(best_graph, graph_inputs_for_printing, graph_gates_for_printing, graph_outputs_for_printing)
+
         return
         
         
@@ -165,7 +167,7 @@ class CELLO3:
             bestassignments = self.genetic_simulation(I_list, O_list, G_list, i, o, g, circuit)
         
         print_centered('End of GATE ASSIGNMENT', padding=True)
-        
+
         return max(bestassignments, key=lambda x: x[0]) if len(bestassignments) > 0 else bestassignments
     
     # NOTE: alternative to exhaustive assignment - simulation
@@ -510,6 +512,7 @@ class CELLO3:
     
     
     def check_conditions(self, verbose=True):
+        # TODO: Ignore logic_constraints value, which is unreliable, and instead use the actual gate count
         if verbose: print()
         if verbose: print_centered('condition checks for valid input')
         
@@ -604,7 +607,28 @@ class CELLO3:
         #     max_iterations = None
 
         return pass_check, max_iterations
-    
+
+    def eugene(self, best_graphs, in_map, gate_map, out_map):
+        """
+        Used to generate a .eug (eugene script) file based on data in the UCF, input, and output files for the final/
+        best circuit.
+        :param out_map:
+        :param gate_map:
+        :param in_map:
+        :param best_graphs:
+        :return: void
+        """
+
+        ucf = os.path.join(self.inpath, self.ucfname)
+        jso = json.load(open(f"temp_out/{self.vrlgname}/{self.vrlgname}.json"))
+        # print(jso['modules']['and_gate']['ports']['a']['direction'])
+        filepath = f"temp_out/{self.vrlgname}/{self.ucfname}/{self.vrlgname}+{self.ucfname}.eug"
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w') as eug:
+            eug.write(f'{str(best_graphs)}\n{str(in_map)}\n{str(gate_map)}\n{str(out_map)}')
+            eug.close()
+
+
 if __name__ == '__main__':
     ucflist = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
     # problem_ucfs = ['Eco1C2G2T2', 'Eco2C1G6T1']
