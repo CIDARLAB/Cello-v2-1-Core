@@ -621,152 +621,157 @@ class CELLO3:
         :return: bool
         """
 
+        # CREATE FILE
         ucf = os.path.join(self.inpath, self.ucfname)
         jso = json.load(open(f"temp_out/{self.vrlgname}/{self.vrlgname}.json"))
         # print(jso['modules']['and_gate']['ports']['a']['direction'])
         filepath = f"temp_out/{self.vrlgname}/{self.ucfname}/{self.vrlgname}+{self.ucfname}.eug"
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-        # in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
-        # I_list = []
-        # for sensor in in_sensors:
-        #     I_list.append(sensor['name'])
-        # out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
-        # O_list = []
-        # for device in out_devices:
-        #     O_list.append(device['name'])
-
-        in_structs = {}
-        gate_structs = {}
-        out_structs = {}
-        for id, i in in_map:
-            in_structs[i.name] = {}
-        for id, g in gate_map:
-            gate_structs[g.gate_id] = {}  # Only use a subset according to range(len(g.inputs))
-        for id, o in out_map:
-            out_structs[o.name] = {}
-
-        # TODO: Simplify (enumeration, etc.)
-
-        # In UCFIn, lookup input_sensors -> lookup structure -> lookup outputs
-        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
-        i_structures = self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures')
-        for in_sensor in in_sensors:
-            if (i := in_sensor['name']) in in_structs.keys():
-                for structure in i_structures:
-                    if structure['name'] == in_sensor['structure']:
-                        in_structs[i] = structure
-        print('\n\n', in_structs)
-
-        gate_devices = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
-        g_structures = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'structures')
-        for gate_device in gate_devices:
-            if (g := gate_device['group']) in gate_structs.keys():
-                for structure in g_structures:
-                    if structure['name'] == gate_device['structure']:
-                        gate_structs[g] = structure
-                        # for device in structure['devices']:
-                        #     if g in device['components']:
-                        #         gates_structs[g].append(device['name'])  # TODO: Error checking, should end in cassette
-        print('\n\n', gate_structs)
-
-        out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
-        o_structures = self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures')
-        for out_device in out_devices:
-            if (o := out_device['name']) in out_structs.keys():
-                for structure in o_structures:
-                    if structure['name'] == out_device['structure']:
-                        out_structs[o] = structure
-        print('\n\n', out_structs)
-
-        parts = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'parts')
-        G_list = ['promoter']
-        for part in parts:
-            if part['name'] in gate_structs.keys() and (t := part['type']) not in G_list:
-                G_list.append(t)
-        G_list.extend(['terminator', 'cassette', 'spacer', 'scar'])
-
-        genetic_locations = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'genetic_locations')[0]
-        locations = genetic_locations['locations']
-
+        # ENUMERATE EDGES
         edges = {}  # key: to; val: from
         for rnl_gate, g_gate in gate_map:
-            edges[g_gate.gate_id] = []
+            edges[g_gate.gate_in_use] = []
         for rnl_out, g_out in out_map:
             edges[g_out.name] = []
         for rnl_gate, g_gate in gate_map:
             for g_in in g_gate.inputs:
                 for rnl_input, g_input in in_map:
                     if rnl_input[1] == g_in:
-                        edges[g_gate.gate_id].append(g_input.name)  # TODO: Still need to merge multi-inputs
+                        edges[g_gate.gate_in_use].append(g_input.name)  # TODO: Still need to merge multi-inputs
                 for rnl_gate2, g_gate2 in gate_map:
                     if g_gate2.output == g_in:
-                        edges[g_gate.gate_id].append(g_gate2.gate_id)
+                        edges[g_gate.gate_in_use].append(g_gate2.gate_in_use)
         for rnl_output, g_output in out_map:  # TODO: Can assume an input is not directly connected to output?
             for rnl_gate, g_gate in gate_map:
                 if g_gate.output == rnl_output[1]:
-                    edges[g_output.name].append(g_gate.gate_id)
+                    edges[g_output.name].append(g_gate.gate_in_use)
         print('\n\n', edges, '\n\n')
 
-        cassette_counts = {}
-        for g, s in gate_structs.items():
-            for d in s['devices']:
-                i = 0
-                cassette = ""
-                for c in d['components']:
-                    if c.startswith('#in'):
-                        i += 1
-                    elif c.endswith('_cassette'):
-                        cassette = c
-                if cassette:
-                    cassette_counts[cassette] = i
+        # CONSTRUCT OBJECTS
+        # self.name = gate_in_use e.g. Gate3    # DONE
+        # self.type = input/output/gate         # DONE
+        # self.group = [no prefixes/subtype]    # DONE
+        # self.model =                          # DONE
+        # self.structure =                      # DONE
+        # self.cassette = device name           # DONE
+        # self.inputs = []                      # DONE TODO: update
+        # self.outputs = ""                     # DONE
 
+        # Names and inputs
         eugene_objects = {}
-        for k in edges:
-            for edge in edges[k]:
-                eugene_objects[edge] = EugeneObject(edge)
-        print(eugene_objects)
+        for key, val in edges.items():
+            eugene_objects[key] = EugeneObject(key)
+            eugene_objects[key].inputs = val
+            for edge in val:
+                if edge not in eugene_objects.keys():
+                    eugene_objects[edge] = EugeneObject(edge)
 
-        for eo in eugene_objects.values():
-            if eo.name in in_structs.keys():
-                eo.type = 'input'
-                eo.outputs = in_structs[eo.name]['outputs']
-            elif eo.name in gate_structs.keys():
-                eo.type = 'gate'
-                eo.outputs = gate_structs[eo.name]['outputs']
-                for device in gate_structs[eo.name]['devices']:
-                    if eo.name in device['components']:
-                        eo.cassette = device['name']
-            elif eo.name in out_structs.keys():
-                eo.type = 'output'
+        # Gate group names
+        for id, g in gate_map:
+            eugene_objects[g.gate_in_use].group = g.gate_id  # Only use a subset according to range(len(g.inputs))
 
+        # ADD STRUCTURES TO DICTS  # TODO: Simplify
+        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
+        i_structures = self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures')
+        for k, v in eugene_objects.items():
+            for in_sensor in in_sensors:
+                if k == in_sensor['name']:
+                    v.type = 'input'
+                    v.model = in_sensor['model']
+                    v.structure = in_sensor['structure']
+                    for structure in i_structures:
+                        if v.structure == structure['name']:
+                            v.outputs = structure['outputs']
 
+        gate_devices = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
+        g_structures = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'structures')
+        for k, v in eugene_objects.items():
+            for gate_device in gate_devices:
+                if k == gate_device['name']:
+                    v.type = 'gate'
+                    v.model = gate_device['model']
+                    v.structure = gate_device['structure']
+                    for structure in g_structures:
+                        if v.structure == structure['name']:
+                            v.outputs = structure['outputs']
+                            cassettes = []
+                            for d in structure['devices']:
+                                cassette = ["", "", 0]
+                                for c in d['components']:
+                                    if c.startswith('#in'):
+                                        cassette[2] += 1
+                                    elif c.endswith('_cassette'):
+                                        cassette[1] = c
+                                if cassette[2] > 0:
+                                    cassette[0] = d['name']
+                                    cassettes.append(cassette)
+                            v.cassettes = cassettes
 
-        # for cassette in cassette_counts.values():
+        out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
+        o_structures = self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures')
+        for k, v in eugene_objects.items():
+            for out_device in out_devices:
+                if k == out_device['name']:
+                    v.type = 'output'
+                    v.model = out_device['model']
+                    v.structure = out_device['structure']
+                    for structure in o_structures:
+                        if v.structure == structure['name']:
+                            cassettes = []
+                            for d in structure['devices']:
+                                cassette = ["", "", 0]
+                                for c in d['components']:
+                                    if c.startswith('#in'):
+                                        cassette[2] += 1
+                                    elif c.endswith('_cassette'):
+                                        cassette[1] = c
+                                if cassette[2] > 0:
+                                    cassette[0] = d['name']
+                                    cassettes.append(cassette)
+                            v.cassettes = cassettes
 
+        for k, v in eugene_objects.items():
+            print(f"Name: {v.name}, Type: {v.type}, Group: {v.group}, Model: {v.model}, Structure: {v.structure},"
+                  f" Cassette: {v.cassettes}, Inputs: {v.inputs}, Outputs: {v.outputs}")
+
+        # GET PARTTYPES  # TODO: iterate both groups and outputs to get part types
+        parts = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'parts')
+        G_list = ['promoter']
+        for part in parts:
+            if part['name'] in eugene_objects.keys() and (t := part['type']) not in G_list:
+                G_list.append(t)
+        G_list.extend(['terminator', 'cassette', 'spacer', 'scar'])
+
+        # GET FENCEPOSTS
+        genetic_locations = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'genetic_locations')[0]
+        locations = genetic_locations['locations']
+
+        # GET BLOCKS
 
 
         with open(filepath, 'w') as eug:
             # eug.write(f'{str(best_graphs)}\n{str(in_map)}\n{str(gate_map)}\n{str(out_map)}\n')
-            # DEBUGGING INFO
+        # DEBUGGING INFO
             eug.write(f'DEBUGGING INFO: CIRCUIT OVERVIEW...\n{best_graphs.inputs}, {best_graphs.gates}, '
                       f'{best_graphs.outputs}\n')
             for rnl_input, g_input in in_map:
                 eug.write(f'\n{g_input.name}{rnl_input}')
             eug.write('\n')
             for rnl_gate, g_gate in gate_map:
-                eug.write(f'\n{g_gate.inputs} -> {g_gate.gate_id}({rnl_gate}):{g_gate.gate_type} -> {g_gate.output}')
+                eug.write(f'\n{g_gate.inputs} -> {g_gate.gate_in_use}({rnl_gate}):{g_gate.gate_type} ->'
+                          f' {g_gate.output}')
             eug.write('\n')
             for rnl_output, g_output in out_map:
                 eug.write(f'\n{g_output.name}{rnl_output}')
             eug.write('\n\n\n')
 
-            # PartTypes
+        # PartTypes
             for type in G_list:
                 eug.write(f'PartType {type};\n')
             eug.write('\n')
 
-            # Sequences
+        # Sequences
             # TODO: Limit retrieval of promoter (with prefixes) and other custom ones; ignore cassette and spacer
             # TODO: Determine proper order...
             for part in parts:
@@ -774,37 +779,63 @@ class CELLO3:
                     eug.write(f"{t} {part['name']}(.SEQUENCE(\"{part['dnasequence']}\"));\n")
             eug.write('\n')
 
-            # Fenceposts
+        # Fenceposts
             eug.write('PartType fencepost;\n')
             for location in locations:
                 eug.write(f"fencepost {location['symbol']};\n")
             eug.write('\n')
 
-            # Cassettes
-            # for k in edges:
-            #     for e in edges[k]:
-            #         for g, s in gate_structs:
-            #             if g == e:
-            #                 for d in g['devices']:
-            #                     if e in d['components']:
-            #                         eug.write(f"cassette {d['name']}();\n")  # TODO: Use cassette count
-            #                         for d2 in g['devices']:
-            #                             if d['name'] in d['components']:
-            #                                 eug.write(f"Device {d2['name']}(\n")
-            #                                 break
-            #                     for i2, s2 in in_structs:
-            #                         if i2 == e:
-            #                             eug.write(f"s2['outputs'][0],\n")
-            #                     for g3, s3 in gate_structs:
-            #
-            #                     for o4, s4 in out_structs:
-            #
-            #                         eug.write(f"    {}")
-            #             for device in g['devices']:
-            #         for o in out_structs:
+        # Cassettes
+        #     for eu in eugene_objects.values():
+        #         if eu.type in ['gate', 'output']:
+        #             for c in eu.cassettes:
+        #                 eug.write(f"cassette {eu.cassettes[1]}();\n"
+        #                           f"Device {eu.cassettes[0]}(\n")
+        #             eug.write(f"{eugene_objects[eu.inputs[c_ins]].outputs},\n")
+        #             eug.write(f"{eu.cassettes[1]}\n);\n\n")
 
+            for eu in eugene_objects.values():
+                if eu.type in ['gate', 'output']:
+                    cas = eu.cassettes[0][0]
+                    eug.write(f"Rule {cas}Rule0( ON {cas}:\n"
+                              f"    ALL_FORWARD\n);\n\n")
 
+            for eu in eugene_objects.values():
+                if eu.type in ['gate', 'output']:
+                    cas = eu.cassettes[0][0]
+                    eug.write(f"{cas}_devices = product({cas});\n")
+            eug.write("\n")
 
+            for eu in eugene_objects.values():
+                if eu.type in ['gate', 'output']:
+                    cas = eu.cassettes[0][0]
+                    eug.write(f"Device {cas}Device();\n")
+            eug.write('\nDevice circuit();\n\n')
+
+            i = 0
+            for eu in eugene_objects.values():
+                i += 1
+                if eu.type in ['gate', 'output']:
+                    cas = eu.cassettes[0][0]
+                    eug.write(f"for(num i{i} = 0; i{i} < sizeof({cas}_devices); i{i} = i{i} + 1) {{}} \n")
+            eug.write('\n')
+
+            i = 0
+            for eu in eugene_objects.values():
+                i += 1
+                if eu.type in ['gate', 'output']:
+                    cas = eu.cassettes[0][0]
+                    eug.write(f"{cas}Device = {cas}_devices[i{i}];\n")
+            eug.write('\n')
+
+            eug.write('Device circuit(\n')
+            for eu in eugene_objects.values():
+                if eu.type in ['gate', 'output']:
+                    cas = eu.cassettes[0][0]
+                    eug.write(f"{cas}Device,\n")
+            eug.write('\n);\n\n')
+
+            eug.write("result = permute(circuit);\n\nallResults = allResults + result;")
 
             eug.close()
         return True
@@ -818,10 +849,11 @@ class EugeneObject:
     def __init__(self, name):
         self.name = name
         self.type = ''
-        self.cassette = ""
-        self.device = ""
+        self.group = ''
+        self.model = ''
+        self.structure = ''
+        self.cassettes = []  # [[1st name, cassette name, num of ins], [2nd name, cassette name, num of ins]]
         self.inputs = []
-        self.cassette_count = 0
         self.outputs = ""
 
 
