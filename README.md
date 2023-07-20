@@ -27,7 +27,7 @@ First, you will need to manually install Graphviz, required for running Yosys. Y
 
 Next, you will need to add the graphviz bin folder to your ```Path``` environment variable. Search for "edit environment variables" in the Windows menu, go to the dialog box, and click "Edit" on the variable named ```Path```. Then click "New" once you see the values of the ```Path``` variable. Now you can the path of the Graphviz bin to the list, by default it is ```C:\Program Files\Graphviz\bin```
 
-You will also need to install the Python package for Graphviz by running: ```pip install graphviz```
+You will also need to install the Python package for Graphviz as well as scipy by running: ```pip install graphviz scipy```
 
 Now, you should have graphviz installed as an executable command. Test it by trying: ```dot -v```
 
