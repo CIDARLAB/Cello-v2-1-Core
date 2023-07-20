@@ -4,6 +4,7 @@ Classes used to generate the eugene file.
 
 import os
 from dataclasses import dataclass, field
+# from typingg import Annotated, Type, TypeDict
 
 
 @dataclass
@@ -96,12 +97,13 @@ class EugeneObject:
         self.dev_rules_operands: dict[str, [str]] = {}  # [rule, [operands]]
         self.cir_rules_operands: dict[str, [str]] = {}  # [rule, [operands]]
 
-    # GENERATE CORE EUGENE OBJECTS #####################################################################################
+    # 1. GENERATE CORE EUGENE OBJECTS ##################################################################################
     def generate_eugene_device(self):
         """
         Generates dict of EugeneDevices objects based on data in the UCF, input, and output files for the final circuit.
         :return: bool
         """
+
         # Enumerate edges from circuit parameters
         edges = {}  # key: to; val: from
         for rnl_gate, g_gate in self.gate_map:
@@ -120,6 +122,12 @@ class EugeneObject:
             for rnl_gate, g_gate in self.gate_map:
                 if g_gate.output == rnl_output[1]:
                     edges[g_output.name].append(g_gate.gate_in_use)
+
+        # Debugging info...
+        print('BASIC CIRCUIT INFO:')
+        print(f'{self.best_graphs}')
+        print(f'Mappings: {self.in_map}, {self.gate_map}, {self.out_map}')
+        print(f'Connections: {edges}\n')
 
         # Add names and inputs to dict
         for key, val in edges.items():
@@ -209,7 +217,7 @@ class EugeneObject:
                             v.cassettes = cassettes
         return True
 
-    # GENERATE ADDITIONAL EUGENE OBJECTS ###############################################################################
+    # 2. GENERATE ADDITIONAL EUGENE OBJECTS ############################################################################
     def generate_eugene_helpers(self):
         """
         Generates some additional objects to help with writing the eugene file.
@@ -281,14 +289,30 @@ class EugeneObject:
                                 self.structs_cas_dict[c[0]].inputs.append(output)
 
         # Get Device Rules
-        device_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'device_rules')[0]['rules']['rules']
-        circuit_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules')[0]['rules']['rules']
+        device_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'device_rules')[0]
+        circuit_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules')[0]
         # TODO: comprehensive rule keywords?  SC1 odd case...
         rules_keywords = ['NOT', 'EQUALS',
                           'NEXTTO', 'CONTAINS',
                           'STARTSWITH', 'ENDSWITH',
                           'BEFORE', 'AFTER',
                           'ALL_FORWARD']
+        # TODO: Pattern in SC1 breaks from other UCFs... has 2 layers of func>rules>func>rules (b/c 2 outputs?)
+        while 'rules' in device_rules:
+            device_rules = device_rules['rules']
+        while 'rules' in circuit_rules:
+            circuit_rules = circuit_rules['rules']
+        if isinstance(device_rules[0], dict):
+            temp = []
+            for v in device_rules:
+                temp.extend(v['rules'])
+            device_rules = temp
+        if isinstance(circuit_rules[0], dict):
+            temp = []
+            for v in circuit_rules:
+                temp.extend(v['rules'])
+            circuit_rules = temp
+
         for rule in device_rules:
             self.dev_rules_operands[rule] = [word for word in rule.split() if word not in rules_keywords]
         for rule in circuit_rules:
@@ -296,7 +320,7 @@ class EugeneObject:
 
         return True
 
-    # CREATE, WRITE, AND CLOSE THE EUGENE FILE #########################################################################
+    # 3. CREATE, WRITE, AND CLOSE THE EUGENE FILE ######################################################################
     def write_eugene(self):
         """
         Creates the eugene file at filepath, uses previously created objects to write to the file, then closes it.
@@ -336,20 +360,20 @@ class EugeneObject:
                     eug.write(f"{sep}    {input}")
                     if not sep:
                         sep = ",\n"
-                eug.write(f'\n    {c.struct_cas_name}\n);\n\n')
+                eug.write(f',\n    {c.struct_cas_name}\n);\n\n')
             eug.write('\n')
 
             # Device Rules
             # Include every rule for which all the operands exist in a given cassette (as specified in blocks above)
-            for device, inputs in self.structs_cas_dict.items():
+            for device, cassette in self.structs_cas_dict.items():
                 eug.write(f'Rule {device}Rule0( ON {device}:\n')  # TODO: Always 'Rule0'?  Always ON?
                 sep = ""
                 for rule, operands in self.dev_rules_operands.items():
-                    if all([1 if operand in inputs else 0 for operand in operands]):
-                        eug.write(f'{sep}    {rule}\n')
+                    if all([1 if operand in cassette.inputs else 0 for operand in operands]):
+                        eug.write(f'{sep}    {rule}')
                         if not sep:
                             sep = " AND\n"
-                eug.write(');\n\n')
+                eug.write('\n);\n\n')
             eug.write('\n')
 
             # Product Mappings
@@ -396,7 +420,7 @@ class EugeneObject:
                 eug.write(f"    {device}Device,\n")
             sep = ""
             for fencepost in self.genlocs_fenceposts:
-                eug.write(f'    {fencepost}')
+                eug.write(f'{sep}    {fencepost}')
                 if not sep:
                     sep = ",\n"
             eug.write('\n);\n\n')

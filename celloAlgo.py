@@ -111,7 +111,18 @@ class CELLO3:
                     for r in tb:
                         print(r)
                     print()
-                    
+
+                    # EUGENE FILE
+                    filepath = f"temp_out/{self.vrlgname}/{self.ucfname}/{self.vrlgname}+{self.ucfname}.eug"
+                    eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
+                                          graph_outputs_for_printing, filepath, best_graph)
+                    if eugene.generate_eugene_device():
+                        print("Eugene objects created...")
+                    if eugene.generate_eugene_helpers():
+                        print("Eugene helpers created...")
+                    if eugene.write_eugene():
+                        print("Eugene script written...")
+
         return
 
     def __load_netlist(self):
