@@ -4,7 +4,7 @@ Classes used to generate the eugene file.
 
 import os
 from dataclasses import dataclass, field
-# from typingg import Annotated, Type, TypeDict
+# from typing import Annotated, Type, TypeDict
 
 
 @dataclass
@@ -138,7 +138,7 @@ class EugeneObject:
                     self.devices_dict[edge] = EugeneDevice(gates_name=edge)
 
         # Add gate group names to dict
-        for id, g in self.gate_map:
+        for id_, g in self.gate_map:
             self.devices_dict[g.gate_in_use].group = g.gate_id  # Only use a subset according to range(len(g.inputs))
 
         # Add type, model, structure, outputs to the Inputs in dict
@@ -278,14 +278,14 @@ class EugeneObject:
         # e.g. and+Bth on the 2-input NOR should specify *2* cassette blocks b/c each only permits one #in
         for eu in self.devices_dict.values():
             if eu.type in ['gate', 'output']:
-                input = 0
+                input_ = 0
                 for c in eu.cassettes:
-                    if input < len(eu.inputs):
+                    if input_ < len(eu.inputs):
                         self.structs_cas_dict[c[0]] = EugeneCassette(c[0], c[1], eu.type)
                         for i in range(c[2]):
-                            if input < len(eu.inputs):
-                                output = self.devices_dict[eu.inputs[input]].outputs[0]  # TODO: Only ever 1 'outputs'?
-                                input += 1
+                            if input_ < len(eu.inputs):
+                                output = self.devices_dict[eu.inputs[input_]].outputs[0]  # TODO: Only ever 1 'outputs'?
+                                input_ += 1
                                 self.structs_cas_dict[c[0]].inputs.append(output)
 
         # Get Device Rules
@@ -335,8 +335,8 @@ class EugeneObject:
             #           f" Cassette: {v.cassettes}, Inputs: {v.inputs}, Outputs: {v.outputs}\n")
 
             # PartTypes
-            for type in self.parts_types:
-                eug.write(f'PartType {type};\n')
+            for type_ in self.parts_types:
+                eug.write(f'PartType {type_};\n')
             eug.write('\n')
 
             # Sequences
@@ -356,8 +356,8 @@ class EugeneObject:
                     eug.write(f"cassette {c.struct_cas_name}();\n")
                 eug.write(f"Device {c.struct_var_name}(\n")
                 sep = ""
-                for input in c.inputs:
-                    eug.write(f"{sep}    {input}")
+                for input_ in c.inputs:
+                    eug.write(f"{sep}    {input_}")
                     if not sep:
                         sep = ",\n"
                 eug.write(f',\n    {c.struct_cas_name}\n);\n\n')
@@ -410,8 +410,8 @@ class EugeneObject:
             eug.write('\n')
 
             # Device Iter Assignments
-            for device, iter in device_iters_dict.items():
-                eug.write(f"{device}Device = {device}_devices[i{iter}];\n")
+            for device, iter_ in device_iters_dict.items():
+                eug.write(f"{device}Device = {device}_devices[i{iter_}];\n")
             eug.write('\n')
 
             # Device Circuit
