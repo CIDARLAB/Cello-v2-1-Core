@@ -337,8 +337,9 @@ class EugeneObject:
             # Debugging Info...
             # for k, v in self.devices_dict.items():
             #     print(f'{k}...')
-            #     print(f"Name: {v.name}, Type: {v.type}, Group: {v.group}, Model: {v.model}, Structure: {v.structure},"
-            #           f" Cassette: {v.cassettes}, Inputs: {v.inputs}, Outputs: {v.outputs}\n")
+            #     print(f"Name: {v.gates_name}, Type: {v.type}, Group: {v.gates_group}, Model: {v.gates_model}, "
+            #           f"Structure: {v.gates_struct}, Cassette: {v.struct_cassettes}, Inputs: {v.inputs}, "
+            #           f"Outputs: {v.outputs}\n")
 
             # PartTypes
             for type_ in self.parts_types:
