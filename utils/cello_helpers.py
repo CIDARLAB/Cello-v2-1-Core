@@ -1,16 +1,20 @@
+"""
+TODO: insert cello_helpers docstring
+"""
+
 import json
 import math
 
 '''
 cello gate_assignment algorithm pseudo code:
 
-def assign_hash_table_for_every_gate_permu():
+def assign_hash_table_for_every_gate_permutation():
     max_score = 0
     best_design = None
     for each possibility in (I)P(i) * (O)P(o) * (G)P(g) permutations: (* choice in algorithm)
         design = new Circuit(possibility)
         circuit_score = evaluate(design)
-        if circuit_sccore > max_score:
+        if circuit_score > max_score:
             max_score = circuit_score
             best_design = design
     return best_design
@@ -19,7 +23,7 @@ def assign_hash_table_for_every_gate_permu():
 (*) def exhaustive_assign:
     permute available inputs with number of inputs needed
         permute available outputs with number of outputs needed
-            permute avaialbe gates with the number of gates needed
+            permute available gates with the number of gates needed
                 newI, newO, newG = permutation
 time complexity: O((I)P(i) * (O)P(o) * (G)P(g))
 space: O(1) using itertools
@@ -45,25 +49,45 @@ disadvantage: sometimes would evaluate the same design again, still time-consumi
 
 (*) def simulated_annealing:
     temperature = some value
-    cur_curcuit = generate random initial solution
+    cur_circuit = generate random initial solution
     while True:
         uses hill-climb
 advantage: less resource-intensive than genetic simulation algorithm
 disadvantage: not guaranteed to reach global optima
 '''
 
+
 def permute_count_helper(i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf):
+    """
+
+    :param i_netlist:
+    :param o_netlist:
+    :param g_netlist:
+    :param i_ucf:
+    :param o_ucf:
+    :param g_ucf:
+    :return:
+    """
     # print("i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf")
     # print((i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf))
     factorial = lambda n: 1 if n == 0 else n * factorial(n - 1)
     partial_factorial = lambda n, k: 1 if n <= k else n * partial_factorial(n - 1, k)
     # check it thrice
-    total_permutations = partial_factorial(i_ucf, i_ucf-i_netlist) * partial_factorial(g_ucf, g_ucf-g_netlist) * partial_factorial(o_ucf, o_ucf-o_netlist)
-    confirm_permutations = (factorial(i_ucf) / factorial(i_ucf - i_netlist)) * (factorial(o_ucf) / factorial(o_ucf - o_netlist)) * (factorial(g_ucf) / factorial(g_ucf - g_netlist))
-    confirm_permuattions2 = math.perm(i_ucf, i_netlist) * math.perm(o_ucf, o_netlist) * math.perm(g_ucf, g_netlist)
-    return total_permutations, (confirm_permutations + confirm_permuattions2) / 2
+    total_permutations = partial_factorial(i_ucf, i_ucf - i_netlist) * partial_factorial(g_ucf,
+                                                                                         g_ucf - g_netlist) * partial_factorial(
+        o_ucf, o_ucf - o_netlist)
+    confirm_permutations = (factorial(i_ucf) / factorial(i_ucf - i_netlist)) * (
+                factorial(o_ucf) / factorial(o_ucf - o_netlist)) * (factorial(g_ucf) / factorial(g_ucf - g_netlist))
+    confirm_permutations2 = math.perm(i_ucf, i_netlist) * math.perm(o_ucf, o_netlist) * math.perm(g_ucf, g_netlist)
+    return total_permutations, (confirm_permutations + confirm_permutations2) / 2
+
 
 def print_centered(text, padding=False):
+    """
+
+    :param text:
+    :param padding:
+    """
     length = 88  # Length of the string of slashes
     if padding:
         print()
@@ -79,6 +103,11 @@ def print_centered(text, padding=False):
 
 
 def debug_print(msg, padding=True):
+    """
+
+    :param msg:
+    :param padding:
+    """
     out_msg = f'∫DEBUG∫ {msg}'
     if padding:
         out_msg = '\n' + out_msg + '\n'
@@ -86,35 +115,60 @@ def debug_print(msg, padding=True):
 
 
 def print_json(chunk):
+    """
+
+    :param chunk:
+    """
     print(json.dumps(chunk, indent=4))
-    
-def query_helper(dictList, key, vals):
+
+
+def query_helper(dict_list, key, vals):
+    """
+
+    :param dict_list:
+    :param key:
+    :param vals:
+    :return:
+    """
     out = []
-    for d in dictList:
+    for d in dict_list:
         if key in list(d.keys()):
             if d[key] in vals:
                 out.append(d)
     return out
 
+
 def print_table(table):
+    """
+
+    :param table:
+    :return:
+    """
     if not table:
         print("Table is empty.")
         return
-    
+
     num_columns = len(table[0])
-    column_widths = [max(len(str(row[column])) if row[column] is not None else 0 for row in table) for column in range(num_columns)]
-    
+    column_widths = [max(len(str(row[column])) if row[column] is not None else 0 for row in table) for column in
+                     range(num_columns)]
+
     # Print table header
     print_separator(column_widths)
     print_row(table[0], column_widths)
     print_separator(column_widths)
-    
+
     # Print table body
     for row in table[1:]:
         print_row(row, column_widths)
     print_separator(column_widths)
 
+
 def print_row(row, column_widths):
+    """
+
+    :param row:
+    :param column_widths:
+    """
     max_lines = 1
     for i, item in enumerate(row):
         if item is None:
@@ -141,8 +195,11 @@ def print_row(row, column_widths):
 
 
 def print_separator(column_widths):
+    """
+
+    :param column_widths:
+    """
     separator = "+"
     for width in column_widths:
         separator += f"{'-' * (width + 2)}+"
     print(separator)
-
