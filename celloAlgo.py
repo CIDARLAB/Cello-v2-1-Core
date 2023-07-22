@@ -1,5 +1,6 @@
 """
 This software package is for designing genetic circuits based on logic gate designs written in the Verilog format.
+TODO: Link to articles and other sources
 """
 
 import itertools
@@ -14,18 +15,15 @@ from ucf_class import UCF
 from eugene import *
 
 
-# CELLO arguments:
-# 1. verilog name
-# 2. ucf name
-# 3. path-to-verilog-and-ucf
-# 4. path-for-output
-# 5. options (optional)
-
-flag_test_all_configs: bool = False
-
-
 class CELLO3:
     """
+    CELLO arguments:
+    1. verilog name
+    2. ucf name
+    3. path-to-verilog-and-ucf
+    4. path-for-output
+    5. options (optional)
+
     General flow of control...
         call_YOSYS()
         UCF Class (read in UCF data)
@@ -52,22 +50,22 @@ class CELLO3:
         yosys_cmd_choice = 1  # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
         self.verbose = False  # Print more info to console and log. See logging.config to change log metadata verbosity
         self.print_iters = False  # Print to console info on *all* tested iterations (produces copious amounts of text)
-        self.sim_anneal = True  # Uses scipy's dual_annealing to very efficiently find good results (max not guaranteed)
+        self.exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
         self.test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
-        self.log_overwrite = True  # Removes date/time from file name, allowing overwrite of log from equivalent config
+        self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of log from equivalent config
 
         if 'yosys_cmd_choice' in options:
             yosys_cmd_choice = options['yosys_cmd_choice']
         if 'verbose' in options:
             self.verbose = options['verbose']
         if 'print_iters' in options:
-            self.print_iters = options['print_iters']
+            self.print_iters = options['print_iters']  # NOTE: Never prints to log (some configs have billions of iters)
         if 'test_configs' in options:
             self.test_configs = options['test_configs']
         if 'log_overwrite' in options:
             self.log_overwrite = options['log_overwrite']
-        if 'sim_anneal' in options:
-            self.simulated_annealing = options['sim_anneal']  # Scipy's dual annealing
+        if 'exhaustive' in options:
+            self.exhaustive = options['exhaustive']  # Normally uses Scipy's dual annealing
 
         self.in_path = in_path
         self.out_path = out_path
@@ -127,7 +125,9 @@ class CELLO3:
 
                 # RESULTS/CIRCUIT DESIGN
                 print_centered('RESULTS')
-                log.cf.info(f'CIRCUIT DESIGN: Best Result( {best_result[1]} )')
+                log.cf.info(f'CIRCUIT DESIGN:\n'
+                            f' - Best Design: {best_result[1]}\n'
+                            f' - Best Circuit Score: {self.best_score}')
 
                 log.cf.info(f'\nInputs ( input_response = {best_graph.inputs[0].function} ):')
                 for rnl_in, g_in in graph_inputs_for_printing:
@@ -144,8 +144,7 @@ class CELLO3:
                     log.cf.info(f' - {rnl_out} {str(g_out)}')
 
                 # TRUTH TABLE/GATE SCORING
-                log.cf.info(f'\nTRUTH TABLE/GATE SCORING:\n'
-                            f' - Final Circuit Score: {self.best_score}')
+                log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
                 tb = [truth_table_labels] + truth_table
                 print_table(tb)
                 print('(See log for more precision)')
@@ -214,11 +213,11 @@ class CELLO3:
                        (num_ucf_input_parts >= num_netlist_inputs)
         if verbose:
             log.cf.info('\nINPUTS:')
-            log.cf.info(f'num IN-SENSORS in {ucf_name_} in-UCF: {num_ucf_input_sensors}')
-            log.cf.info(f'num IN-STRUCTURES in {ucf_name_} in-UCF: {num_ucf_input_structures}')
-            log.cf.info(f'num IN-MODELS in {ucf_name_} in-UCF: {num_ucf_input_models}')
-            log.cf.info(f'num IN-PARTS in {ucf_name_} in-UCF: {num_ucf_input_parts}')
-            log.cf.info(f'num IN-NODES in {v_name_} netlist: {num_netlist_inputs}')
+            log.cf.info(f'num IN-SENSORS in {self.ucf_name} in-UCF: {num_ucf_input_sensors}')
+            log.cf.info(f'num IN-STRUCTURES in {self.ucf_name} in-UCF: {num_ucf_input_structures}')
+            log.cf.info(f'num IN-MODELS in {self.ucf_name} in-UCF: {num_ucf_input_models}')
+            log.cf.info(f'num IN-PARTS in {self.ucf_name} in-UCF: {num_ucf_input_parts}')
+            log.cf.info(f'num IN-NODES in {self.verilog_name} netlist: {num_netlist_inputs}')
 
         if verbose:
             log.cf.info([i['name'] for i in in_sensors])
@@ -235,11 +234,11 @@ class CELLO3:
                         (num_ucf_output_parts >= num_netlist_outputs)
         if verbose:
             log.cf.info('\nOUTPUTS:')
-            log.cf.info(f'num OUT-SENSORS in {ucf_name_} out-UCF: {num_ucf_output_sensors}')
-            log.cf.info(f'num OUT-STRUCTURES in {ucf_name_} out-UCF: {num_ucf_output_structures}')
-            log.cf.info(f'num OUT-MODELS in {ucf_name_} out-UCF: {num_ucf_output_models}')
-            log.cf.info(f'num OUT-PARTS in {ucf_name_} out-UCF: {num_ucf_output_parts}')
-            log.cf.info(f'num OUT-NODES in {v_name_} netlist: {num_netlist_outputs}')
+            log.cf.info(f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}')
+            log.cf.info(f'num OUT-STRUCTURES in {self.ucf_name} out-UCF: {num_ucf_output_structures}')
+            log.cf.info(f'num OUT-MODELS in {self.ucf_name} out-UCF: {num_ucf_output_models}')
+            log.cf.info(f'num OUT-PARTS in {self.ucf_name} out-UCF: {num_ucf_output_parts}')
+            log.cf.info(f'num OUT-NODES in {self.verilog_name} netlist: {num_netlist_outputs}')
 
             log.cf.info([out['name'] for out in out_sensors])
             log.cf.info(f"{'Valid' if outputs_match else 'NOT valid'} output match!")
@@ -260,11 +259,11 @@ class CELLO3:
         # numFunctions = len(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions'))
         if verbose:
             log.cf.info('\nGATES:')
-            log.cf.info(f'num PARTS in {ucf_name_} UCF: {num_parts}')
-            # log.cf.info(f'(ref only) num FUNCTIONS in {ucf_name} UCF: {numFunctions}')
-            log.cf.info(f'num STRUCTURES in {ucf_name_} UCF: {num_structs}')
-            log.cf.info(f'num MODELS in {ucf_name_} UCF: {num_models}')
-            log.cf.info(f'num GATES in {ucf_name_} UCF: {num_gates}')
+            log.cf.info(f'num PARTS in {self.ucf_name} UCF: {num_parts}')
+            # log.cf.info(f'(ref only) num FUNCTIONS in {self.ucf_name} UCF: {numFunctions}')
+            log.cf.info(f'num STRUCTURES in {self.ucf_name} UCF: {num_structs}')
+            log.cf.info(f'num MODELS in {self.ucf_name} UCF: {num_models}')
+            log.cf.info(f'num GATES in {self.ucf_name} UCF: {num_gates}')
 
         num_gates_available = []
         logic_constraints = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'logic_constraints')
@@ -275,7 +274,7 @@ class CELLO3:
             log.cf.info(f'num GATE USES: {num_gates_available}')
         num_netlist_gates = len(self.rnl.gates) if netlist_valid else 99999
         if verbose:
-            log.cf.info(f'num GATES in {v_name_} netlist: {num_netlist_gates}')
+            log.cf.info(f'num GATES in {self.verilog_name} netlist: {num_netlist_gates}')
 
             log.cf.info(sorted(g_list))
             log.cf.info(sorted(gate_names))
@@ -348,7 +347,7 @@ class CELLO3:
         # NOTE: ^ This is the input to whatever algorithm to use
 
         # best_assignments = []
-        if self.simulated_annealing:
+        if not self.exhaustive:
             best_assignments = self.simulated_annealing_assign(i_list, o_list, g_list, i, o, g, circuit, iter_)
         else:
             best_assignments = self.exhaustive_assign(i_list, o_list, g_list, i, o, g, circuit, iter_)
@@ -855,9 +854,9 @@ if __name__ == '__main__':
     def_yosys_cmd_choice = 1  # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
     def_verbose = False       # Print more info to console and log. See logging.config to change log metadata verbosity
     def_print_iters = False   # Print to console info on *all* tested iterations (produces copious amounts of text)
-    def_sim_anneal = True     # Uses scipy's dual_annealing to very efficiently find good results (max not guaranteed)
+    def_exhaustive = False    # Run *all* possible permutations to find true optimum score (may run for *long* time)
     def_test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
-    def_log_overwrite = True  # Removes date/time from file name, allowing overwrite of log from equivalent config
+    def_log_overwrite = False # Removes date/time from file name, allowing overwrite of log from equivalent config
 
     figlet = r"""
     
@@ -874,42 +873,69 @@ if __name__ == '__main__':
 ================================================================================
     """
     print(figlet)
+    print('Welcome to Cello 2.1')
+    at_menus = True
+    ucf_list = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
 
-    if flag_test_all_configs:
-        from config_tester import test_all_configs
-        test_all_configs()
-    else:
+    while at_menus:
+        v_name_ = ""
         # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
-        log.cf.info(v_name_ := input(
-            'Welcome to Cello 2.1\n\n\n'
-            'For which Verilog file do you want a genetic circuit design and score to be generated?\n'
-            '(Hint: ___.v, without the .v, from the sample_inputs folder...)\n\n'
+        print(user_input := input(
+            '\n\nFor which Verilog file do you want a genetic circuit design and score to be generated?\n'
+            '(Hint: ___.v, without the .v, from the sample_inputs folder...or type \'help\' for more info.)\n\n'
             'Verilog File: '))
 
-        ucf_list = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
+        if user_input == 'help':
+            print(f'\nHELP INFO:\n'
+                  f'Cello is a software package used for designing genetic circuits based on logic gate designs '
+                  f'written in the Verilog format.\n\n'
+                  f'To test a Verilog file and produce a corresponding circuit design (and circuit score) you can...\n'
+                  f'1. First specify a Verilog file name (exclude the \'.v\'; should be in the \'inputs\' folder)\n'
+                  f'2. Then you will be asked to choose a UCF (User Constraint File)\n'
+                  f'(Available UCFs: {list(zip(range(len(ucf_list)), ucf_list))})\n'
+                  f'3. Then you will be able to specify any additional settings (optional; see choices below)\n'
+                  f'4. Finally, the test will run, producing a log file (in \'logs\') and console output\n\n'
+                  f'You can also run a test of all possible combinations of Verilogs and UCFs in \'inputs\'.\n'
+                  f'This only runs a small number of tests per configuration but can be used to test config validity.\n'
+                  f'It produces log files for each run and a spreadsheet that summarizes the result of each test.\n'
+                  f'To run the utility, enter \'test_all_configs\'.\n\n'
+                  f'Available Settings (specify for the run during step 3)\n'
+                  f'Verbosity: \n'
+                  f'Print all iterations: \n'
+                  f'Log Overwrite: \n'
+                  f'Simulated Annealing | Exhuastive: ')
 
-        # 'Bth1C1G1T1': (3 in, 2 out,  7 gate_groups)
-        # 'Eco1C1G1T1': (4 in, 2 out, 12 gate_groups)
-        # 'Eco1C2G2T2': (4 in, 2 out, 18 gate_groups) # FIXME: uses a tandem Hill function...
-        # 'Eco2C1G3T1': (7 in, 2 out,  6 gate_groups)
-        # 'Eco2C1G5T1': (7 in, 3 out, 13 gate_groups) # FIXME: seemingly has incomplete input file...
-        # 'SC1C1G1T1' : (3 in, 2 out,  9 gate_groups)
-        log.cf.info(ucf_name_ := input(f'\n\nWhich of the following UCF (User Constraint File) do you want to use? \n'
-                          f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'
-                          f'Index of UCF: '))
-        try:
-            ucf_name_ = ucf_list[int(ucf_name_)]
-        except Exception as e:
-            log.cf.info('Cello was unable to identify the UCF you specified...')
-            log.cf.info(e)
-            
-        log.cf.info(options := input(
-            f'\n\nIf you want any additional options set, type the space-separated characters below.\n'
-            f'Available Settings: Verbosity: {def_verbose} (enter \'v\' to toggle {not def_verbose})\n'
-            f'Otherwise, just press Enter...\n\n'
-            f'Options (if any): '))
-        if options == 'v':
-            verbose = True
+        elif user_input == 'test_all_configs':
+            at_menus = False
+            from config_tester import test_all_configs
+            test_all_configs()
+
+        else:
+            at_menus = False
+            v_name_ = user_input
+
+            # 'Bth1C1G1T1': (3 in, 2 out,  7 gate_groups)
+            # 'Eco1C1G1T1': (4 in, 2 out, 12 gate_groups)
+            # 'Eco1C2G2T2': (4 in, 2 out, 18 gate_groups) # FIXME: uses a tandem Hill function...
+            # 'Eco2C1G3T1': (7 in, 2 out,  6 gate_groups)
+            # 'Eco2C1G5T1': (7 in, 3 out, 13 gate_groups) # FIXME: seemingly has incomplete input file...
+            # 'SC1C1G1T1' : (3 in, 2 out,  9 gate_groups)
+            log.cf.info(ucf_name_ := input(f'\n\nWhich of the following UCF (User Constraint File) do you want to use? \n'
+                                           f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'
+                                           f'Index of UCF: '))
+            try:
+                ucf_name_ = ucf_list[int(ucf_name_)]
+            except Exception as e:
+                log.cf.info('Cello was unable to identify the UCF you specified...')
+                log.cf.info(e)
+
+            log.cf.info(options := input(
+                f'\n\nIf you want any additional options set, type the space-separated characters below.\n'
+                f'Available Settings: Verbosity: {def_verbose} (enter \'v\' to toggle {not def_verbose})\n'
+                f'Otherwise, just press Enter...\n\n'
+                f'Options (if any): '))
+            if options == 'v':
+                verbose = True
 
     # TODO: source UCF files from CELLO-UCF instead
     in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
@@ -918,7 +944,7 @@ if __name__ == '__main__':
     Cello3Process = CELLO3(v_name_, ucf_name_, in_path_, out_path_, options={'yosys_cmd_choice': def_yosys_cmd_choice,
                                                                              'verbose': def_verbose,
                                                                              'print_iters': def_print_iters,
-                                                                             'sim_anneal': def_sim_anneal,
+                                                                             'exhaustive': def_exhaustive,
                                                                              'test_configs': def_test_configs,
                                                                              'log_overwrite': def_log_overwrite})
 

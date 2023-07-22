@@ -10,7 +10,7 @@ import csv
 def test_all_configs():
     """
     This utility will run through every combination of configuration files currently
-    available in the all_inputs folder (matching every .v to every .ucf/input/out),
+    available in the sample_inputs folder (matching every .v to every .ucf/input/out),
     completing the first 100 iterations, logging the outputs, and producing a CSV of
     the results. Intended for testing the validity of all configurations.
     """
@@ -18,15 +18,15 @@ def test_all_configs():
     # SCAN FILES
     v_names = []
     ucf_names = []
-    for f in listdir('all_inputs/'):
-        if isfile(join('all_inputs/', f)):
+    for f in listdir('sample_inputs/'):
+        if isfile(join('sample_inputs/', f)):
             if f.endswith('.v'):
                 v_names.append(f.split('.')[0])
             elif f.endswith('.UCF.json'):
                 ucf_names.append(f.split('.')[0])
 
     start_test = input(
-        '\n\nThis utility tests the validity of all combos of verilogs & UCFs in "all_inputs" (not subdirectories).\n'
+        '\n\nThis utility tests the validity of all combos of verilogs & UCFs in "sample_inputs" (not subdirectories).\n'
         'Each valid config will only run for the first 100 iterations to check for errors.\n'
         'Each config produces a log file of the terminal output, and a csv summarizing all results is generated.\n\n'
         'Total number of configurations to be tested: ' + str(len(v_names) * len(ucf_names)) + '\n'
@@ -49,7 +49,7 @@ def test_all_configs():
                     # NOTE: Do *not* enable verbose
                     best = 0
                     try:
-                        cello_config_test = CELLO3(v_name, ucf_name, 'all_inputs/', 'test_all_configs_out/',  # TODO: Limit file production
+                        cello_config_test = CELLO3(v_name, ucf_name, 'sample_inputs/', 'test_all_configs_out/',  # TODO: Limit file production
                                                    options={'yosys_cmd_choice': 1, 'verbose': False, 'test_configs': True})
                         exception = "Done"
                     except Exception as e:
