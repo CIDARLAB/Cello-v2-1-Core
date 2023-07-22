@@ -10,12 +10,12 @@
 		"name": "YFP_reporter_model",
 		"functions": {
 			"response_function": "linear_response",
-			"input_composition": "linear_input_composition"
+			"input_composition": "tandem_input_composition"
 		},
 		"parameters": [
 			{
 				"name": "unit_conversion",
-				"value": 0.4
+				"value": 1.0
 			}
 		]
 	},
@@ -36,8 +36,8 @@
 			{
 				"name": "YFP_reporter",
 				"components": [
-					"#in1",
 					"#in2",
+					"#in1",
 					"YFP_cassette"
 				]
 			}
@@ -77,12 +77,12 @@
 		"name": "YFP_reporter_2_model",
 		"functions": {
 			"response_function": "linear_response",
-			"input_composition": "linear_input_composition"
+			"input_composition": "tandem_input_composition"
 		},
 		"parameters": [
 			{
 				"name": "unit_conversion",
-				"value": 0.4
+				"value": 1.0
 			}
 		]
 	},
@@ -103,8 +103,8 @@
 			{
 				"name": "YFP_reporter_2",
 				"components": [
-					"#in1",
 					"#in2",
+					"#in1",
 					"YFP_cassette"
 				]
 			}

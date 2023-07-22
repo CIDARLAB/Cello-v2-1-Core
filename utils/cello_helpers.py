@@ -55,7 +55,7 @@ disadvantage: not guaranteed to reach global optima
 
 def permute_count_helper(i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf):
     # print("i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf")
-    print((i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf))
+    # print((i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf))
     factorial = lambda n: 1 if n == 0 else n * factorial(n - 1)
     partial_factorial = lambda n, k: 1 if n <= k else n * partial_factorial(n - 1, k)
     # check it thrice

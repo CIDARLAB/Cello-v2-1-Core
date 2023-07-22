@@ -1,0 +1,131 @@
+[
+	{
+		"collection": "input_sensors",
+		"name": "aTc_sensor",
+		"model": "aTc_sensor_model",
+		"structure": "aTc_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "aTc_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 2.5,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.002,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "aTc_sensor_structure",
+		"outputs": [
+			"Ptet"
+		]
+	},
+	{
+		"collection": "input_sensors",
+		"name": "Xylose_sensor",
+		"model": "Xylose_sensor_model",
+		"structure": "Xylose_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "Xylose_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 1.8,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.003,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "Xylose_sensor_structure",
+		"outputs": [
+			"Pxyl"
+		]
+	},
+    {
+		"collection": "input_sensors",
+		"name": "IPTG_sensor",
+		"model": "IPTG_sensor_model",
+		"structure": "IPTG_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "IPTG_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 2.5,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0082,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "IPTG_sensor_structure",
+		"outputs": [
+			"Plac"
+		]
+	},
+	{
+		"collection": "functions",
+		"name": "sensor_response",
+		"equation": "$STATE * (ymax - ymin) + ymin",
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "Ptet",
+		"dnasequence": "TTTTTTTGTTTTTTATTTTTTGCGGTATAAAAATCCCTATCAGTGATAGAGATTTTCTTTTTTTTTTATTTTTCCCTATCAGTGATAGAGAATATCAAGCTACAAAAA"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "Pxyl",
+		"dnasequence": "TTTTTTATTTTTGTTTTTTTTTGCAGTATAAAAAGTTAGTTTGTTTAAACAACAAACTTTTTTCATTTCTTTTGTTTCCCCTTCTCTTCTTTTAGTTAGTTTGTTTAAACAACAAACTAGAATATCAAGCTACAAAAA"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "Plac",
+		"dnasequence": "TTTTTATTTTTTGTTTTTTTTTAATTGTGAGCGGATAACAATATAAAAAGGAGCGCTATACGCGGAGAAGAGATTAAGAATTGTGAGCGGATAACAATAGAATATCAAGCTACAAAAA"
+	}
+]

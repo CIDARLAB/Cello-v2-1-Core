@@ -37,6 +37,22 @@ last_log = "[None]"
 #         pass
 
 
+# class Tee(object):
+#     def __init__(self, *files):
+#         self.files = files
+#
+#     def write(self, obj):
+#         for f in self.files:
+#             f.write(obj)
+#
+#     def flush(self):
+#         pass
+# # main
+# f = open('logfile', 'w')
+# backup = sys.stdout
+# sys.stdout = Tee(sys.stdout, f)
+
+
 def config_logger(vname: str, ucfname: str, ow: bool):
     """
     Generates log file and initializes the Logger class (for print() statements) every time a Cello process is created.
@@ -80,7 +96,7 @@ class ContextFilter(logging.Filter):
             log_counts[record.levelname] += 1
             last_log = f"Caught exception: {record.msg}"
             cf.info(f"*****  !{record.levelname}!  *****\n{traceback.format_exc()}")
-        elif record.levelname is 'DEBUG':  # 'debug' level reserved for invalid configs (e.g. gate mismatch)
+        elif record.levelname == 'DEBUG':  # 'debug' level reserved for invalid configs (e.g. gate mismatch)
             iter_validity = "Invalid"
         return True
 
