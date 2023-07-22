@@ -1,3 +1,10 @@
+"""
+Calls the YOSYS library to generate the netlist, figures, and associated information from the provided Verilog file.
+https://yosyshq.net/yosys/
+
+call_YOSYS() [see parameters below for customizing YOSYS output; note, changing parameters may cause problems]
+"""
+
 # Python default libraries
 import subprocess
 import os
@@ -8,7 +15,7 @@ import log
 
 def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0, no_files=False):
     try:
-        new_out = os.path.join(out_path, vname)
+        new_out = os.path.join(out_path, v_name)
         new_out = os.path.join(*new_out.split('/'))
         if os.path.exists(new_out):
             shutil.rmtree(new_out)  # this could be switched out for making a new dir path instead
@@ -24,7 +31,7 @@ def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0, no_files=False
     else:
         new_in = in_path
         new_in = os.path.join(*new_in.split('/'))
-    verilog = vname + '.v'
+    verilog = v_name + '.v'
     v_loc = os.path.join(new_in, verilog)
 
     log.cf.info(verilog)

@@ -1,6 +1,6 @@
 # Cello-v3-Core
 
-This software package is a streamlined algorithm for designing genetic circuits based on logic gate designs written in the Verilog format. It executes through the command-line interface by calling the 'celloAlgo.py' script. CELLO-3.0 is capable of efficiently handling single-cellular (with multi-cellular support coming soon) partitioning with multiple-output support, gerenating results saved in a local directory on your machine, with verbose logging, ang with GUI interface coming soon.
+This software package is a streamlined algorithm for designing genetic circuits based on logic gate designs written in the Verilog format. It executes through the command-line interface by calling the 'celloAlgo.py' script. CELLO-3.0 is capable of efficiently handling single-cellular (with multicellular support coming soon) partitioning with multiple-output support, generating results saved in a local directory on your machine, with verbose logging, ang with GUI interface coming soon.
 
 ## Cloning the repo
 
@@ -27,11 +27,11 @@ First, you will need to manually install Graphviz, required for running Yosys. Y
 
 Next, you will need to add the graphviz bin folder to your ```Path``` environment variable. Search for "edit environment variables" in the Windows menu, go to the dialog box, and click "Edit" on the variable named ```Path```. Then click "New" once you see the values of the ```Path``` variable. Now you can the path of the Graphviz bin to the list, by default it is ```C:\Program Files\Graphviz\bin```
 
-You will also need to install the Python package for Graphviz by running: ```pip install graphviz```
+You will also need to install the Python package for Graphviz as well as scipy by running: ```pip install graphviz scipy```
 
 Now, you should have graphviz installed as an executable command. Test it by trying: ```dot -v```
 
-If no errors show up, Graphviz is correctly installed, and you can setup Yosys next.
+If no errors show up, Graphviz is correctly installed, and you can set up Yosys next.
 
 ### Yosys
 Go to [here](https://github.com/YosysHQ/oss-cad-suite-build/releases/tag/2023-06-16) and download the OSS Cad Suite, remember to select the architecture for your PC.
@@ -46,7 +46,7 @@ oss-cad-suite\start.bat
 ```
 Running the above commands will load the "oss-cad-suite" libraries in your existing shell environment.
 
-With your shell now set up, you can now cd into ```\Cello-v3-Core``` and begin exprimenting.
+With your shell now set up, you can now cd into ```\Cello-v3-Core``` and begin experimenting.
 
 ## Other
 Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms
@@ -79,7 +79,7 @@ You will see the results and the optimized design in the *outpath* folder.
 Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
 ### Note: 
-The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole](https://github.com/CIDARLAB/genetic-circuit-partitioning-new.git) to parition the design into smaller circuits, and the feed them into CELLO-3.0. 
+The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole](https://github.com/CIDARLAB/genetic-circuit-partitioning-new.git) to partition the design into smaller circuits, and the feed them into CELLO-3.0. 
 
 ### Complexity:
 
@@ -89,7 +89,7 @@ $$
 O((I)P(i) \cdot (G)P(g) \cdot (O)P(o))
 $$
 
-Where capital letters represent the available set of Inputs, Gates, and Outputs from the UCF, and lowercase letters represet the set of Inputs, Gates, and Outputs required by the logic circuit.
+Where capital letters represent the available set of Inputs, Gates, and Outputs from the UCF, and lowercase letters represent the set of Inputs, Gates, and Outputs required by the logic circuit.
 
 Space Complexity (exhaustive algorithm):
 
@@ -101,12 +101,13 @@ Only one iteration is stored in the memory at a time in the exhaustive pass. Eac
 
 #
 ## Sample Inputs
+
 Can be found in the [inputs](/inputs/) folder. This includes the UCF files for Cello, as well as a few dozen 
 Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different a different folder to store them by speifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
 
 #
 ## Example Output
-Here is an example of what the result from Cello looks like in the terminal. It uses the and.v circuit paried with Bth1C1G1T1 UCF. After running this experiment, you will see other files generated in the output folder as well. The important takeways are the *circuit score* and the *design*, which will be returned in the terminal. Because additional convenience features are on the backlog, it is important to check the terminal for the *circuit score* and the *design* Cello made.
+Here is an example of what the result from Cello looks like in the terminal. It uses the and.v circuit pared with Bth1C1G1T1 UCF. After running this experiment, you will see other files generated in the output folder as well. The important takeaways are the *circuit score* and the *design*, which will be returned to the terminal. Because additional convenience features are on the backlog, it is important to check the terminal for the *circuit score* and the *design* Cello made.
 
 Example resulting design outputted by Cello.
 
