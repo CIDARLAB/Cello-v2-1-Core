@@ -7,6 +7,7 @@ Class: EugeneObject: generate_eugene_device(), generate_eugene_helpers(), write_
 
 import os
 from dataclasses import dataclass, field
+import log
 # from typing import Annotated, Type, TypeDict
 
 
@@ -128,10 +129,10 @@ class EugeneObject:
                     edges[g_output.name].append(g_gate.gate_in_use)
 
         # Debugging info...
-        print('BASIC CIRCUIT INFO:')
-        print(f'{self.best_graphs}')
-        print(f'Mappings: {self.in_map}, {self.gate_map}, {self.out_map}')
-        print(f'Connections: {edges}\n')
+        # log.cf.info('BASIC CIRCUIT INFO:')
+        # log.cf.info(f'{self.best_graphs}')
+        # log.cf.info(f'Mappings: {self.in_map}, {self.gate_map}, {self.out_map}')
+        # log.cf.info(f'Connections: {edges}\n')
 
         # Add names and inputs to dict
         for key, val in edges.items():

@@ -184,7 +184,7 @@ class Netlist:
                 not_used_ports.append(port_bit)
 
         if len(not_used_ports) > 0:
-            debug_print(f"Ports {not_used_ports} not used in any cell (gate).", False)
+            debug_print(f"Ports {not_used_ports} not used in any cell (gate).")
             return False
 
         return True

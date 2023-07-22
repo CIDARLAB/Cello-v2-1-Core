@@ -55,7 +55,7 @@ class UCF:
                     out.append(ucf)
                 except Exception as e:
                     debug_print(f'FAILED TO LOAD UCF {name}\nlocated at path: {f}')
-                    debug_print(e, padding=False)
+                    debug_print(e)
                     # raise(Exception)
         if len(out) == 3:
             return tuple(out)

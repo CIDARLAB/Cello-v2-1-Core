@@ -104,39 +104,44 @@ def query_helper(dict_list, key, vals):
     return out_temp
 
 
-def print_centered(text, padding=False):
+def print_centered(text: str | list[str], also_logfile: bool = True) -> None:
     """
-
-    :param text:
-    :param padding:
+    Prints a few lines that are centered and formatted like a header.
+    :param text: str | list[str]: text to be printed
+    :param also_logfile: bool (default False): whether to also print to the logfile or just console.
     """
     length = 88  # Length of the string of slashes
-    if padding:
-        log.cf.info('\n')
-    log.cf.info("/" * length)
-    if type(text) == list:
-        for t in text:
-            log.cf.info(t.center(length))
+    if also_logfile:
+        log.cf.info(f'\n{"/" * length}')
+        if type(text) == list:
+            for t in text:
+                log.cf.info(t.center(length))
+        else:
+            log.cf.info(text.center(length))
+        log.cf.info(f'{"/" * length}\n')
     else:
-        log.cf.info(text.center(length))
-    log.cf.info("/" * length)
-    log.cf.info('\n')
-    if padding:
-        log.cf.info('\n')
+        print(f'\n{"/" * length}')
+        if type(text) == list:
+            for t in text:
+                print(t.center(length))
+        else:
+            print(text.center(length))
+        print(f'{"/" * length}\n')
 
 
-def debug_print(msg, padding=True):
+def debug_print(msg: str, also_logfile: bool = True) -> None:
     """
-
-    :param msg:
-    :param padding:
+    Prints a debug line, formatted to be easily found.
+    :param msg: str: text to be printed
+    :param also_logfile: bool (default True): whether to also print to the logfile or just console.
     """
-    # integral = '\u222b'  # str: ∫,   utf-8: '\u222b',   byte: b'\xe2\x88\xab'
-    integral = '***'
-    out_msg = f'{integral}DEBUG{integral} {msg}'
-    if padding:
-        out_msg = '\n' + out_msg + '\n'
-    log.cf.info(out_msg)  # I reserved 'debug' for valid iteration exits
+    integral = '\u222b'  # str: ∫,   utf-8: '\u222b',   byte: b'\xe2\x88\xab'
+    # integral = '@'  # Switch to this if issues with character encoding
+    out_msg = f'\n\n{integral} *** DEBUG *** {integral} {msg}\n'
+    if also_logfile:
+        log.cf.info(out_msg)  # I reserved 'debug' log level for valid iteration exits
+    else:
+        print(out_msg)
 
 
 def print_json(chunk):
@@ -157,24 +162,39 @@ def print_table(table):
         log.cf.info("Table is empty.")
         return
 
-    num_columns = len(table[0])
-    column_widths = [max(len(str(row[column])) if row[column] is not None else 0 for row in table) for column in
-                     range(num_columns)]
+    for format in ['log', 'console']:  # For printing full decimals to log, fewer to console
+        if format == 'console':
+            rounded = []
+            for r in table[1:]:
+                rounded_row = [round(v, 4) for v in r]
+                rounded.append(rounded_row)
+            table = [table[0]] + rounded
 
-    # Print table header
-    print_separator(column_widths)
-    print_row(table[0], column_widths)
-    print_separator(column_widths)
+        for set in range(math.ceil((len(table[0]) / 12))):
+            set *= 12
+            subset = []
+            for row in table:
+                new_row = row[set:set+12]
+                subset.append(new_row)
+            num_columns = len(subset[0])
+            column_widths = [max(len(str(row[column])) if row[column] is not None else 0 for row in subset) for column in
+                             range(num_columns)]
 
-    # Print table body
-    for row in table[1:]:
-        print_row(row, column_widths)
-    print_separator(column_widths)
+            # Print table header
+            print_separator(column_widths, format)
+            print_row(subset[0], column_widths, format)
+            print_separator(column_widths, format)
+
+            # Print table body
+            for row in subset[1:]:
+                print_row(row, column_widths, format)
+            print_separator(column_widths, format)
 
 
-def print_row(row, column_widths):
+def print_row(row, column_widths, format):
     """
 
+    :param format:
     :param row:
     :param column_widths:
     """
@@ -200,15 +220,22 @@ def print_row(row, column_widths):
                     formatted_row += f" {'':<{column_widths[i]}} |"
             else:
                 formatted_row += f" {str(item):<{column_widths[i]}} |"
-        log.cf.info(formatted_row)
+        if format == 'console':
+            print(formatted_row)
+        elif format == 'log':
+            log.f.info(formatted_row)
 
 
-def print_separator(column_widths):
+def print_separator(column_widths, format):
     """
 
+    :param format:
     :param column_widths:
     """
     separator = "+"
     for width in column_widths:
         separator += f"{'-' * (width + 2)}+"
-    log.cf.info(separator + '\n')
+    if format == 'console':
+        print(separator)
+    elif format == 'log':
+        log.f.info(separator)
