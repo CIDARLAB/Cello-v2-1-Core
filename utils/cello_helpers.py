@@ -1,12 +1,15 @@
 """
-TODO: insert cello_helpers docstring
+Contains funcs for printing headers, debug info, JSON, and tables, counting permutations of nodes, and query parsing.
+
+permute_count_helper(), query_helper(),
+print_centered(), debug_print(), print_json(), print_table(), print_row(), print_separator()
 """
 
 import json
 import math
 
 '''
-cello gate_assignment algorithm pseudo code:
+pseudocode:
 
 def assign_hash_table_for_every_gate_permutation():
     max_score = 0
@@ -73,13 +76,29 @@ def permute_count_helper(i_netlist, o_netlist, g_netlist, i_ucf, o_ucf, g_ucf):
     factorial = lambda n: 1 if n == 0 else n * factorial(n - 1)
     partial_factorial = lambda n, k: 1 if n <= k else n * partial_factorial(n - 1, k)
     # check it thrice
-    total_permutations = partial_factorial(i_ucf, i_ucf - i_netlist) * partial_factorial(g_ucf,
-                                                                                         g_ucf - g_netlist) * partial_factorial(
-        o_ucf, o_ucf - o_netlist)
+    total_permutations = partial_factorial(i_ucf, i_ucf - i_netlist) * \
+                         partial_factorial(g_ucf, g_ucf - g_netlist) * \
+                         partial_factorial(o_ucf, o_ucf - o_netlist)
     confirm_permutations = (factorial(i_ucf) / factorial(i_ucf - i_netlist)) * (
-                factorial(o_ucf) / factorial(o_ucf - o_netlist)) * (factorial(g_ucf) / factorial(g_ucf - g_netlist))
+            factorial(o_ucf) / factorial(o_ucf - o_netlist)) * (factorial(g_ucf) / factorial(g_ucf - g_netlist))
     confirm_permutations2 = math.perm(i_ucf, i_netlist) * math.perm(o_ucf, o_netlist) * math.perm(g_ucf, g_netlist)
     return total_permutations, (confirm_permutations + confirm_permutations2) / 2
+
+
+def query_helper(dict_list, key, vals):
+    """
+
+    :param dict_list:
+    :param key:
+    :param vals:
+    :return:
+    """
+    out = []
+    for d in dict_list:
+        if key in list(d.keys()):
+            if d[key] in vals:
+                out.append(d)
+    return out
 
 
 def print_centered(text, padding=False):
@@ -120,22 +139,6 @@ def print_json(chunk):
     :param chunk:
     """
     print(json.dumps(chunk, indent=4))
-
-
-def query_helper(dict_list, key, vals):
-    """
-
-    :param dict_list:
-    :param key:
-    :param vals:
-    :return:
-    """
-    out = []
-    for d in dict_list:
-        if key in list(d.keys()):
-            if d[key] in vals:
-                out.append(d)
-    return out
 
 
 def print_table(table):

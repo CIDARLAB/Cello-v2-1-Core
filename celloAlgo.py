@@ -1,5 +1,27 @@
 """
-TODO: Add celloAlgo docstring
+This software package is for designing genetic circuits based on logic gate designs written in the Verilog format.
+
+General flow of control...
+    __main__
+    CELLO3 Class
+    call_YOSYS()
+    UCF Class (read in UCF data)
+    __load_netlist() (rnl ~ netlist)
+    check_conditions()
+    techmap()
+      GraphParser Class (initialize in/out/gate assignments from UCF to netlist)
+      [append to node (i, o, g) lists, querying UCF]
+      simulated_annealing_assign() or exhaustive_assign()
+        [generate permutations of nodes]
+        scipy.dual_annealing()
+          prep_assign_for_scoring()
+            AssignGraph Class (map UCF parts to netlist)
+              score_circuit()
+                ...
+    [techmap() returns best graph]
+    [info printed]
+    [eugene file created]
+    [end]
 """
 
 import itertools
@@ -21,23 +43,21 @@ from eugene import *
 # 4. path-for-output
 # 5. options (optional)
 
-# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices,  # TODO: Address this...
-# therefore so far it is the only one that will work for 2-output circuits
-# TODO: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1')  CK: Finish addressing...
+# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices,  # FIXME: Address this...
+#  therefore so far it is the only one that will work for 2-output circuits
+# FIXME: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1')  CK: Finish addressing...
 class CELLO3:
     """
-    General flow of control:  TODO: Improve description...
-    init -> call_YOSYS -> UCF Class -> load_netlist -> check_conditions -> techmap -> GraphParser -> assign method ->
-    prep_assign_for_scoring -> score_circuit(s) -> ~print results
+
     """
 
-    def __init__(self, v_name, ucf_name, in_path, out_path, options=None):
+    def __init__(self, v_name: str, ucf_name: str, in_path: str, out_path: str, options: dict = None):
         self.verbose = True
         self.simulated_annealing = False
         if options is not None:
             yosys_cmd_choice = options['yosys_choice']
             self.verbose = options['verbose']
-            self.simulated_annealing = options['simulated_annealing']  # Am actually implementing scipy's dual annealing
+            self.simulated_annealing = options['simulated_annealing']  # Scipy's dual annealing
         else:
             yosys_cmd_choice = 1
 
@@ -63,6 +83,8 @@ class CELLO3:
 
         self.rnl = self.__load_netlist()  # initialize RG from netlist JSON output from Yosys
 
+        valid: bool
+        iter_: int
         valid, iter_ = self.check_conditions(verbose=True)
         print()
         print(f'Condition check passed? {valid}\n')
@@ -72,7 +94,6 @@ class CELLO3:
             if (cont == 'Y' or cont == 'y') and valid:
                 best_result = self.techmap(iter_)  # Executing the algorithm if things check out
 
-                # NOTE: best_result = tuple(circuit_score, graph_obj, truth_table)
                 # best_score = best_result[0]
                 best_graph = best_result[1]
                 truth_table = best_result[2]
@@ -86,13 +107,11 @@ class CELLO3:
                 debug_print(best_result[1], padding=False)
                 print()
 
-                # if self.verbose:
                 print_centered('RESULTS:')
                 print()
 
                 for rnl_in, g_in in graph_inputs_for_printing:
                     print(f'{rnl_in} {str(g_in)} with max sensor output of {str(list(g_in.out_scores.items()))}')
-                    # print(g_in.out_scores)
                 print(f'in_eval: input_response = {best_graph.inputs[0].function}\n')
 
                 for rnl_g, g_g in graph_gates_for_printing:
@@ -136,544 +155,15 @@ class CELLO3:
             return None
         return netlist
 
-    def techmap(self, iter_):
-        """
-        TODO: add techmap docstring
-        :param iter_:
-        :return:
-        """
-        # NOTE: POE of the CELLO gate assignment simulation & optimization algorithm
-        # TODO: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
-        print_centered('Beginning GATE ASSIGNMENT', padding=True)
-
-        circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
-
-        debug_print('Netlist de-construction: ')
-        print(circuit)
-        # scrapped this because it uses networkx library for visualizations
-        # G = circuit.to_networkx()
-        # visualize_logic_circuit(G, preview=False, outfile=f'{self.out_path}/{self.verilog_name}/techmap_preview.png')
-
-        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
-        i_list = []
-        for sensor in in_sensors:
-            i_list.append(sensor['name'])
-
-        out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
-        o_list = []
-        for device in out_devices:
-            o_list.append(device['name'])
-
-        gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
-        g_list = []
-        for gate in gates:
-            # NOTE: below assumes that all gates in our UCFs are 'NOR' gates
-            g_list.append(gate['group'])
-        g_list = list(set(g_list))
-
-        debug_print('Listing available assignments from UCF: ')
-        print(i_list)
-        print(o_list)
-        print(g_list)
-
-        debug_print('Netlist requirements: ')
-        i = len(self.rnl.inputs)
-        o = len(self.rnl.outputs)
-        g = len(self.rnl.gates)
-        print(f'need {i} inputs')
-        print(f'need {o} outputs')
-        print(f'need {g} gates')
-        # NOTE: ^ This is the input to whatever algorithm to use
-
-        # best_assignments = []
-        if self.simulated_annealing:
-            best_assignments = self.simulated_annealing_assign(i_list, o_list, g_list, i, o, g, circuit, iter_)
-        else:
-            best_assignments = self.exhaustive_assign(i_list, o_list, g_list, i, o, g, circuit, iter_)
-
-        print_centered('End of GATE ASSIGNMENT', padding=True)
-
-        return max(best_assignments, key=lambda x: x[0]) if len(best_assignments) > 0 else best_assignments
-
-    # NOTE: Simulation alternative to exhaustive_assign (not yet implemented)
-    # def genetic_simulation_assign(self, I_list, O_list, G_list, i: int, o: int, g: int, netgraph: GraphParser):
-    #     # TODO: work on this algorithm...
-    #     print_centered('Running GENETIC SIMULATION gate-assignment algorithm...', padding=True)
-    #     debug_print('Too many combinations for exhaustive search, using simulation algorithm instead.')
-    #     best_assignments = [AssignGraph()]
-    #     return best_assignments
-
-    def simulated_annealing_assign(self, i_list, o_list, g_list, i: int, o: int, g: int, netgraph: GraphParser, iter_):
-        """
-        Uses scipy's dual annealing func to efficiently find a regional optimum when exhaustive search is not feasible.
-        :param i_list: List of available inputs
-        :param o_list: List of available outputs
-        :param g_list: List of available gates
-        :param i: Number of required inputs
-        :param o: Number of required outputs
-        :param g: Number of required gates
-        :param netgraph: Circuit parameters
-        :param iter_: Number of total possible configurations
-        :return: Best identified graph(s)
-        """
-
-        print_centered('Running SIMULATED ANNEALING gate-assignment algorithm...', padding=True)
-        i_perms, o_perms, g_perms = [], [], []
-        # TODO: Optimize permutation arrays
-        for i_perm in itertools.permutations(i_list, i):
-            i_perms.append(i_perm)
-        for o_perm in itertools.permutations(o_list, o):
-            o_perms.append(o_perm)
-        for g_perm in itertools.permutations(g_list, g):
-            g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 1000 else 1000
-
-        # DUAL ANNEALING SCIPY FUNC
-        func = lambda x: self.prep_assign_for_scoring(x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
-        lo = [0, 0, 0]
-        hi = [len(i_perms), len(o_perms), len(g_perms)]
-        bounds = list(zip(lo, hi))
-        # TODO: CK: Implement seed
-        # TODO: CK: Implement toxicity check...
-        ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
-        """
-        Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
-        Dual Annealing combines Classical Simulated Annealing, Fast Simulated Annealing, and local search optimizations
-        to improve upon the standard simulated annealing technique. The algorithm does not guarantee a global optimal 
-        score but can find a good regional optimum in far less time than would be required by exhaustive search.
-        
-        Key Parameters:
-        :param func:    Function of form func(x, *args) with return value that dual_annealing is attempting to optimize
-        :param bounds:  Upper and lower bounds for each dimension/variable being passed into func
-        :param maxiter: Max number of ~global searches (to identify neighborhoods with potential local maxima)
-        :param max_fun: Max number of total function calls/circuit iterations, including local minimization searches
-        :param seed:    
-        :param no_local_search: Enable to function more like traditional simulated annealing
-        Note: Additional parameters specified in URL above...
-
-        :return OptimizeResult: Array including the solution input array, best score, number of iterations run, and a 
-        message indicating the specific reason for termination, among additional attributes specified here...
-        docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult  
-        """
-
-        # TODO: CK: Capture multiple equivalent optimums
-        # self.best_graphs = ret.x     # solution inputs (already stored in object attribute)
-        self.best_score = -ret.fun  # solution score (reverses inversion from prep_assign_for_scoring)
-        # count = ret.nfev     # number of func executions
-        # reason = ret.message # reason for termination
-        print(
-            f'\nDONE!\nCompleted: {self.iter_count:,} / {max_fun:,} iterations (out of {iter_:,} possible iterations)')
-        print("Best Score: ", self.best_score)
-
-        return self.best_graphs
-
-    def exhaustive_assign(self, i_list, o_list, g_list, i: int, o: int, g: int, netgraph: GraphParser, iter_):
-        """
-        TODO: add exhaustive_assign docstring
-        :param i_list:
-        :param o_list:
-        :param g_list:
-        :param i:
-        :param o:
-        :param g:
-        :param netgraph:
-        :param iter_:
-        :return:
-        """
-        print_centered('Running EXHAUSTIVE gate-assignment algorithm...', padding=True)
-        for I_perm in itertools.permutations(i_list, i):
-            for O_perm in itertools.permutations(o_list, o):
-                for G_perm in itertools.permutations(g_list, g):
-                    self.prep_assign_for_scoring((I_perm, O_perm, G_perm), (None, None, None, netgraph, i, o, g, iter_))
-
-        if not self.verbose:
-            print()
-        print(f'\nDONE!\nCounted: {self.iter_count:,} iterations')
-
-        return self.best_graphs
-
-    def prep_assign_for_scoring(self, x, args):
-        """
-        Prepares a specific iteration/configuration to be scored by score_circuit.
-        :param x: Tuple of dimensions passed into func, including the following
-            - i_perm: Specific inputs permutation to be tested
-            - o_perm: Specific outputs permutation to be tested
-            - g_perm: Specific gates permutation to be tested
-            - netgraph:
-            - i
-        :param args: Tuple of additional arguments to be passed to func
-            - i_perms: First dimension domain:  all permutations of inputs
-            - o_perms: Second dimension domain: all permutations of outputs
-            - g_perms: Third dimension domain:  all permutations of gates
-            - i: Number of required inputs
-            - o: Number of required outputs
-            - g: Number of required gates
-            - netgraph: Circuit parameters
-            - iter: Number of total possible configurations
-        :return: Best score (only returns score because of how dual_annealing functions; graph info in obj attributes)
-        """
-
-        (i_perm, o_perm, g_perm) = x
-        (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun) = args
-        # TODO: CK: Account for duplicates
-        if i_perms and o_perms and g_perms:
-            i_perm = i_perms[math.ceil(i_perm) - 1]
-            o_perm = o_perms[math.ceil(o_perm) - 1]
-            g_perm = g_perms[math.ceil(g_perm) - 1]
-
-        # Check if inputs, outputs, and gates are unique and the correct number
-        if len(set(i_perm + o_perm + g_perm)) == i + o + g:
-            self.iter_count += 1
-            if self.verbose:
-                print_centered(f'beginning iteration {self.iter_count}:')
-            # Output the combination
-            map_helper = lambda l, c: list(map(lambda x_, y: (x_, y), l, c))
-            new_i = map_helper(i_perm, netgraph.inputs)
-            new_g = map_helper(g_perm, netgraph.gates)
-            new_o = map_helper(o_perm, netgraph.outputs)
-            new_i = [Input(i[0], i[1].id) for i in new_i]
-            new_o = [Output(o[0], o[1].id) for o in new_o]
-            new_g = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in new_g]
-
-            graph = AssignGraph(new_i, new_o, new_g)
-            (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose)
-            # NOTE: follow the circuit scoring functions
-
-            if not self.verbose:
-                block = '\u2588'
-                num_blocks = int(round(self.iter_count / max_fun, 2) * 100)
-                ph_pb = '_' * 100
-                format_cnt = format(self.iter_count, ',')
-                format_itr = format(max_fun, ',')
-                print(
-                    f'{ph_pb} #{format_cnt}/{format_itr} | circuit score: {circuit_score} best: {self.best_score}\r{num_blocks * block}',
-                    end='\r')
-
-            if self.verbose:
-                print_centered(f'end of iteration {self.iter_count} : intermediate circuit score = {circuit_score}',
-                               padding=True)
-
-            if circuit_score > self.best_score:
-                self.best_score = circuit_score
-                self.best_graphs = [(circuit_score, graph, tb, tb_labels)]
-            elif circuit_score == self.best_score:
-                self.best_graphs.append((circuit_score, graph, tb_labels))
-
-        return -self.best_score  # Inverted because Dual Annealing designed to find minimum; should ONLY return score
-
-    # NOTE: this function calculates CIRCUIT SCORE
-    # NOTE: modify it if you want circuit score to be calculated differently
-    def score_circuit(self, graph: AssignGraph, verbose=True):
-        # TODO: Account for toxicity
-        # NOTE: PLEASE ENSURE ALL FUTURE UCF FILES FOLLOW THE SAME FORMAT AS ORIGINALS
-        # (THAT'S THE ONLY TO GET THIS TO WORK)
-
-        # NOTE: RETURNS circuit_score
-        # NOTE: this is the core mapping from UCF
-
-        # NOTE: use one gate from each group only!
-        # NOTE: try every gate from each group (graph.gates.gate_id = group name)
-        # print(graph.gates)
-
-        """
-        Pseudocode:
-
-        initialize traversal circuit()
-
-        for each input:
-            assign input function
-
-        for each gate(group):
-            find all gates in group
-            for each gate in group:
-                assign response function
-                (basically find all individual gate permutations)
-
-        for each output:
-            assign output function
-
-        create truth table of circuit
-
-        if toxicity & cytometry in all gates:
-            label circuit for extra tox and cyt plot evaluations
-            (maybe ignore this part because they can just look in the UCF instead to find the plots)
-
-        for each truth table combination:
-            for each individual gate assignment:
-                traverse circuit from inputs (input composition is mostly x1+x2)
-                evaluate output
-        """
-
-        # First, make sure that all inputs use the same 'sensor_response' function
-        # This has to do with UCF formatting
-        input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')[0]
-        input_function_str = input_function_json['equation'][1:]  # remove the '$' sign
-
-        input_model_names = [i.name + '_model' for i in graph.inputs]
-        input_params = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
-                                    input_model_names)
-        input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
-
-        if verbose:
-            debug_print(f'Assignment configuration: {repr(graph)}')
-            print(f'INPUT parameters:')
-            for p in input_params:
-                print(p, input_params[p])
-            print(f'input_response = {input_function_str}\n')
-        # print(f'Parameters in sensor_response function json: \n{input_function_params}\n')
-
-        gate_groups = [(g.gate_id, g.gate_type) for g in graph.gates]
-        gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
-        gate_query = query_helper(gates, 'group', [g[0] for g in gate_groups])
-        gate_ids = [(g['group'], g['name']) for g in gate_query]
-        gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
-        gate_id_names = [i[1] + '_model' for i in gate_ids]
-        gate_functions = query_helper(gate_functions, 'name', gate_id_names)
-        gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_functions}
-        if verbose:
-            print(f'GATE parameters: ')
-            for f in gate_params:
-                print(f, gate_params[f])
-
-        ucf_main_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions')
-        hill_response = query_helper(ucf_main_functions, 'name', ['Hill_response'])[0]
-        input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
-        hill_response_equation = hill_response['equation'].replace('^', '**')  # substitute power operator
-        linear_input_composition = input_composition['equation']
-        if verbose:
-            print(f'hill_response = {hill_response_equation}')
-            print(f'linear_input_composition = {linear_input_composition}')
-            print()
-
-        output_names = [o.name for o in graph.outputs]
-        output_model_names = [o + '_model' for o in output_names]
-        output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
-                                    output_model_names)
-        output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in output_jsons}
-
-        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')[0]
-        output_function_str = output_function_json['equation']
-
-        if verbose:
-            print('OUTPUT parameters: ')
-            for op in output_params:
-                print(op, output_params[op])
-            print(f'output_response = {output_function_str}\n')
-
-        # adding parameters to inputs
-        for graph_input in graph.inputs:
-            if repr(graph_input) in input_params:
-                graph_input.add_eval_params(input_function_str, input_params[repr(graph_input)])
-
-        # adding parameters to outputs
-        for graph_output in graph.outputs:
-            if repr(graph_output) in output_params:
-                graph_output.add_eval_params(output_function_str, output_params[repr(graph_output)])
-
-        # adding parameters and individual gates to gates
-        for (gate_group, gate_name) in gate_ids:
-            gate_param = gate_params[gate_name]
-            for graph_gate in graph.gates:
-                if graph_gate.gate_id == gate_group:
-                    graph_gate.add_eval_params(hill_response_equation, linear_input_composition, gate_name, gate_param)
-
-        # NOTE: creating a truth table for each graph assignment
-        num_inputs = len(graph.inputs)
-        num_outputs = len(graph.outputs)
-        num_gates = len(graph.gates)
-        (truth_table, truth_table_labels) = generate_truth_table(num_inputs, num_gates, num_outputs, graph.inputs,
-                                                                 graph.gates, graph.outputs)
-        if verbose:
-            print('generating truth table...\n')
-
-        # IO_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
-        # IO_names = ['_'.join(x.split('_')[:-1]) for x in truth_table_labels if x.split('_')[-1] == 'I/O']
-
-        def get_tb_IO_index(node_name):
-            """
-            TODO: add get_tb_IO_index docstring
-            :param node_name:
-            :return:
-            """
-            return truth_table_labels.index(node_name + '_I/O')
-
-        circuit_scores = []
-        for r in range(len(truth_table)):
-            if verbose:
-                print(f'row{r} {truth_table[r]}')
-
-            for (input_name, input_onoff) in list(
-                    dict(zip(truth_table_labels[:num_inputs], truth_table[r][:num_inputs])).items()):
-                input_name = input_name[:input_name.rfind('_')]
-                for graph_input in graph.inputs:
-                    if repr(graph_input) == input_name:
-                        # switch input on/off
-                        graph_input.switch_onoff(input_onoff)
-                        graph_input_idx = truth_table_labels.index(input_name)
-                        truth_table[r][graph_input_idx] = graph_input.out_scores[graph_input.score_in_use]
-
-            # NOTE: filling out truth table IO values in this part
-            def set_tb_IO(node_name, io_val):
-                """
-                TODO: docstring
-                :param node_name:
-                :param io_val:
-                """
-                tb_index_ = get_tb_IO_index(node_name)
-                truth_table[r][tb_index_] = io_val
-
-            def get_tb_IO_val(node_name):
-                """
-                TODO: docstring
-                :param node_name:
-                :return:
-                """
-                tb_index_ = get_tb_IO_index(node_name)
-                return truth_table[r][tb_index_]
-
-            def fill_truth_table_IO(graph_node):
-                """
-                TODO: docstring
-                :param graph_node:
-                """
-                if type(graph_node) == Gate:
-                    gate_inputs = graph.find_prev(graph_node)
-                    gate_type = graph_node.gate_type
-                    # gate_io = None
-                    if gate_type == 'NOR':  # gate_type is either 'NOR' or 'NOT'
-                        io_s = []
-                        for gate_input in gate_inputs:  # should be exactly 2 inputs
-                            input_io = get_tb_IO_val(repr(gate_input))
-                            if input_io is None:
-                                # this might happen if the gate_input is a gate
-                                fill_truth_table_IO(gate_input)
-                            input_io = get_tb_IO_val(repr(gate_input))
-                            io_s.append(input_io)
-                        if len(io_s) == 2 and sum(io_s) == 0:
-                            gate_io = 1
-                        else:
-                            gate_io = 0
-                    else:  # (gate_type == 'NOT')
-                        input_io = get_tb_IO_val(repr(gate_inputs))
-                        if input_io is None:
-                            fill_truth_table_IO(gate_inputs)
-                        input_io = get_tb_IO_val(repr(gate_inputs))
-                        if input_io == 0:
-                            gate_io = 1
-                        elif input_io == 1:
-                            gate_io = 0
-                        else:
-                            raise RecursionError
-                    # finally, update the truth table for this gate 
-                    set_tb_IO(repr(graph_node), gate_io)
-                    graph_node.IO = gate_io
-                elif type(graph_node) == Output:
-                    input_gate = graph.find_prev(graph_node)
-                    gate_io = get_tb_IO_val(repr(input_gate))
-                    if gate_io is None:
-                        fill_truth_table_IO(input_gate)
-                    gate_io = get_tb_IO_val(repr(input_gate))
-                    set_tb_IO(repr(graph_node), gate_io)  # output just carries the gate I/O
-                    graph_node.IO = gate_io
-                elif type(graph_node) == Input:
-                    raise NameError('not suppose to recurse to input to fill truth table')
-                else:
-                    raise RecursionError
-
-            for gout in graph.outputs:
-                try:
-                    fill_truth_table_IO(gout)
-                except Exception as e_:
-                    # NOTE: this happens for something like the sr_latch, it is not currently supported
-                    # NOTE: but with modifications to the truth table, this type of unstable could work
-                    debug_print(f'{self.verilog_name} has unsupported circuit configuration due to flip-flopping.\n'
-                                f'{e_}')
-                    print_table([truth_table_labels] + truth_table)
-                    print()
-                    raise RecursionError
-
-            # if verbose:
-            #     print_table([truth_table_labels] + truth_table)
-
-            for graph_output in graph.outputs:
-                # NOTE: add function to test whether g_output is intermediate or final
-                output_name = graph_output.name
-                graph_output_idx = truth_table_labels.index(output_name)
-                if truth_table[r][graph_output_idx] is None:
-                    output_score = graph.get_score(graph_output, verbose=verbose)
-                    truth_table[r][graph_output_idx] = output_score
-                    circuit_scores.append((output_score, output_name))
-
-            for graph_gate in graph.gates:
-                graph_gate_idx = truth_table_labels.index(graph_gate.gate_id)
-                truth_table[r][graph_gate_idx] = graph_gate.best_score
-
-            if verbose:
-                print(circuit_scores)
-                print(truth_table_labels)
-                print(f'row{r} {truth_table[r]}\n')
-
-        # this part does this: for each output, find minOn/maxOff, and save output device score for this design
-        # try:
-        #   Min(On) / Max(Off)
-        # except:
-        #   either Max() ?
-        truth_tested_output_values = {}
-        for o in graph.outputs:
-            tb_io_index = get_tb_IO_index(repr(o))
-            tb_index = truth_table_labels.index(repr(o))
-            truth_values = {0: [], 1: []}
-            for r in range(len(truth_table)):
-                o_io_val = truth_table[r][tb_io_index]
-                truth_values[o_io_val].append(truth_table[r][tb_index])
-            try:
-                truth_tested_output_values[repr(o)] = min(truth_values[1]) / max(truth_values[0])
-            except Exception:  # TODO: improve exception handling...
-                # this means that either all the rows in the output is ON or all OFF
-                try:
-                    truth_tested_output_values[repr(o)] = max(truth_values[0])
-                except Exception:
-                    truth_tested_output_values[repr(o)] = max(truth_values[1])
-
-        graph_inputs_for_printing = list(zip(self.rnl.inputs, graph.inputs))
-        graph_gates_for_printing = list(zip(self.rnl.gates, graph.gates))
-        graph_outputs_for_printing = list(zip(self.rnl.outputs, graph.outputs))
-        if verbose:
-            print('reconstructing netlist: ')
-            for rnl_in, g_in in graph_inputs_for_printing:
-                print(f'{rnl_in} {str(g_in)} and max composition of {max(g_in.out_scores)}')
-                # print(g_in.out_scores)
-            for rnl_g, g_g in graph_gates_for_printing:
-                print(rnl_g, str(g_g))
-            for rnl_out, g_out in graph_outputs_for_printing:
-                print(rnl_out, str(g_out))
-            print()
-
-        truth_table_vis = f'{truth_table_labels}\n'
-        for r in truth_table:
-            truth_table_vis += str(r) + '\n'
-        if verbose:
-            print(truth_table_vis)
-            print(truth_tested_output_values)
-            print()
-            print_table([truth_table_labels] + truth_table)
-        # take the output columns of the truth table, and calculate the outputs
-
-        # NOTE: **return the lower-scored output of the multiple outputs**
-        score = min(truth_tested_output_values.values()), truth_table, truth_table_labels
-
-        if verbose:
-            print('\nscore_circuit returns:')
-            print(score)
-        return score
-
     def check_conditions(self, verbose=True):
         """
-        TODO: add check_conditions docstring
-        :param verbose:
+
+        NOTE: Ignore logic_constraints value, which is unreliable, and instead use the actual gate count
+
+        :param verbose: bool: default True
         :return:
         """
-        # TODO: Ignore logic_constraints value, which is unreliable, and instead use the actual gate count
+
         if verbose:
             print()
             print_centered('condition checks for valid input')
@@ -778,17 +268,544 @@ class CELLO3:
 
             print_centered('End of condition checks')
 
-        # NOTE: if max_iterations passes a threshold, switch from exhaustive algorithm to simulative algorithm
-        # threshold = 1000000  # 1 million iterations (which should take around an hour or so)
-        # if max_iterations > threshold:
-        #     max_iterations = None
-
         return pass_check, max_iterations
+
+    def techmap(self, iter_: int):
+        """
+        TODO: add techmap docstring
+
+        :param iter_: int
+        :return:
+        """
+        # NOTE: POE of the CELLO gate assignment simulation & optimization algorithm
+        # NOTE: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
+        print_centered('Beginning GATE ASSIGNMENT', padding=True)
+
+        circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
+
+        debug_print('Netlist de-construction: ')
+        print(circuit)
+
+        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
+        i_list = []
+        for sensor in in_sensors:
+            i_list.append(sensor['name'])
+
+        out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
+        o_list = []
+        for device in out_devices:
+            o_list.append(device['name'])
+
+        gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
+        g_list = []
+        for gate in gates:
+            # NOTE: below assumes that all gates in our UCFs are 'NOR' gates
+            g_list.append(gate['group'])
+        g_list = list(set(g_list))
+
+        debug_print('Listing available assignments from UCF: ')
+        print(i_list)
+        print(o_list)
+        print(g_list)
+
+        debug_print('Netlist requirements: ')
+        i = len(self.rnl.inputs)
+        o = len(self.rnl.outputs)
+        g = len(self.rnl.gates)
+        print(f'need {i} inputs')
+        print(f'need {o} outputs')
+        print(f'need {g} gates')
+        # NOTE: ^ This is the input to whatever algorithm to use
+
+        # best_assignments = []
+        if self.simulated_annealing:
+            best_assignments = self.simulated_annealing_assign(i_list, o_list, g_list, i, o, g, circuit, iter_)
+        else:
+            best_assignments = self.exhaustive_assign(i_list, o_list, g_list, i, o, g, circuit, iter_)
+
+        print_centered('End of GATE ASSIGNMENT', padding=True)
+
+        return max(best_assignments, key=lambda x: x[0]) if len(best_assignments) > 0 else best_assignments
+
+    def simulated_annealing_assign(self, i_list: list, o_list: list, g_list: list, i: int, o: int, g: int,
+                                   netgraph: GraphParser, iter_: int) -> list:
+        """
+        Uses scipy's dual annealing func to efficiently find a regional optimum when exhaustive search is not feasible.
+        (See notes on Dual Annealing below...)
+
+        :param i_list: list of available inputs
+        :param o_list: list of available outputs
+        :param g_list: list of available gates
+        :param i: int of required inputs
+        :param o: int of required outputs
+        :param g: int of required gates
+        :param netgraph: GraphParser of circuit parameters
+        :param iter_: int of total possible configurations
+        :return: list: self.best_graphs: [(circuit_score, graph, tb, tb_labels)]
+        """
+
+        print_centered('Running SIMULATED ANNEALING gate-assignment algorithm...', padding=True)
+        i_perms, o_perms, g_perms = [], [], []
+        # TODO: Optimize permutation arrays
+        for i_perm in itertools.permutations(i_list, i):
+            i_perms.append(i_perm)
+        for o_perm in itertools.permutations(o_list, o):
+            o_perms.append(o_perm)
+        for g_perm in itertools.permutations(g_list, g):
+            g_perms.append(g_perm)
+        max_fun = iter_ if iter_ < 1000 else 1000
+
+        # DUAL ANNEALING SCIPY FUNC
+        func = lambda x: self.prep_assign_for_scoring(x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+        lo = [0, 0, 0]
+        hi = [len(i_perms), len(o_perms), len(g_perms)]
+        bounds = list(zip(lo, hi))
+        # TODO: CK: Implement seed
+        # TODO: CK: Implement toxicity check...
+        ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
+        """
+        Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
+        Dual Annealing combines Classical Simulated Annealing, Fast Simulated Annealing, and local search optimizations
+        to improve upon the standard simulated annealing technique. The algorithm does not guarantee a global optimal 
+        score but can find a good regional optimum in far less time than would be required by exhaustive search.
+        
+        Key Parameters:
+        :param func:    Function of form func(x, *args) with return value that dual_annealing is attempting to optimize
+        :param bounds:  Upper and lower bounds for each dimension/variable being passed into func
+        :param maxiter: Max number of ~global searches (to identify neighborhoods with potential local maxima)
+        :param max_fun: Max number of total function calls/circuit iterations, including local minimization searches
+        :param seed:    For replicating the same results across runs
+        :param no_local_search: Enable to function more like traditional simulated annealing
+        Note: Additional parameters specified in URL above...
+
+        :return OptimizeResult: Array including the solution input array, best score, number of iterations run, and a 
+        message indicating the specific reason for termination, among additional attributes specified here...
+        docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult  
+        """
+
+        # TODO: CK: Capture multiple equivalent optimums
+        # self.best_graphs = ret.x     # solution inputs (already stored in object attribute)
+        self.best_score = -ret.fun  # solution score (reverses inversion from prep_assign_for_scoring)
+        # count = ret.nfev     # number of func executions
+        # reason = ret.message # reason for termination
+        print(f'\nDONE!\nCompleted: {self.iter_count:,}/{max_fun:,} iterations (out of {iter_:,} possible iterations)')
+        print("Best Score: ", self.best_score)
+
+        return self.best_graphs
+
+    def exhaustive_assign(self, i_list: list, o_list: list, g_list: list, i: int, o: int, g: int,
+                          netgraph: GraphParser, iter_: int) -> list:
+        """
+        Algorithm to check *all* possible permutations of inputs, gates, and outputs for this circuit.
+        Depending on the number of possible iterations, this could take prohibitively long.
+        Use simulated_annealing_assign for a far more efficient (though it does not guarantee the global optimum).
+
+        :param i_list:
+        :param o_list:
+        :param g_list:
+        :param i:
+        :param o:
+        :param g:
+        :param netgraph:
+        :param iter_:
+        :return: list: self.best_graphs: [(circuit_score, graph, tb, tb_labels)]
+        """
+        print_centered('Running EXHAUSTIVE gate-assignment algorithm...', padding=True)
+        for I_perm in itertools.permutations(i_list, i):
+            for O_perm in itertools.permutations(o_list, o):
+                for G_perm in itertools.permutations(g_list, g):
+                    self.prep_assign_for_scoring((I_perm, O_perm, G_perm), (None, None, None, netgraph, i, o, g, iter_))
+
+        if not self.verbose:
+            print()
+        print(f'\nDONE!\nCounted: {self.iter_count:,} iterations')
+
+        return self.best_graphs
+
+    def prep_assign_for_scoring(self, x, args):
+        """
+        Prepares a specific iteration/configuration to be scored by score_circuit.
+
+        :param x: Tuple of dimensions passed into func, including the following
+            - i_perm: Specific inputs permutation to be tested
+            - o_perm: Specific outputs permutation to be tested
+            - g_perm: Specific gates permutation to be tested
+            - netgraph:
+            - i
+        :param args: Tuple of additional arguments to be passed to func
+            - i_perms: First dimension domain:  all permutations of inputs
+            - o_perms: Second dimension domain: all permutations of outputs
+            - g_perms: Third dimension domain:  all permutations of gates
+            - i: Number of required inputs
+            - o: Number of required outputs
+            - g: Number of required gates
+            - netgraph: Circuit parameters
+            - iter: Number of total possible configurations
+        :return: Best score (only returns score because of how dual_annealing functions; graph info in obj attributes)
+        """
+
+        (i_perm, o_perm, g_perm) = x
+        (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun) = args
+        # TODO: CK: Account for duplicates
+        if i_perms and o_perms and g_perms:
+            i_perm = i_perms[math.ceil(i_perm) - 1]
+            o_perm = o_perms[math.ceil(o_perm) - 1]
+            g_perm = g_perms[math.ceil(g_perm) - 1]
+
+        # Check if inputs, outputs, and gates are unique and the correct number
+        if len(set(i_perm + o_perm + g_perm)) == i + o + g:
+            self.iter_count += 1
+            if self.verbose:
+                print_centered(f'beginning iteration {self.iter_count}:')
+            # Output the combination
+            map_helper = lambda l, c: list(map(lambda x_, y: (x_, y), l, c))
+            new_i = map_helper(i_perm, netgraph.inputs)
+            new_g = map_helper(g_perm, netgraph.gates)
+            new_o = map_helper(o_perm, netgraph.outputs)
+            new_i = [Input(i[0], i[1].id) for i in new_i]
+            new_o = [Output(o[0], o[1].id) for o in new_o]
+            new_g = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in new_g]
+
+            graph = AssignGraph(new_i, new_o, new_g)
+            (circuit_score, tb, tb_labels) = self.score_circuit(graph, verbose=self.verbose)
+            # NOTE: follow the circuit scoring functions
+
+            if not self.verbose:
+                block = '\u2588'
+                num_blocks = int(round(self.iter_count / max_fun, 2) * 100)
+                ph_pb = '_' * 100
+                format_cnt = format(self.iter_count, ',')
+                format_itr = format(max_fun, ',')
+                print(
+                    f'{ph_pb} #{format_cnt}/{format_itr} | Best Score: {self.best_score} | '
+                    f'Current Score: {circuit_score}\r'
+                    f'{num_blocks * block}', end='\r')
+
+            if self.verbose:
+                print_centered(f'end of iteration {self.iter_count} : intermediate circuit score = {circuit_score}',
+                               padding=True)
+
+            if circuit_score > self.best_score:
+                self.best_score = circuit_score
+                self.best_graphs = [(circuit_score, graph, tb, tb_labels)]
+            elif circuit_score == self.best_score:
+                self.best_graphs.append((circuit_score, graph, tb, tb_labels))
+
+        return -self.best_score  # Inverted because Dual Annealing designed to find minimum; should ONLY return score
+
+    def score_circuit(self, graph: AssignGraph, verbose=True):
+        """
+        Calculates the circuit score. Returns circuit_score, the core mapping from UCF. (See Pseudocode below).
+
+        NOTE: Please ensure the UCF files follow the same format as those provided in the samples folder!
+
+        NOTE: Use one gate from each group only! (graph.gates.gate_id = group name)
+
+        :param graph: AssignGraph
+        :param verbose: bool: default True
+        :return: score: tuple[SupportsLessThan, list[list[int] | int], list[str]]
+        """
+
+        # print(graph.gates)
+
+        '''
+        Pseudocode:
+
+        initialize traversal circuit()
+
+        for each input:
+            assign input function
+
+        for each gate(group):
+            find all gates in group
+            for each gate in group:
+                assign response function
+                (basically find all individual gate permutations)
+
+        for each output:
+            assign output function
+
+        create truth table of circuit
+
+        if toxicity & cytometry in all gates:
+            label circuit for extra tox and cyt plot evaluations
+            (maybe ignore this part because they can just look in the UCF instead to find the plots)
+
+        for each truth table combination:
+            for each individual gate assignment:
+                traverse circuit from inputs (input composition is mostly x1+x2)
+                evaluate output
+        '''
+
+        # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
+        input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')[0]
+        input_function_str = input_function_json['equation'][1:]  # remove the '$' sign
+
+        input_model_names = [i.name + '_model' for i in graph.inputs]
+        input_params = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
+                                    input_model_names)
+        input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
+
+        if verbose:
+            debug_print(f'Assignment configuration: {repr(graph)}')
+            print(f'INPUT parameters:')
+            for p in input_params:
+                print(p, input_params[p])
+            print(f'input_response = {input_function_str}\n')
+            # print(f'Parameters in sensor_response function json: \n{input_function_params}\n')
+
+        gate_groups = [(g.gate_id, g.gate_type) for g in graph.gates]
+        gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
+        gate_query = query_helper(gates, 'group', [g[0] for g in gate_groups])
+        gate_ids = [(g['group'], g['name']) for g in gate_query]
+        gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
+        gate_id_names = [i[1] + '_model' for i in gate_ids]
+        gate_functions = query_helper(gate_functions, 'name', gate_id_names)
+        gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_functions}
+        if verbose:
+            print(f'GATE parameters: ')
+            for f in gate_params:
+                print(f, gate_params[f])
+
+        ucf_main_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions')
+        hill_response = query_helper(ucf_main_functions, 'name', ['Hill_response'])[0]
+        input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
+        hill_response_equation = hill_response['equation'].replace('^', '**')  # substitute power operator
+        linear_input_composition = input_composition['equation']
+        if verbose:
+            print(f'hill_response = {hill_response_equation}')
+            print(f'linear_input_composition = {linear_input_composition}')
+            print()
+
+        output_names = [o.name for o in graph.outputs]
+        output_model_names = [o + '_model' for o in output_names]
+        output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
+                                    output_model_names)
+        output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in output_jsons}
+        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')[0]
+        output_function_str = output_function_json['equation']
+
+        if verbose:
+            print('OUTPUT parameters: ')
+            for op in output_params:
+                print(op, output_params[op])
+            print(f'output_response = {output_function_str}\n')
+
+        # adding parameters to inputs
+        for graph_input in graph.inputs:
+            if repr(graph_input) in input_params:
+                graph_input.add_eval_params(input_function_str, input_params[repr(graph_input)])
+
+        # adding parameters to outputs
+        for graph_output in graph.outputs:
+            if repr(graph_output) in output_params:
+                graph_output.add_eval_params(output_function_str, output_params[repr(graph_output)])
+
+        # adding parameters and individual gates to gates
+        for (gate_group, gate_name) in gate_ids:
+            gate_param = gate_params[gate_name]
+            for graph_gate in graph.gates:
+                if graph_gate.gate_id == gate_group:
+                    graph_gate.add_eval_params(hill_response_equation, linear_input_composition, gate_name, gate_param)
+
+        # NOTE: creating a truth table for each graph assignment
+        num_inputs = len(graph.inputs)
+        num_outputs = len(graph.outputs)
+        num_gates = len(graph.gates)
+        (truth_table, truth_table_labels) = generate_truth_table(num_inputs, num_gates, num_outputs, graph.inputs,
+                                                                 graph.gates, graph.outputs)
+        if verbose:
+            print('generating truth table...\n')
+
+        # io_indexes = [i for i, x in enumerate(truth_table_labels) if x.split('_')[-1] == 'I/O']
+        # io_names = ['_'.join(x.split('_')[:-1]) for x in truth_table_labels if x.split('_')[-1] == 'I/O']
+
+        def get_tb_IO_index(node_name):
+            """
+            TODO: add get_tb_IO_index docstring
+
+            :param node_name:
+            :return:
+            """
+            return truth_table_labels.index(node_name + '_I/O')
+
+        circuit_scores = []
+        for r in range(len(truth_table)):
+            if verbose:
+                print(f'row{r} {truth_table[r]}')
+
+            for (input_name, input_onoff) in list(
+                    dict(zip(truth_table_labels[:num_inputs], truth_table[r][:num_inputs])).items()):
+                input_name = input_name[:input_name.rfind('_')]
+                for graph_input in graph.inputs:
+                    if repr(graph_input) == input_name:
+                        # switch input on/off
+                        graph_input.switch_onoff(input_onoff)
+                        graph_input_idx = truth_table_labels.index(input_name)
+                        truth_table[r][graph_input_idx] = graph_input.out_scores[graph_input.score_in_use]
+
+            def set_tb_IO(node_name, io_val):
+                """
+                Fills out truth table IO values
+
+                :param node_name:
+                :param io_val:
+                """
+                tb_index_ = get_tb_IO_index(node_name)
+                truth_table[r][tb_index_] = io_val
+
+            def get_tb_IO_val(node_name):
+                """
+                TODO: docstring
+
+                :param node_name:
+                :return:
+                """
+                tb_index_ = get_tb_IO_index(node_name)
+                return truth_table[r][tb_index_]
+
+            def fill_truth_table_IO(graph_node):
+                """
+                TODO: docstring
+
+                :param graph_node:
+                """
+                if type(graph_node) == Gate:
+                    gate_inputs = graph.find_prev(graph_node)
+                    gate_type = graph_node.gate_type
+                    # gate_io = None
+                    if gate_type == 'NOR':  # gate_type is either 'NOR' or 'NOT'
+                        io_s = []
+                        for gate_input in gate_inputs:  # should be exactly 2 inputs
+                            input_io = get_tb_IO_val(repr(gate_input))
+                            if input_io is None:
+                                # this might happen if the gate_input is a gate
+                                fill_truth_table_IO(gate_input)
+                            input_io = get_tb_IO_val(repr(gate_input))
+                            io_s.append(input_io)
+                        if len(io_s) == 2 and sum(io_s) == 0:
+                            gate_io = 1
+                        else:
+                            gate_io = 0
+                    else:  # (gate_type == 'NOT')
+                        input_io = get_tb_IO_val(repr(gate_inputs))
+                        if input_io is None:
+                            fill_truth_table_IO(gate_inputs)
+                        input_io = get_tb_IO_val(repr(gate_inputs))
+                        if input_io == 0:
+                            gate_io = 1
+                        elif input_io == 1:
+                            gate_io = 0
+                        else:
+                            raise RecursionError
+                    # finally, update the truth table for this gate 
+                    set_tb_IO(repr(graph_node), gate_io)
+                    graph_node.IO = gate_io
+                elif type(graph_node) == Output:
+                    input_gate = graph.find_prev(graph_node)
+                    gate_io = get_tb_IO_val(repr(input_gate))
+                    if gate_io is None:
+                        fill_truth_table_IO(input_gate)
+                    gate_io = get_tb_IO_val(repr(input_gate))
+                    set_tb_IO(repr(graph_node), gate_io)  # output just carries the gate I/O
+                    graph_node.IO = gate_io
+                elif type(graph_node) == Input:
+                    raise NameError('not suppose to recurse to input to fill truth table')
+                else:
+                    raise RecursionError
+
+            for gout in graph.outputs:
+                try:
+                    fill_truth_table_IO(gout)
+                except Exception as e_:
+                    # FIXME: this happens for something like the sr_latch, it is not currently supported,
+                    #  but with modifications to the truth table, this type of unstable could work
+                    debug_print(f'{self.verilog_name} has unsupported circuit configuration due to flip-flopping.\n'
+                                f'{e_}')
+                    print_table([truth_table_labels] + truth_table)
+                    print()
+                    raise RecursionError
+
+            # if verbose:
+            #     print_table([truth_table_labels] + truth_table)
+
+            for graph_output in graph.outputs:
+                # TODO: add function to test whether g_output is intermediate or final
+                output_name = graph_output.name
+                graph_output_idx = truth_table_labels.index(output_name)
+                if truth_table[r][graph_output_idx] is None:
+                    output_score = graph.get_score(graph_output, verbose=verbose)
+                    truth_table[r][graph_output_idx] = output_score
+                    circuit_scores.append((output_score, output_name))
+
+            for graph_gate in graph.gates:
+                graph_gate_idx = truth_table_labels.index(graph_gate.gate_id)
+                truth_table[r][graph_gate_idx] = graph_gate.best_score
+
+            if verbose:
+                print(circuit_scores)
+                print(truth_table_labels)
+                print(f'row{r} {truth_table[r]}\n')
+
+        # this part does this: for each output, find minOn/maxOff, and save output device score for this design
+        # try:
+        #   Min(On) / Max(Off)
+        # except:
+        #   either Max() ?
+        truth_tested_output_values = {}
+        for o in graph.outputs:
+            tb_io_index = get_tb_IO_index(repr(o))
+            tb_index = truth_table_labels.index(repr(o))
+            truth_values = {0: [], 1: []}
+            for r in range(len(truth_table)):
+                o_io_val = truth_table[r][tb_io_index]
+                truth_values[o_io_val].append(truth_table[r][tb_index])
+            try:
+                truth_tested_output_values[repr(o)] = min(truth_values[1]) / max(truth_values[0])
+            except Exception:  # TODO: improve exception handling...
+                # this means that either all the rows in the output is ON or all OFF
+                try:
+                    truth_tested_output_values[repr(o)] = max(truth_values[0])
+                except Exception:
+                    truth_tested_output_values[repr(o)] = max(truth_values[1])
+
+        graph_inputs_for_printing = list(zip(self.rnl.inputs, graph.inputs))
+        graph_gates_for_printing = list(zip(self.rnl.gates, graph.gates))
+        graph_outputs_for_printing = list(zip(self.rnl.outputs, graph.outputs))
+        if verbose:
+            print('reconstructing netlist: ')
+            for rnl_in, g_in in graph_inputs_for_printing:
+                print(f'{rnl_in} {str(g_in)} and max composition of {max(g_in.out_scores)}')
+                # print(g_in.out_scores)
+            for rnl_g, g_g in graph_gates_for_printing:
+                print(rnl_g, str(g_g))
+            for rnl_out, g_out in graph_outputs_for_printing:
+                print(rnl_out, str(g_out))
+            print()
+
+        truth_table_vis = f'{truth_table_labels}\n'
+        for r in truth_table:
+            truth_table_vis += str(r) + '\n'
+        if verbose:
+            print(truth_table_vis)
+            print(truth_tested_output_values)
+            print()
+            print_table([truth_table_labels] + truth_table)
+        # take the output columns of the truth table, and calculate the outputs
+
+        # NOTE: **return the lower-scored output of the multiple outputs**
+        score = min(truth_tested_output_values.values()), truth_table, truth_table_labels
+
+        if verbose:
+            print('\nscore_circuit returns:')
+            print(score)
+        return score
 
 
 if __name__ == '__main__':
+
     ucf_list = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
-    # problem ucf = ['Eco1C2G2T2', 'Eco2C1G6T1']
+    # FIXME: problem ucf = ['Eco1C2G2T2', 'Eco2C1G6T1']
 
     # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
 

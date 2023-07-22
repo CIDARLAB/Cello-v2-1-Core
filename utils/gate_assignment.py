@@ -1,5 +1,9 @@
 """
+Contains a function that generates the truth table and classes for: representing netlist inputs, outputs, and gates,
+assigning gates to the graph, and initializing permutations of gate assignments.
 
+generate_truth_table()
+Classes: IO, Input(IO), Output(IO), Gate, AssignGraph, GraphParser
 """
 
 # import networkx as nx
@@ -23,11 +27,9 @@ def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_lis
         row = [(i >> j) & 1 for j in range(num_in - 1, -1, -1)] + ([None] * num_in) + ([None] * num_gates) * 2 + (
                     [None] * num_out) * 2
         table.append(row)
-    # labels = [i.name for i in in_list] + [g.gate_id for g in gate_list] + [o.name for o in out_list] 
-    labels = [f'{i.name}_I/O' for i in in_list] + [i.name for i in in_list] + [f'{g.gate_id}_I/O' for g in
-                                                                               gate_list] + [g.gate_id for g in
-                                                                                             gate_list] + [
-                 f'{o.name}_I/O' for o in out_list] + [o.name for o in out_list]
+    labels = [f'{i.name}_I/O' for i in in_list] + [i.name for i in in_list] + \
+             [f'{g.gate_id}_I/O' for g in gate_list] + [g.gate_id for g in gate_list] + \
+             [f'{o.name}_I/O' for o in out_list] + [o.name for o in out_list]
     return table, labels
 
 
@@ -149,14 +151,13 @@ class Output(IO):
         if self.function is None:
             return f'output {self.name} {self.id}'
         else:
-            return f'output {self.name} {self.id} with c: {self.unit_conversion} and outscore={self.out_score}'
+            return f'output {self.name} {self.id} with c: {self.unit_conversion}'
 
 
 class Gate:
     """
-
+    Used ot represent a gate in a netlist.
     """
-    # NOTE: used to represent a gate in a netlist
     def __init__(self, gate_id, gate_type, inputs, output):
         self.gate_id = gate_id
         self.gate_type = gate_type
@@ -170,25 +171,26 @@ class Gate:
         self.best_score = None
         self.IO = None
 
-    def add_eval_params(self, hill_response, input_composition, gname, params):
+    def add_eval_params(self, hill_response, input_composition, g_name, params):
         """
 
         :param hill_response:
         :param input_composition:
-        :param gname:
+        :param g_name:
         :param params:
         """
         self.hill_response = hill_response
         self.input_composition = input_composition
-        self.gate_params[gname] = params
+        self.gate_params[g_name] = params
 
     def eval_gates(self, in_comp):
         """
+        Returns the best gate assignment from gate group.
 
         :param in_comp:
         :return:
         """
-        # returns the best gate assignment from gate group
+
         if self.hill_response is not None and self.input_composition is not None:
             # this means that add_eval_params was already called
             gate_scores = []
@@ -216,9 +218,11 @@ class Gate:
     def __str__(self):
         if self.hill_response is not None:
             if self.gate_in_use is not None:
-                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and best_gate = {self.gate_in_use}'
+                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and ' \
+                       f'output {self.output}, and best_gate = {self.gate_in_use}'
             else:
-                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}, and individual gates {list(self.gate_params.keys())}'
+                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and ' \
+                       f'output {self.output}, and individual gates {list(self.gate_params.keys())}'
         else:
             return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}'
 
@@ -243,7 +247,7 @@ class AssignGraph:
     """
 
     """
-    def __init__(self, inputs=None, outputs=None, gates=None):
+    def __init__(self, inputs: list = None, outputs: list = None, gates: list = None):
         if gates is None:
             gates = []
         if outputs is None:
@@ -254,48 +258,6 @@ class AssignGraph:
         self.outputs = outputs
         self.gates = gates
         self.in_binary = {}
-
-    def add_input(self, input):
-        """
-
-        :param input:
-        """
-        self.inputs.append(input)
-
-    def add_output(self, output):
-        """
-
-        :param output:
-        """
-        self.outputs.append(output)
-
-    def add_gate(self, gate):
-        """
-
-        :param gate:
-        """
-        self.gates.append(gate)
-
-    def remove_gate(self, gate):
-        """
-
-        :param gate:
-        """
-        self.gates.remove(gate)
-
-    def remove_input(self, input):
-        """
-
-        :param input:
-        """
-        self.inputs.remove(input)
-
-    def remove_output(self, output):
-        """
-
-        :param output:
-        """
-        self.outputs.remove(output)
 
     def switch_input_ios(self, truth_row, indexes):
         """
@@ -339,23 +301,6 @@ class AssignGraph:
         else:
             # this should not happen also
             return ValueError()
-
-    # def __eq__(self, other: object) -> bool:
-    #     if isinstance(other, AssignGraph):
-    #         if other.inputs == self.inputs and other.gates == self.gates and other.outputs == self.outputs:
-    #             return True
-    #         else:
-    #             return False
-    #     return NotImplemented
-
-    # don't think that this function needs to be used.   
-    # def find_next(self, node):
-    #     if type(node) == Input:
-    #         pass
-    #     elif type(node) == Gate:
-    #         pass
-    #     else:
-    #         return None
 
     # NOTE: needs modification
     def get_score(self, node, verbose=False):
@@ -403,10 +348,9 @@ class AssignGraph:
         return f"Inputs: {self.inputs}, Gates: {self.gates}, Outputs: {self.outputs}"
 
 
-# NOTE: used to initialize all permutations of gate assignments from UCF to netlist
 class GraphParser:
     """
-
+    Used to initialize all permutations of gate assignments from UCF to netlist.
     """
     def __init__(self, inputs, outputs, gates):
         self.inputs = self.load_inputs(inputs)
@@ -452,11 +396,10 @@ class GraphParser:
 
     def permute_inputs(self, UCFobj: UCF):
         """
-
+        Return the different input combo permutations.
         :param UCFobj:
         :return:
         """
-        # return the different input combo permutations
         input_sensors = UCFobj.query_top_level_collection(UCFobj.UCFin, 'input_sensors')
         new_inputs = []
         for (_, edge_no) in self.inputs:
@@ -467,11 +410,10 @@ class GraphParser:
 
     def permute_outputs(self, UCFobj: UCF):
         """
-
+        Return the different output combo permutations.
         :param UCFobj:
         :return:
         """
-        # return the different input combo permutations
         output_devices = UCFobj.query_top_level_collection(UCFobj.UCFout, 'output_devices')
         new_outputs = []
         for (_, edge_no) in self.outputs:
@@ -482,7 +424,7 @@ class GraphParser:
 
     def permute_gates(self, UCFobj: UCF):
         """
-
+        return the different gate combo permutations.
         :param UCFobj:
         :return:
         """
@@ -501,72 +443,12 @@ class GraphParser:
     @staticmethod
     def traverse_graph(start_node):
         """
-
+        Traverse the graph and assign gates to each node.
         :param start_node:
         :return:
         """
-        # traverse the graph and assign gates to each node
         return 0  # return 0 exit code
-
-    # NOTE: Scrapped for weight-reduction
-    # def to_networkx(self):
-    #     G = nx.DiGraph()
-
-    #     # Add input and output nodes to the graph
-    #     for (input_node, no) in self.inputs:
-    #         G.add_node(no, type='input')
-
-    #     # Add gate nodes and edges to the graph
-    #     for gate in self.gates:
-    #         gate_name = f'{gate.gate_type}{gate.gate_id}'
-    #         G.add_node(gate_name, type=gate.gate_type)
-    #         for input_node in gate.inputs:
-    #             G.add_edge(input_node, gate_name)
-    #         G.add_node(gate.output, type='output')
-    #     G.add_edge(gate_name, gate.output)
-    #   return G
 
     def __str__(self):
         gates_str = "\n".join(str(gate) for gate in self.gates)
         return f"Inputs: {self.inputs},\n\nOutputs: {self.outputs}\n\nGates:\n{gates_str}"
-
-# NOTE: Scrapped for weight reduction
-# def visualize_logic_circuit(G, preview=True, outfile=None):
-#     if not preview: plt.figure()
-#     # Compute the distances from input nodes
-#     distances = {input_node: 0 for input_node, data in G.nodes(data=True) if data["type"] == "input"}
-
-#     for input_node in list(distances.keys()):
-#         for node, distance in nx.single_source_shortest_path_length(G, input_node).items():
-#             distances[node] = max(distances.get(node, 0), distance)
-
-#     # Create a custom layout that distributes nodes across layers
-#     pos = {}
-#     layer_counts = {}
-#     for node, distance in distances.items():
-#         layer_counts[distance] = layer_counts.get(distance, 0) + 1
-#         pos[node] = (distance, -layer_counts[distance])
-
-#     # Draw the different node types with different colors and shapes
-#     input_nodes = [n for n, d in G.nodes(data=True) if d["type"] == "input"]
-#     output_nodes = [n for n, d in G.nodes(data=True) if d["type"] == "output"]
-#     gate_nodes = [n for n, d in G.nodes(data=True) if d["type"] not in ["input", "output"]]
-
-#     nx.draw_networkx_nodes(G, pos, nodelist=input_nodes, node_color="green", node_shape="o")
-#     nx.draw_networkx_nodes(G, pos, nodelist=output_nodes, node_color="red", node_shape="o")
-#     nx.draw_networkx_nodes(G, pos, nodelist=gate_nodes, node_shape="s")
-
-#     # Draw edges with arrows and labels
-#     edge_opts = {
-#         "arrowsize": 20,      # Set the size of the arrowhead
-#         "arrowstyle": "-|>",  # Set the style of the arrowhead
-#     }
-#     nx.draw_networkx_edges(G, pos, arrows=True)  # Add 'arrows=True' to draw arrows for the edges
-#     nx.draw_networkx_labels(G, pos)
-
-#     plt.axis("off")
-#     if preview: 
-#         plt.show()
-#     else:
-#         plt.savefig(outfile)
-#         plt.close()

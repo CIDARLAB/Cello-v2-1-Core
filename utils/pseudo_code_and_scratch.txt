@@ -1,0 +1,152 @@
+Initialization:
+    specify path to: input_folder
+    specify path to: output_folder
+    choose Verilog
+    choose UCF
+
+    UCF Rules:
+        note: rules can be modified in the future as needed
+        - no syntax error in UCF files
+        - only use NOR/NOT gates
+            - NOR = 2 inputs ; NOT = 1 input
+        eval function params: 
+            - input_response : ymax, ymin, STATE = range between ymax and ymin
+            - gate hill_response : any parameters, but x = input_composition
+            - gate input_composition : any paremeters, need x (input score[s])
+            - output unit_conversion : c, x = input score
+        check for number of inputs, outputs, and gates available in UCF
+
+    Logic Synthesis (yosys):
+        generate netlist from Verilog using yosys, get a json file for netlist
+        convert netlist_json & store as graph representation
+        Netlist Rules:
+            - only single-bit nodes in Netlist
+            - only NOR/NOT gates
+            - all nodes are used/connected in netlist
+            - intermediate output in netlist OK
+            - netlist inputs/outputs/gates number <= UCF availablity
+        
+IF Initialization is SUCCESS:
+    count total number of possible permuations for netlist, matched with assignments from UCF:
+        note: only permute gate_groups, and test individual gates in each group in Score_Circuit()
+        permuations = (I)P(i) * (O)P(o) * (G)P(g), where A=UCF, a:netlist
+    if permuations < (threshold==100,000):
+        run exhaustive_assignment algorithm:
+            for each permuation:
+                Score_Circuit(permutation)
+            return best assignment
+    else:
+        exhaustive_assign will take too long,
+        run simulation algorithm instead - genetic_algorithm (note: need to wrap up this function):
+            initial_population = 20 random permutations
+            num_generations = int(x>=100)
+            mutation_rate = float(0<x<=0.2)
+            for each generation in num_generations:
+                scores = list: Score_Circuit(permuation) for each permuation in initial_population
+                parents = find highest scores from scores
+                offsprings = generate_offspring(parents, mutation)
+                add offsprings to population
+                randomly mutate part of the rest of population
+                select 20 best permuations from population
+                repeat
+            return best assignment from population
+    (NOTE: exhaustive_assign will return the definitive best assignment, genetic_algorithm might return slightly varying results)
+
+FUNCTION: Score_Circuit(graph):
+    for each output (doesn't matter if multiple or single):
+        recursively score the nodes connected to the output
+            (calling score_circuit() on the gates, intermediate outputs, and inputs, combining and calculating their values)
+    note: returns the lowest output value for the circuit, as long as it is not an intermediate output
+    return the (min_output_score, output_device_name)
+
+
+
+techmap
+    # scrapped this because it uses networkx library for visualizations
+    # G = circuit.to_networkx()
+    # visualize_logic_circuit(G, preview=False, outfile=f'{self.out_path}/{self.verilog_name}/techmap_preview.png')
+
+
+
+gate_assignment
+    # NOTE: Scrapped for weight reduction
+    # def visualize_logic_circuit(G, preview=True, outfile=None):
+    #     if not preview: plt.figure()
+    #     # Compute the distances from input nodes
+    #     distances = {input_node: 0 for input_node, data in G.nodes(data=True) if data["type"] == "input"}
+
+    #     for input_node in list(distances.keys()):
+    #         for node, distance in nx.single_source_shortest_path_length(G, input_node).items():
+    #             distances[node] = max(distances.get(node, 0), distance)
+
+    #     # Create a custom layout that distributes nodes across layers
+    #     pos = {}
+    #     layer_counts = {}
+    #     for node, distance in distances.items():
+    #         layer_counts[distance] = layer_counts.get(distance, 0) + 1
+    #         pos[node] = (distance, -layer_counts[distance])
+
+    #     # Draw the different node types with different colors and shapes
+    #     input_nodes = [n for n, d in G.nodes(data=True) if d["type"] == "input"]
+    #     output_nodes = [n for n, d in G.nodes(data=True) if d["type"] == "output"]
+    #     gate_nodes = [n for n, d in G.nodes(data=True) if d["type"] not in ["input", "output"]]
+
+    #     nx.draw_networkx_nodes(G, pos, nodelist=input_nodes, node_color="green", node_shape="o")
+    #     nx.draw_networkx_nodes(G, pos, nodelist=output_nodes, node_color="red", node_shape="o")
+    #     nx.draw_networkx_nodes(G, pos, nodelist=gate_nodes, node_shape="s")
+
+    #     # Draw edges with arrows and labels
+    #     edge_opts = {
+    #         "arrowsize": 20,      # Set the size of the arrowhead
+    #         "arrowstyle": "-|>",  # Set the style of the arrowhead
+    #     }
+    #     nx.draw_networkx_edges(G, pos, arrows=True)  # Add 'arrows=True' to draw arrows for the edges
+    #     nx.draw_networkx_labels(G, pos)
+
+    #     plt.axis("off")
+    #     if preview:
+    #         plt.show()
+    #     else:
+    #         plt.savefig(outfile)
+    #         plt.close()
+
+
+
+travers_graph
+    # NOTE: Scrapped for weight-reduction
+    # def to_networkx(self):
+    #     G = nx.DiGraph()
+
+    #     # Add input and output nodes to the graph
+    #     for (input_node, no) in self.inputs:
+    #         G.add_node(no, type='input')
+
+    #     # Add gate nodes and edges to the graph
+    #     for gate in self.gates:
+    #         gate_name = f'{gate.gate_type}{gate.gate_id}'
+    #         G.add_node(gate_name, type=gate.gate_type)
+    #         for input_node in gate.inputs:
+    #             G.add_edge(input_node, gate_name)
+    #         G.add_node(gate.output, type='output')
+    #     G.add_edge(gate_name, gate.output)
+    #   return G
+
+
+
+find_prev
+    # def __eq__(self, other: object) -> bool:
+    #     if isinstance(other, AssignGraph):
+    #         if other.inputs == self.inputs and other.gates == self.gates and other.outputs == self.outputs:
+    #             return True
+    #         else:
+    #             return False
+    #     return NotImplemented
+
+    # don't think that this function needs to be used.
+    # def find_next(self, node):
+    #     if type(node) == Input:
+    #         pass
+    #     elif type(node) == Gate:
+    #         pass
+    #     else:
+    #         return None
