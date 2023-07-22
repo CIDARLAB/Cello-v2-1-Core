@@ -131,7 +131,8 @@ def debug_print(msg, padding=True):
     :param msg:
     :param padding:
     """
-    integral = '\u222b'  # str: ∫,   utf-8: '\u222b',   byte: b'\xe2\x88\xab'
+    # integral = '\u222b'  # str: ∫,   utf-8: '\u222b',   byte: b'\xe2\x88\xab'
+    integral = '***'
     out_msg = f'{integral}DEBUG{integral} {msg}'
     if padding:
         out_msg = '\n' + out_msg + '\n'
