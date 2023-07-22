@@ -804,20 +804,17 @@ class CELLO3:
 
 if __name__ == '__main__':
 
-    ucf_list = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
-    # FIXME: problem ucf = ['Eco1C2G2T2', 'Eco2C1G6T1']
-
     # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
-
-    # Example UCFs
-    # 'Bth1C1G1T1': (3 in, 1 out,  7 gate_groups)
-    # 'Eco1C1G1T1': (4 in, 1 out, 12 gate_groups)
-    # 'Eco2C1G3T1': (7 in, 1 out,  6 gate_groups)
-    # 'Eco2C1G5T1': (7 in, 1 out, 13 gate_groups)
-    # 'SC1C1G1T1' : (3 in, 2 out,  9 gate_groups)
-
     v_name_ = input('which verilog to test, without the .v? (hint, ___.v from your folder) \nname=')
     print()
+
+    ucf_list = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
+    # 'Bth1C1G1T1': (3 in, 2 out,  7 gate_groups)
+    # 'Eco1C1G1T1': (4 in, 2 out, 12 gate_groups)
+    # 'Eco1C2G2T2': (4 in, 2 out, 18 gate_groups) # FIXME: uses a tandem Hill function...
+    # 'Eco2C1G3T1': (7 in, 2 out,  6 gate_groups)
+    # 'Eco2C1G5T1': (7 in, 3 out, 13 gate_groups) # FIXME: seemingly has incomplete input file...
+    # 'SC1C1G1T1' : (3 in, 2 out,  9 gate_groups)
     ucf_name_ = input(f'which ucf to use? \n{list(zip(range(len(ucf_list)), ucf_list))} \nselect an index=')
     try:
         ucf_name_ = ucf_list[int(ucf_name_)]
