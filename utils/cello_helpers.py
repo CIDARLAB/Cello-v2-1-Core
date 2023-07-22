@@ -127,7 +127,9 @@ def debug_print(msg, padding=True):
     :param msg:
     :param padding:
     """
-    out_msg = f'∫DEBUG∫ {msg}'
+    # integral = '∫'
+    integral = ''
+    out_msg = f'{integral}DEBUG{integral} {msg}'
     if padding:
         out_msg = '\n' + out_msg + '\n'
     print(out_msg)

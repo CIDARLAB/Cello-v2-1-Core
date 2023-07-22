@@ -43,9 +43,7 @@ from eugene import *
 # 4. path-for-output
 # 5. options (optional)
 
-# NOTE: if verilog has multiple outputs, SC1C1G1T1 is the only UCF with 2 output devices,  # FIXME: Address this...
-#  therefore so far it is the only one that will work for 2-output circuits
-# FIXME: fix the UCFs with syntax errors: ('Eco1C2G2T2', 'Eco2C1G6T1')  CK: Finish addressing...
+
 class CELLO3:
     """
 
@@ -90,7 +88,9 @@ class CELLO3:
         print(f'Condition check passed? {valid}\n')
 
         if valid:
-            cont = input('\nContinue to evaluation? y/n ')
+            cont = input('\nDo you want to continue with the evaluation?\n'
+                         '(y: yes, or n: no)\n\n'
+                         'Continue? ')  # TODO: put simulated vs. exhaustive option here...
             if (cont == 'Y' or cont == 'y') and valid:
                 best_result = self.techmap(iter_)  # Executing the algorithm if things check out
 
@@ -272,10 +272,10 @@ class CELLO3:
 
     def techmap(self, iter_: int):
         """
-        TODO: add techmap docstring
+        Calls functions that will generate the gate assignments.
 
         :param iter_: int
-        :return:
+        :return: list: best_assignment
         """
         # NOTE: POE of the CELLO gate assignment simulation & optimization algorithm
         # NOTE: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
@@ -400,14 +400,14 @@ class CELLO3:
         Depending on the number of possible iterations, this could take prohibitively long.
         Use simulated_annealing_assign for a far more efficient (though it does not guarantee the global optimum).
 
-        :param i_list:
-        :param o_list:
-        :param g_list:
-        :param i:
-        :param o:
-        :param g:
-        :param netgraph:
-        :param iter_:
+        :param i_list: list
+        :param o_list: list
+        :param g_list: list
+        :param i: int
+        :param o: int
+        :param g: int
+        :param netgraph: GraphParser
+        :param iter_: int
         :return: list: self.best_graphs: [(circuit_score, graph, tb, tb_labels)]
         """
         print_centered('Running EXHAUSTIVE gate-assignment algorithm...', padding=True)
@@ -471,7 +471,8 @@ class CELLO3:
             # NOTE: follow the circuit scoring functions
 
             if not self.verbose:
-                block = '\u2588'
+                # block = '\u2588'
+                block = '#'
                 num_blocks = int(round(self.iter_count / max_fun, 2) * 100)
                 ph_pb = '_' * 100
                 format_cnt = format(self.iter_count, ',')
@@ -624,7 +625,7 @@ class CELLO3:
             """
             TODO: add get_tb_IO_index docstring
 
-            :param node_name:
+            :param node_name: str
             :return:
             """
             return truth_table_labels.index(node_name + '_I/O')
@@ -730,7 +731,7 @@ class CELLO3:
             #     print_table([truth_table_labels] + truth_table)
 
             for graph_output in graph.outputs:
-                # TODO: add function to test whether g_output is intermediate or final
+                # TODO: add function to test whether g_output is intermediate or final?
                 output_name = graph_output.name
                 graph_output_idx = truth_table_labels.index(output_name)
                 if truth_table[r][graph_output_idx] is None:
@@ -802,11 +803,50 @@ class CELLO3:
         return score
 
 
+# class Tee(object):
+#     def __init__(self, *files):
+#         self.files = files
+#
+#     def write(self, obj):
+#         for f in self.files:
+#             f.write(obj)
+#
+#     def flush(self):
+#         pass
+
+
 if __name__ == '__main__':
 
+    # NOTE: SETTINGS
+    verbose = False
+    assigns = 0
+    testers = False
+
+    # f = open('logfile', 'w')
+    # backup = sys.stdout
+    # sys.stdout = Tee(sys.stdout, f)
+
+    figlet = r"""
+    
+    
+
+
+     ######  ######## ##       ##        #######        #######         ##   
+    ##    ## ##       ##       ##       ##     ##      ##     ##      ####   
+    ##       ##       ##       ##       ##     ##             ##        ##   
+    ##       ######   ##       ##       ##     ##       #######         ##   
+    ##       ##       ##       ##       ##     ##      ##               ##   
+    ##    ## ##       ##       ##       ##     ##      ##        ###    ##   
+     ######  ######## ######## ########  #######       ######### ###  ###### 
+================================================================================
+    """
+    print(figlet)
+
     # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
-    v_name_ = input('which verilog to test, without the .v? (hint, ___.v from your folder) \nname=')
-    print()
+    v_name_ = input('Welcome to Cello 2.1\n\n\n'
+                    'For which Verilog file do you want a genetic circuit design and score to be generated?\n'
+                    '(Hint: ___.v, without the .v, from the sample_inputs folder...)\n\n'
+                    'Verilog File: ')
 
     ucf_list = ['Bth1C1G1T1', 'Eco1C1G1T1', 'Eco1C2G2T2', 'Eco2C1G3T1', 'Eco2C1G5T1', 'Eco2C1G6T1', 'SC1C1G1T1']
     # 'Bth1C1G1T1': (3 in, 2 out,  7 gate_groups)
@@ -815,7 +855,17 @@ if __name__ == '__main__':
     # 'Eco2C1G3T1': (7 in, 2 out,  6 gate_groups)
     # 'Eco2C1G5T1': (7 in, 3 out, 13 gate_groups) # FIXME: seemingly has incomplete input file...
     # 'SC1C1G1T1' : (3 in, 2 out,  9 gate_groups)
-    ucf_name_ = input(f'which ucf to use? \n{list(zip(range(len(ucf_list)), ucf_list))} \nselect an index=')
+    ucf_name_ = input(f'\n\nWhich of the following UCF (User Constraint File) do you want to use? \n'
+                      f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'
+                      f'Index of UCF: ')
+
+    options = input(f'\n\nIf you want any additional options set, type the space-separated characters below.\n'
+                    f'Available Settings: Verbosity: {verbose} (enter \'v\' to toggle {not verbose})\n'
+                    f'Otherwise, just press Enter...\n\n'
+                    f'Options (if any): ')
+    if options == 'v':
+        verbose = True
+
     try:
         ucf_name_ = ucf_list[int(ucf_name_)]
     except Exception as e:
@@ -827,5 +877,7 @@ if __name__ == '__main__':
     out_path_ = 'temp_out/'  # (any path to a local folder)
 
     Cello3Process = CELLO3(v_name_, ucf_name_, in_path_, out_path_, options={'yosys_choice': 1,
-                                                                             'verbose': False,
-                                                                             'simulated_annealing': True})
+                                                                             'verbose': verbose,
+                                                                             'simulated_annealing': assigns})
+
+    print("\nExiting Cello...\n")
