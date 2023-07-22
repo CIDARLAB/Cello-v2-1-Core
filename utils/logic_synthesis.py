@@ -1,5 +1,8 @@
 """
+Calls the YOSYS library to generate the netlist, figures, and associated information from the provided Verilog file.
+https://yosyshq.net/yosys/
 
+call_YOSYS() [see parameters below for customizing YOSYS output; note, changing parameters may cause problems]
 """
 
 # Python default libraries

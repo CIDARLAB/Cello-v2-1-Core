@@ -1,5 +1,8 @@
 """
+Class to query, parse, and otherwise interface with the User Constraint Files (UCFs) specified by the user.
 
+UCF Class: __count_collections(), __collection_names(), __parse_helpers(),
+          list_collection_parameters(), query_top_level_collection()
 """
 
 import os
@@ -11,13 +14,14 @@ class UCF:
     """
 
     """
+
     def __init__(self, filepath, name):
         (U, I, O) = self.__parse_helper(filepath, name)
         self.UCFmain = U
         self.UCFin = I
         self.UCFout = O
         self.valid = True if (
-                    self.UCFmain is not None and self.UCFin is not None and self.UCFout is not None) else False
+                self.UCFmain is not None and self.UCFin is not None and self.UCFout is not None) else False
         if self.valid:
             self.collection_count = {cName: self.__count_collection(cName) for cName in
                                      self.__collection_names(self.UCFmain)}  # Main UCF collection counts
@@ -77,11 +81,11 @@ class UCF:
 
     def list_collection_parameters(self, c_name):
         """
+        Returns the list (set) of parameters found in a collection.
 
         :param c_name:
         :return:
         """
-        # returns the list (set) of parameters found in a collection
         params = []
         for c in self.UCFmain:
             if c['collection'] == c_name:
@@ -93,12 +97,12 @@ class UCF:
     @staticmethod
     def query_top_level_collection(ucf, c_name):
         """
+        Returns all collections with the specified name from the UCF.
 
         :param ucf:
         :param c_name:
         :return:
         """
-        # returns all collections with the of a name from the UCF
         matches = []
         for c in ucf:
             if c['collection'] == c_name:

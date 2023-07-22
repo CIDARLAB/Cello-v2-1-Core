@@ -1,16 +1,13 @@
 """
-NETLIST class
-input: netlist JSON from YOSYS output
-(under development)
+Netlist Class (input: netlist JSON from YOSYS output): __sort_nodes(), __sort_gates(), is_valid_netlist()
 """
 
 from cello_helpers import *
 
 
-# NOTE: pass in a json initialized netlistJSON (dictionary)
 class Netlist:
     """
-
+    Pass in a JSON initialized netlistJSON (dictionary)
     """
 
     def __init__(self, netlistJSON):
@@ -103,7 +100,7 @@ class Netlist:
     # NOTE: IMPORTANT CELLO FEATURE
     def is_valid_netlist(self):
         """
-
+        NOTE: Important Cello feature!
         :return:
         """
         # only support one circuit per Verilog design

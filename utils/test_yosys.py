@@ -1,13 +1,12 @@
 """
-
+Batch runs YOSYS to a folder to quickly compare results.
 """
 
 import sys
+
 sys.path.insert(0, '../')  # Add parent directory to Python path
 from logic_synthesis import *
 import time
-
-# NOTE: This script batch runs YOSYS to a folder you desire to quickly compare results 
 
 # define path to folder containing verilogs
 verilog_path = '../../../IO/inputs'
@@ -15,10 +14,9 @@ verilog_path = '../../../IO/inputs'
 out_path = '../../../IO/temp_folder'
 
 
-# find all verilogs in input folder
 def find_verilogs(v_path):
     """
-
+    Finds all Verilogs in the input folder.
     :param v_path:
     :return:
     """

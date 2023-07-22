@@ -1,5 +1,8 @@
 """
-Classes used to generate the eugene file.
+Classes used to generate the Eugene file.
+
+Dataclasses: EugeneDevice, EugeneSequence, EugeneCassette
+Class: EugeneObject: generate_eugene_device(), generate_eugene_helpers(), write_eugene()
 """
 
 import os
@@ -98,9 +101,10 @@ class EugeneObject:
         self.cir_rules_operands: dict[str, [str]] = {}  # [rule, [operands]]
 
     # 1. GENERATE CORE EUGENE OBJECTS ##################################################################################
-    def generate_eugene_device(self):
+    def generate_eugene_device(self) -> bool:
         """
         Generates dict of EugeneDevices objects based on data in the UCF, input, and output files for the final circuit.
+
         :return: bool
         """
 
@@ -218,9 +222,10 @@ class EugeneObject:
         return True
 
     # 2. GENERATE ADDITIONAL EUGENE OBJECTS ############################################################################
-    def generate_eugene_helpers(self):
+    def generate_eugene_helpers(self) -> bool:
         """
         Generates some additional objects to help with writing the eugene file.
+
         :return: bool
         """
         # Get PartTypes and Sequences
@@ -321,9 +326,10 @@ class EugeneObject:
         return True
 
     # 3. CREATE, WRITE, AND CLOSE THE EUGENE FILE ######################################################################
-    def write_eugene(self):
+    def write_eugene(self) -> bool:
         """
         Creates the eugene file at filepath, uses previously created objects to write to the file, then closes it.
+
         :return: bool
         """
         os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
