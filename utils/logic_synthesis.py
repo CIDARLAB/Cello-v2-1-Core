@@ -10,17 +10,10 @@ import subprocess
 import os
 import shutil
 import sys
+import log
 
 
-def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0):
-    """
-
-    :param in_path: 
-    :param out_path: 
-    :param v_name: 
-    :param choice: 
-    :return: 
-    """
+def call_YOSYS(in_path=None, out_path=None, vname=None, choice=0, no_files=False):
     try:
         new_out = os.path.join(out_path, v_name)
         new_out = os.path.join(*new_out.split('/'))
@@ -28,27 +21,27 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0):
             shutil.rmtree(new_out)  # this could be switched out for making a new dir path instead
         os.makedirs(new_out)
     except Exception as e:
-        print(f"YOSYS output folder for {v_name} could not be re-initialized, please double-check. \n{e}")
+        log.cf.error(f"YOSYS output folder for {vname} could not be re-initialized, please double-check. \n{e}")
         return False
-    print(new_out)  # new out_path
-    if '/' in v_name:
-        new_in = os.path.join(in_path, '/'.join(v_name.split('/')[:-1]))
-        v_name = v_name.split('/')[-1]
-        print(new_in)
+    log.cf.info(new_out)  # new out_path
+    if '/' in vname:
+        new_in = os.path.join(in_path, '/'.join(vname.split('/')[:-1]))
+        vname = vname.split('/')[-1]
+        log.cf.info(new_in)
     else:
         new_in = in_path
         new_in = os.path.join(*new_in.split('/'))
     verilog = v_name + '.v'
     v_loc = os.path.join(new_in, verilog)
 
-    print(verilog)
-    print(v_loc)
-    print(new_in)
-    print(new_out)
-    print()
+    log.cf.info(verilog)
+    log.cf.info(v_loc)
+    log.cf.info(new_in)
+    log.cf.info(new_out)
+    log.cf.info('\n')
 
     if not os.path.isfile(v_loc):
-        print(f"ERROR finding {verilog}, please check verilog input.")
+        log.cf.error(f"ERROR finding {verilog}, please check verilog input.")
         return False
 
     slash = '/'
@@ -56,12 +49,17 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0):
         slash = '\\'
 
     command_start = ["read_verilog {}{}{};".format(new_in, slash, verilog)]
-    command_end = [
-        "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, v_name),
-        "write_verilog -noexpr {}{}{}".format(new_out, slash, 'struct_' + v_name),
-        "write_edif {}{}{}.edif;".format(new_out, slash, v_name),
-        "write_json {}{}{}.json;".format(new_out, slash, v_name),
-    ]
+    if no_files:
+        command_end = [
+            "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, vname)
+        ]
+    else:
+        command_end = [
+            "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, vname),
+            "write_verilog -noexpr {}{}{}".format(new_out, slash, 'struct_'+vname),
+            "write_edif {}{}{}.edif;".format(new_out, slash, vname),
+            "write_json {}{}{}.json;".format(new_out, slash, vname),
+        ]
     core_commands = [
         [
             # Old Cello Yosys commands
@@ -119,7 +117,7 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0):
         command = f"yosys -p \"{'; '.join(commands)}\""
         subprocess.call(command, shell=True)
     except Exception as e:
-        print(f"Yosys output for {v_name} already exists, pleas double-check. \n{e}")
+        log.cf.error(f"Yosys output for {vname} already exists, pleas double-check. \n{e}")
         return False
-
+    
     return True

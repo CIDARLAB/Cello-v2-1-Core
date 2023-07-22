@@ -3,6 +3,7 @@ Netlist Class (input: netlist JSON from YOSYS output): __sort_nodes(), __sort_ga
 """
 
 from cello_helpers import *
+import log
 
 
 class Netlist:
@@ -88,7 +89,7 @@ class Netlist:
                     gate[gate_id]['output'][node_name] += edge_nos
                 except Exception as e:
                     gate[gate_id]['output'][node_name] = edge_nos
-            # print(json.dumps(gate, indent=4))
+            # log.cf.info(json.dumps(gate, indent=4))
             gates.update(gate)
         return gates
 

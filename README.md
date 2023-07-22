@@ -60,7 +60,8 @@ inpath = '/home/user/example/path/to/input_folder'
 outpath = '/home/user/example/path/to/output_folder'
 ```
 
-By default, the ```inpath``` is the [sample_inputs](/sample_inputs/) folder, and the ```outpath``` is the [def_out](/def_out/) folder, so users can use Cello without having to specify the paths.
+By default, the ```inpath``` is the [inputs](/inputs/) folder, and the ```outpath``` is the [outputs](/outputs/) 
+folder, so users can use Cello without having to specify the paths.
 
 You can also set the ```verbose``` option as either ```True / False``` in the ```main``` function of celloAlgo.py. The non-verbose output will show a progress bar, whereas verbose option will show every individual iteration. (It is recommended to only set verbose to True if you are debugging to avoid cluttering.)
 
@@ -100,7 +101,9 @@ Only one iteration is stored in the memory at a time in the exhaustive pass. Eac
 
 #
 ## Sample Inputs
-Can be found in the [sample_inputs](sample_inputs/) folder. This includes the UCF files for Cello, as well as a few dozen Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different folder to store them by specifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
+
+Can be found in the [inputs](/inputs/) folder. This includes the UCF files for Cello, as well as a few dozen 
+Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different a different folder to store them by speifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
 
 #
 ## Example Output
