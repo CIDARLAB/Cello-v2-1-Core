@@ -1,3 +1,9 @@
+"""
+Tests all possible combinations of Verilogs and UCFs in the sample_inputs folder. By default does 1000 dual_annealing
+iterations per config.  Also produces a csv that summarizes the results.
+TEAM: Note this is still being fixed up since merge & not fully working!\n\n'  # TODO: Remove line
+"""
+
 from os import listdir
 from os.path import isfile, join
 from celloAlgo import CELLO3
@@ -27,11 +33,12 @@ def test_all_configs():
 
     start_test = input(
         '\n\nThis utility tests the validity of all combos of verilogs & UCFs in "sample_inputs" (not subdirectories).\n'
-        'Each valid config will only run for the first 100 iterations to check for errors.\n'
+        'By default, each valid config will only run for the first 1000 iterations to check for errors.\n'
+        '(Note: log overwrite is turned on by default.)\n'
         'Each config produces a log file of the terminal output, and a csv summarizing all results is generated.\n\n'
         'Total number of configurations to be tested: ' + str(len(v_names) * len(ucf_names)) + '\n'
-        '(Depending on the number of valid configs, this may take several minutes to complete...)\n'
-        '\nDo you want to proceed? y/n ')
+        '(Depending on the number of valid configs, this may take awhile to complete...)\n'
+        '\nDo you want to proceed? (y/n) ')
 
     if start_test == 'y' or start_test == 'Y':
 
@@ -49,8 +56,9 @@ def test_all_configs():
                     # NOTE: Do *not* enable verbose
                     best = 0
                     try:
-                        cello_config_test = CELLO3(v_name, ucf_name, 'sample_inputs/', 'test_all_configs_out/',  # TODO: Limit file production
-                                                   options={'yosys_cmd_choice': 1, 'verbose': False, 'test_configs': True})
+                        cello_config_test = CELLO3(v_name, ucf_name, 'sample_inputs/', 'test_all_configs_out/',
+                                            options={'yosys_cmd_choice': 1, 'verbose': False,    'log_overwrite': True,
+                                                     'print_iters': False,  'exhaustive': False, 'test_configs': True})
                         exception = "Done"
                     except Exception as e:
                         log.cf.info("FAILED with error (will go to next iteration)!")

@@ -6,7 +6,8 @@ To use the loggers, 'log.cf.[level]' prints to console and log file, and 'log.f.
 Levels include: debug, info, warning, critical and others as specified in Python logging library documentation.
 """
 
-import sys, traceback
+import sys
+import traceback
 import logging.config
 from datetime import datetime
 
@@ -15,42 +16,6 @@ iter_num = 0
 iter_validity = "Valid"
 log_counts = {'WARNING': 0, 'ERROR': 0, 'CRITICAL': 0}  # Global issue counts (resets at new cello process)
 last_log = "[None]"
-
-
-# TODO: This approach of redirecting all print statements, though more elegant, was proving unreliable; will investigate
-# class Logger(object):
-#     """
-#     Converts all print statements so they print to both console and the log file.
-#     """
-#
-#     def __init__(self, log_file_name):
-#         self.terminal = sys.stdout
-#         self.log = open('test.log', "a")
-#
-#     def write(self, message):
-#         self.terminal.write(message)
-#         if '\r' not in message:  # Avoids writing scores of every iteration (i.e. potentially many millions) to log file
-#             self.log.write(message)
-#
-#     def flush(self):
-#         # For compatibility
-#         pass
-
-
-# class Tee(object):
-#     def __init__(self, *files):
-#         self.files = files
-#
-#     def write(self, obj):
-#         for f in self.files:
-#             f.write(obj)
-#
-#     def flush(self):
-#         pass
-# # main
-# f = open('logfile', 'w')
-# backup = sys.stdout
-# sys.stdout = Tee(sys.stdout, f)
 
 
 def config_logger(vname: str, ucfname: str, ow: bool):

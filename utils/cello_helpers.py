@@ -170,11 +170,11 @@ def print_table(table):
                 rounded.append(rounded_row)
             table = [table[0]] + rounded
 
-        for set in range(math.ceil((len(table[0]) / 12))):
-            set *= 12
+        for set in range(math.ceil((len(table[0]) / 10))):
+            set *= 10
             subset = []
             for row in table:
-                new_row = row[set:set+12]
+                new_row = row[set:set+10]
                 subset.append(new_row)
             num_columns = len(subset[0])
             column_widths = [max(len(str(row[column])) if row[column] is not None else 0 for row in subset) for column in
