@@ -14,6 +14,7 @@ from logic_synthesis import *
 from netlist_class import Netlist
 from ucf_class import UCF
 from eugene import *
+from dna_design import *
 
 
 class CELLO3:
@@ -158,14 +159,20 @@ class CELLO3:
                 # EUGENE FILE
                 filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}.eug"
                 eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
-                                      graph_outputs_for_printing, filepath, best_graph)
+                                      graph_outputs_for_printing, best_graph)
                 log.cf.info('\n\nEUGENE FILE:')
                 if eugene.generate_eugene_device():
                     log.cf.info(" - Eugene objects created...")
-                if eugene.generate_eugene_helpers():
+                devices, device_rules, circuit_rules = eugene.generate_eugene_helpers()
+                if devices and device_rules and circuit_rules:
                     log.cf.info(" - Eugene helpers created...")
-                if eugene.write_eugene():
+                if eugene.write_eugene(filepath):
                     log.cf.info(f" - Eugene script written to {filepath}")
+
+                # DNA DESIGN
+                dna_design = DNADesign(devices, device_rules, circuit_rules)
+                dna_design.gen_seq()
+
                     
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
@@ -213,12 +220,12 @@ class CELLO3:
                        (num_ucf_input_models == num_ucf_input_structures == num_ucf_input_parts) and \
                        (num_ucf_input_parts >= num_netlist_inputs)
         if verbose:
-            log.cf.info('\nINPUTS:')
-            log.cf.info(f'num IN-SENSORS in {self.ucf_name} in-UCF: {num_ucf_input_sensors}')
-            log.cf.info(f'num IN-STRUCTURES in {self.ucf_name} in-UCF: {num_ucf_input_structures}')
-            log.cf.info(f'num IN-MODELS in {self.ucf_name} in-UCF: {num_ucf_input_models}')
-            log.cf.info(f'num IN-PARTS in {self.ucf_name} in-UCF: {num_ucf_input_parts}')
-            log.cf.info(f'num IN-NODES in {self.verilog_name} netlist: {num_netlist_inputs}')
+            log.cf.info(f'\nINPUTS:'
+                        f'num IN-SENSORS in {self.ucf_name} in-UCF: {num_ucf_input_sensors}'
+                        f'num IN-STRUCTURES in {self.ucf_name} in-UCF: {num_ucf_input_structures}'
+                        f'num IN-MODELS in {self.ucf_name} in-UCF: {num_ucf_input_models}'
+                        f'num IN-PARTS in {self.ucf_name} in-UCF: {num_ucf_input_parts}'
+                        f'num IN-NODES in {self.verilog_name} netlist: {num_netlist_inputs}')
 
         if verbose:
             log.cf.info([i['name'] for i in in_sensors])
@@ -234,12 +241,12 @@ class CELLO3:
                         (num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and \
                         (num_ucf_output_parts >= num_netlist_outputs)
         if verbose:
-            log.cf.info('\nOUTPUTS:')
-            log.cf.info(f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}')
-            log.cf.info(f'num OUT-STRUCTURES in {self.ucf_name} out-UCF: {num_ucf_output_structures}')
-            log.cf.info(f'num OUT-MODELS in {self.ucf_name} out-UCF: {num_ucf_output_models}')
-            log.cf.info(f'num OUT-PARTS in {self.ucf_name} out-UCF: {num_ucf_output_parts}')
-            log.cf.info(f'num OUT-NODES in {self.verilog_name} netlist: {num_netlist_outputs}')
+            log.cf.info(f'\nOUTPUTS:'
+                        f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}'
+                        f'num OUT-STRUCTURES in {self.ucf_name} out-UCF: {num_ucf_output_structures}'
+                        f'num OUT-MODELS in {self.ucf_name} out-UCF: {num_ucf_output_models}'
+                        f'num OUT-PARTS in {self.ucf_name} out-UCF: {num_ucf_output_parts}'
+                        f'num OUT-NODES in {self.verilog_name} netlist: {num_netlist_outputs}')
 
             log.cf.info([out['name'] for out in out_sensors])
             log.cf.info(f"{'Valid' if outputs_match else 'NOT valid'} output match!")
@@ -259,12 +266,12 @@ class CELLO3:
         num_groups = len(g_list)
         # numFunctions = len(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions'))
         if verbose:
-            log.cf.info('\nGATES:')
-            log.cf.info(f'num PARTS in {self.ucf_name} UCF: {num_parts}')
-            # log.cf.info(f'(ref only) num FUNCTIONS in {self.ucf_name} UCF: {numFunctions}')
-            log.cf.info(f'num STRUCTURES in {self.ucf_name} UCF: {num_structs}')
-            log.cf.info(f'num MODELS in {self.ucf_name} UCF: {num_models}')
-            log.cf.info(f'num GATES in {self.ucf_name} UCF: {num_gates}')
+            log.cf.info(f'\nGATES:'
+                        f'num PARTS in {self.ucf_name} UCF: {num_parts}'
+                        # f'(ref only) num FUNCTIONS in {self.ucf_name} UCF: {numFunctions}'
+                        f'num STRUCTURES in {self.ucf_name} UCF: {num_structs}'
+                        f'num MODELS in {self.ucf_name} UCF: {num_models}'
+                        f'num GATES in {self.ucf_name} UCF: {num_gates}')
 
         num_gates_available = []
         logic_constraints = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'logic_constraints')

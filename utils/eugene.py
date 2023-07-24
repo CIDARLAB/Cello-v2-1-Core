@@ -7,7 +7,10 @@ Class: EugeneObject: generate_eugene_device(), generate_eugene_helpers(), write_
 
 import os
 from dataclasses import dataclass, field
+from cello_helpers import debug_print
 import log
+import dna_design
+
 # from typing import Annotated, Type, TypeDict
 
 
@@ -33,7 +36,7 @@ class EugeneDevice:
     """[ [ 1st name, cassette name, num of ins, [components] ] , etc.]"""
     inputs: list[str] = field(default_factory=list[str])
     """gates_name of input nodes"""
-    outputs: str = ""
+    outputs: str = ""  # TODO: Change to support mult outputs
     """gates_name of output nodes"""
 
 
@@ -76,6 +79,10 @@ class EugeneCassette:
     """'input', 'gate', or 'output'"""
     inputs: list[str] = field(default_factory=list[str])
     """'outputs' (from input node's UCF structures block) name for each input node"""
+    comps: list[str] = field(default_factory=list[str])
+    """'components' (from main UCF 'structures' block)"""
+    outputs: str = ""  # TODO: Change to support mult outputs
+    """same 'outputs' as the EugeneDevice object"""
 
 
 class EugeneObject:
@@ -84,17 +91,19 @@ class EugeneObject:
     Extracts info from the UCF files into data objects, then iterates over data to print to eugene file.
     """
 
-    def __init__(self, ucf, in_map, gate_map, out_map, filepath, best_graphs):
+    def __init__(self, ucf, in_map, gate_map, out_map, best_graphs):
         self.ucf = ucf
         self.in_map = in_map
         self.gate_map = gate_map
         self.out_map = out_map
-        self.filepath = filepath
         self.best_graphs = best_graphs
 
-        self.devices_dict: dict[str, {}] = {}  # 'in/gate/out name: EugeneDevice
-        self.parts_seq_dict: dict[str, {}] = {}  # part name: EugeneSequence
-        self.structs_cas_dict: dict[str, {}] = {}  # device var name: EugeneCassette
+        self.devices_dict: dict[str, {}] = {}
+        '''in/gate/out name: EugeneDevice [See 'example_eugene_objects' for example data...]'''
+        self.parts_seq_dict: dict[str, {}] = {}
+        '''part name: EugeneSequence [See 'example_eugene_objects' for example data...]'''
+        self.structs_cas_dict: dict[str, {}] = {}
+        '''device var name: EugeneCassette [See 'example_eugene_objects' for example data...]'''
 
         self.parts_types: [str] = ['terminator', 'spacer', 'scar']  # always present; *all* associated parts used
         self.genlocs_fenceposts: [str] = []  # usually 'L1', 'L2', etc.
@@ -129,7 +138,7 @@ class EugeneObject:
                     edges[g_output.name].append(g_gate.gate_in_use)
 
         # Debugging info...
-        # log.cf.info('BASIC CIRCUIT INFO:')
+        # debug_print('BASIC CIRCUIT INFO:')
         # log.cf.info(f'{self.best_graphs}')
         # log.cf.info(f'Mappings: {self.in_map}, {self.gate_map}, {self.out_map}')
         # log.cf.info(f'Connections: {edges}\n')
@@ -144,7 +153,7 @@ class EugeneObject:
 
         # Add gate group names to dict
         for id_, g in self.gate_map:
-            self.devices_dict[g.gate_in_use].group = g.gate_id  # Only use a subset according to range(len(g.inputs))
+            self.devices_dict[g.gate_in_use].gates_group = g.gate_id
 
         # Add type, model, structure, outputs to the Inputs in dict
         in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
@@ -153,10 +162,10 @@ class EugeneObject:
             for in_sensor in in_sensors:
                 if k == in_sensor['name']:
                     v.type = 'input'
-                    v.model = in_sensor['model']
-                    v.structure = in_sensor['structure']
+                    v.gates_model = in_sensor['model']
+                    v.gates_struct = in_sensor['structure']
                     for structure in i_structures:
-                        if v.structure == structure['name']:
+                        if v.gates_struct == structure['name']:
                             v.outputs = structure['outputs']
 
         # Add type, model, structure, outputs, and cassettes/components to the Gates in dict
@@ -166,10 +175,10 @@ class EugeneObject:
             for gate_device in gate_devices:
                 if k == gate_device['name']:
                     v.type = 'gate'
-                    v.model = gate_device['model']
-                    v.structure = gate_device['structure']
+                    v.gates_model = gate_device['model']
+                    v.gates_struct = gate_device['structure']
                     for structure in g_structures:
-                        if v.structure == structure['name']:
+                        if v.gates_struct == structure['name']:
                             v.outputs = structure['outputs']
                             cassettes = []
                             for d in structure['devices']:
@@ -193,7 +202,7 @@ class EugeneObject:
                                     if cassette[2] > 0:
                                         cassette[0] = d['name']
                                         cassettes.append(cassette)
-                            v.cassettes = cassettes
+                            v.struct_cassettes = cassettes
 
         # Add type, model, structure, and cassettes/components to the Outputs in dict
         out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
@@ -202,32 +211,32 @@ class EugeneObject:
             for out_device in out_devices:
                 if k == out_device['name']:
                     v.type = 'output'
-                    v.model = out_device['model']
-                    v.structure = out_device['structure']
+                    v.gates_model = out_device['model']
+                    v.gates_struct = out_device['structure']
                     for structure in o_structures:
-                        if v.structure == structure['name']:
+                        if v.gates_struct == structure['name']:
                             cassettes = []
                             for d in structure['devices']:
                                 cassette = ["", "", 0, []]  # [~'X_a' name, 'X_cassette' name, #in cnt, [components]]
                                 for c in d['components']:
                                     if c.startswith('#in'):
                                         cassette[2] += 1
-                                    elif c.endswith('_cassette'):
+                                    elif '_cassette' in c:
                                         cassette[1] = c
                                         if c not in cassette[3]:
                                             cassette[3].append(c)
                                 if cassette[2] > 0:
                                     cassette[0] = d['name']
                                     cassettes.append(cassette)
-                            v.cassettes = cassettes
+                            v.struct_cassettes = cassettes
         return True
 
     # 2. GENERATE ADDITIONAL EUGENE OBJECTS ############################################################################
-    def generate_eugene_helpers(self) -> bool:
+    def generate_eugene_helpers(self) -> (dict, dict, dict):
         """
         Generates some additional objects to help with writing the eugene file.
 
-        :return: bool
+        :return: (dict[EugeneCassette], dict[device rules], dict[circuit rules])
         """
         # Get PartTypes and Sequences
         # TODO: Why include all terminators and all scars even if corresponding parts not in the circuit?
@@ -240,11 +249,11 @@ class EugeneObject:
             if v.type == 'input':
                 ins.extend(v.outputs)
             if v.type == 'gate':
-                for c in v.cassettes:
+                for c in v.struct_cassettes:
                     mains.extend(c[3])
                 mains.extend(v.outputs)
             if v.type == 'output':
-                for c in v.cassettes:
+                for c in v.struct_cassettes:
                     outs.extend(c[3])
                 outs.extend(v.outputs)
         in_parts = self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts')
@@ -285,9 +294,9 @@ class EugeneObject:
         for eu in self.devices_dict.values():
             if eu.type in ['gate', 'output']:
                 input_ = 0
-                for c in eu.cassettes:
+                for c in eu.struct_cassettes:
                     if input_ < len(eu.inputs):
-                        self.structs_cas_dict[c[0]] = EugeneCassette(c[0], c[1], eu.type)
+                        self.structs_cas_dict[c[0]] = EugeneCassette(c[0], c[1], eu.type, [], c[3], eu.outputs)
                         for i in range(c[2]):
                             if input_ < len(eu.inputs):
                                 output = self.devices_dict[eu.inputs[input_]].outputs[0]  # TODO: Only ever 1 'outputs'?
@@ -324,17 +333,24 @@ class EugeneObject:
         for rule in circuit_rules:
             self.cir_rules_operands[rule] = [word for word in rule.split() if word not in rules_keywords]
 
-        return True
+        # Debugging info...
+        # debug_print('EUGENE OBJECTS:')
+        # log.cf.info(self.devices_dict)
+        # log.cf.info(self.parts_seq_dict)
+        # log.cf.info(self.structs_cas_dict)
+
+        return self.structs_cas_dict, self.dev_rules_operands, self.cir_rules_operands
 
     # 3. CREATE, WRITE, AND CLOSE THE EUGENE FILE ######################################################################
-    def write_eugene(self) -> bool:
+    def write_eugene(self, filepath: str) -> bool:
         """
         Creates the eugene file at filepath, uses previously created objects to write to the file, then closes it.
 
+        :param: filepath: str
         :return: bool
         """
-        os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
-        with open(self.filepath, 'w') as eug:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w') as eug:
             # Debugging Info...
             # for k, v in self.devices_dict.items():
             #     print(f'{k}...')
