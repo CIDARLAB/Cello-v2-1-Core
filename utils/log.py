@@ -21,7 +21,7 @@ last_log = "[None]"
 def config_logger(vname: str, ucfname: str, ow: bool):
     """
     Generates log file and initializes the Logger class (for print() statements) every time a Cello process is created.
-    :return: void
+    :return: None
     """
 
     log_file_name = 'logs/' + vname + '+' + ucfname + ((not ow) * datetime.now().strftime("_%Y-%m-%d_%H%M%S")) + '.log'
@@ -33,7 +33,7 @@ def config_logger(vname: str, ucfname: str, ow: bool):
 def reset_logs():
     """
     Resets the issue counts every time a new Cello process object is created.
-    :return: void
+    :return: None
     """
 
     global iter_num

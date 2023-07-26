@@ -157,23 +157,28 @@ class CELLO3:
                         log.cf.info(r)
 
                 # EUGENE FILE
-                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}.eug"
+                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+" \
+                           f"{self.ucf_name}_eugene.eug"
                 eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
                                       graph_outputs_for_printing, best_graph)
                 log.cf.info('\n\nEUGENE FILE:')
-                if eugene.generate_eugene_device():
-                    log.cf.info(" - Eugene objects created...")
-                devices, device_rules, circuit_rules = eugene.generate_eugene_helpers()
-                if devices and device_rules and circuit_rules:
+                if eugene.generate_eugene_structs():
+                    log.cf.info(" - Eugene object and structs created...")
+                structs, cassettes, sequences = eugene.generate_eugene_cassettes()
+                if structs and cassettes and sequences:
+                    log.cf.info(" - Eugene cassettes created...")
+                device_rules, circuit_rules = eugene.generate_eugene_helpers()
+                if device_rules and circuit_rules:
                     log.cf.info(" - Eugene helpers created...")
                 if eugene.write_eugene(filepath):
                     log.cf.info(f" - Eugene script written to {filepath}")
 
                 # DNA DESIGN
-                dna_design = DNADesign(devices, device_rules, circuit_rules)
-                dna_design.gen_seq()
+                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+" \
+                           f"{self.ucf_name}"
+                dna_design_part_order = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules)
+                dna_design_part_order.gen_seq(filepath)
 
-                    
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
 
