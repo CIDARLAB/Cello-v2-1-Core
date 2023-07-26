@@ -17,19 +17,12 @@ class CirRuleSet:
     """
 
     after: list[str]
-    """"""
     startswith: bool
-    """"""
     endswith: bool
-    """"""
     not_startswith: bool
-    """"""
     not_endswith: bool
-    """"""
     nextto: list[str]
-    """"""
     not_nextto: list[str]
-    """"""
 
 
 @dataclass
@@ -39,19 +32,12 @@ class DevRuleSet:
     """
 
     after: list[str]
-    """"""
     startswith: bool
-    """"""
     endswith: bool
-    """"""
     not_startswith: bool
-    """"""
     not_endswith: bool
-    """"""
     nextto: list[str]
-    """"""
     not_nextto: list[str]
-    """"""
 
 
 class DNADesign:
@@ -79,8 +65,6 @@ class DNADesign:
 
         self.device_order: list[str] = []
         self.part_order: list[str] = []
-
-        print(cassettes)
 
     def gen_seq(self, filepath):
         """
@@ -117,7 +101,7 @@ class DNADesign:
 
         # Reformulate Cir Rules
         for device, cassette in self.cassettes.items():
-            self.circuit_rule_sets[device] = CirRuleSet([], [], [], [], [], [], [])
+            self.circuit_rule_sets[device] = CirRuleSet([], False, False, False, False, [], [])
             for rule in cassette.cir_rules:  # TODO: Account for Equals
                 if 'Loc' not in rule:
                     if 'AFTER' in rule or 'BEFORE' in rule:
@@ -151,7 +135,7 @@ class DNADesign:
                             self.circuit_rule_sets[device].not_nextto.append(y)
                         else:
                             self.circuit_rule_sets[device].nextto.append(y)
-        print(self.circuit_rule_sets)
+        # print(self.circuit_rule_sets)
 
         # Place devices
         devices = list(self.cassettes)
@@ -167,7 +151,7 @@ class DNADesign:
         # Reformulate Dev Rules  # NOTE: For UCFs that only have the 'ALL_FORWARD' device rule, this block has no effect
         for device, cassette in self.cassettes.items():
             for part in list(self.cassettes[device].inputs + self.cassettes[device].comps):
-                self.device_rule_sets[part] = DevRuleSet([], [], [], [], [], [], [])
+                self.device_rule_sets[part] = DevRuleSet([], False, False, False, False, [], [])
                 for rule in self.sequences[part].dev_rules:  # TODO: Account for Equals
                     if 'Loc' not in rule:  # TODO: _nonce_pads
                         if 'AFTER' in rule or 'BEFORE' in rule:
@@ -266,7 +250,7 @@ class DNADesign:
             csv_writer.writerow(new_row)
             dna_part_order.close()
 
-        # WRITE STATIC PLOT PARAMETERS FILE (equivalent of 2.0 plot_paremeters.csv)
+        # WRITE STATIC PLOT PARAMETERS FILE (equivalent of 2.0 plot_parameters.csv)
         plot_parameters = filepath + '_plot-parameters.csv'
         os.makedirs(os.path.dirname(plot_parameters), exist_ok=True)
         with open(plot_parameters, 'w', newline='') as plot_params:
@@ -294,7 +278,5 @@ class DNADesign:
                                struct.color)]
                     csv_writer.writerow(new_row)
             reg_info.close()
-
-        # WRITE
 
         # return self.part_order

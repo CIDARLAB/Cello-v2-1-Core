@@ -98,7 +98,7 @@ class CELLO3:
 
         if not self.rnl:
             return
-    
+
         valid: bool
         iter_: int
         valid, iter_ = self.check_conditions(verbose=True)
@@ -157,8 +157,7 @@ class CELLO3:
                         log.cf.info(r)
 
                 # EUGENE FILE
-                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+" \
-                           f"{self.ucf_name}_eugene.eug"
+                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
                 eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
                                       graph_outputs_for_printing, best_graph)
                 log.cf.info('\n\nEUGENE FILE:')
@@ -170,14 +169,21 @@ class CELLO3:
                 device_rules, circuit_rules = eugene.generate_eugene_helpers()
                 if device_rules and circuit_rules:
                     log.cf.info(" - Eugene helpers created...")
-                if eugene.write_eugene(filepath):
-                    log.cf.info(f" - Eugene script written to {filepath}")
+                if eugene.write_eugene(filepath + "_eugene.eug"):
+                    log.cf.info(f" - Eugene script written to {filepath}_eugene.eug")
 
                 # DNA DESIGN
-                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+" \
-                           f"{self.ucf_name}"
                 dna_design_part_order = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules)
                 dna_design_part_order.gen_seq(filepath)
+
+                # SBOL DIAGRAM
+                os.system(f"python plotters.py "
+                          f"-params     {filepath}_plot-parameters.csv "
+                          f"-parts      {filepath}_dna-part-info.csv "
+                          f"-regulation {filepath}_regulatory-info.csv "
+                          f"-designs    {filepath}_dna-part-order.csv "
+                          f"-output     {filepath}_sbol-diagram.pdf")
+
 
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
@@ -858,16 +864,16 @@ class CELLO3:
     def __del__(self):
 
         log.cf.info('Cello object deleted...')
-      
-      
+
+
 if __name__ == '__main__':
 
     # NOTE: SETTINGS
     yosys_cmd_choice = 1  # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
-    verbose = False       # Print more info to console and log. See logging.config to change log metadata verbosity
-    log_overwrite = False # Removes date/time from file name, allowing overwrite of log from equivalent config
-    print_iters = False   # Print to console info on *all* tested iterations (produces copious amounts of text)
-    exhaustive = False    # Run *all* possible permutations to find true optimum score (may run for *long* time)
+    verbose = False  # Print more info to console and log. See logging.config to change log metadata verbosity
+    log_overwrite = False  # Removes date/time from file name, allowing overwrite of log from equivalent config
+    print_iters = False  # Print to console info on *all* tested iterations (produces copious amounts of text)
+    exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
     test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
 
     figlet = r"""
@@ -928,6 +934,7 @@ if __name__ == '__main__':
         elif user_input == 'test_all_configs':
             at_menus = False
             from config_tester import test_all_configs
+
             if not os.path.isdir('test_all_configs_out'):
                 os.mkdir('test_all_configs_out')
             if not os.path.isdir('logs'):

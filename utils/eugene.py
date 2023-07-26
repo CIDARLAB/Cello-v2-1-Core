@@ -313,7 +313,7 @@ class EugeneObject:
                                                                      comps=c[3],
                                                                      outputs=eu.outputs,
                                                                      color=eu.color,
-                                                                     cir_rules=['ALL_FORWARD'])
+                                                                     cir_rules=[])
                         for i in range(c[2]):
                             if input_ < len(eu.inputs):
                                 output = self.structs_dict[eu.inputs[input_]].outputs[0]  # TODO: Only ever 1 'outputs'?
@@ -416,11 +416,13 @@ class EugeneObject:
             eug.write('\n')
 
             # Device Rules
+            print(self.structs_cas_dict)
             for device, cassette in self.structs_cas_dict.items():
                 eug.write(f'Rule {device}Rule0( ON {device}:\n')  # TODO: Always 'Rule0'?  Always ON?
                 sep = ""
                 for comp in cassette.inputs:
-                    for rule in self.parts_seq_dict[comp].dev_rules:
+                    print(self.parts_seq_dict[comp])
+                    for rule in self.parts_seq_dict[comp].dev_rules:  # TODO: 2 'ALL_FORWARD's on pPhlF on and+Eco1
                         eug.write(f'{sep}    {rule}')
                     if not sep:
                         sep = " AND\n"
