@@ -15,6 +15,7 @@ from netlist_class import Netlist
 from ucf_class import UCF
 from eugene import *
 from dna_design import *
+from plotters import plotter
 
 
 class CELLO3:
@@ -126,7 +127,7 @@ class CELLO3:
                     debug_print(best_result[1])
 
                 # RESULTS/CIRCUIT DESIGN
-                print_centered('RESULTS')
+                print_centered(['RESULTS', self.verilog_name + ' + ' + self.ucf_name])
                 log.cf.info(f'CIRCUIT DESIGN:\n'
                             f' - Best Design: {best_result[1]}\n'
                             f' - Best Circuit Score: {self.best_score}')
@@ -177,13 +178,11 @@ class CELLO3:
                 dna_design_part_order.gen_seq(filepath)
 
                 # SBOL DIAGRAM
-                os.system(f"python plotters.py "
-                          f"-params     {filepath}_plot-parameters.csv "
-                          f"-parts      {filepath}_dna-part-info.csv "
-                          f"-regulation {filepath}_regulatory-info.csv "
-                          f"-designs    {filepath}_dna-part-order.csv "
-                          f"-output     {filepath}_sbol-diagram.pdf")
-
+                log.cf.info("\n\nSBOL:")
+                plotter(f"{filepath}_plot-parameters.csv", f"{filepath}_dna-part-info.csv",
+                        f"{filepath}_regulatory-info.csv", f"{filepath}_dna-part-order.csv",
+                        f"{filepath}_sbol-diagram.pdf")
+                log.cf.info('\n')
 
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'

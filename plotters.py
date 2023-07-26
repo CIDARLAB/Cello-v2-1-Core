@@ -13,12 +13,9 @@
                                  -designs    DESIGN_FILENAME
                                 [-regulation REG_FILENAME]
                                  -output     OUT_FILENAME
-
-    Example:
-    python plotters.py -params "temp_out\and\Bth1C1G1T1\and+Bth1C1G1T1_plot-parameters.csv" -parts "temp_out\and\Bth1C1G1T1\and+Bth1C1G1T1_dna-part-info.csv" -regulation "temp_out\and\Bth1C1G1T1\and+Bth1C1G1T1_regulatory-info.csv" -designs "temp_out\and\Bth1C1G1T1\and+Bth1C1G1T1_dna-part-order.csv" -output "temp_out\and\Bth1C1G1T1\test.pdf"
 """
 
-# Set the backend to use (important for headless servers)
+# Set the backend to use (important for headless servers)  # FIXME: require install of matplotlib and dnaplotlib
 import matplotlib
 
 matplotlib.use('Agg')
@@ -304,38 +301,19 @@ def is_valid_file(parser, arg):
         return open(arg, 'r')  # return an open file handle
 
 
-def main():
+def plotter(params, parts, regulation, designs, output, reverse_char=""):
     """
 
     """
-    # Parse the arguments
-    parser = ArgumentParser(description="file paths as arguments")
-    parser.add_argument("-params", dest="params", required=True, help="plot_params.csv", metavar="FILE",
-                        type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-parts", dest="parts", required=True, help="parts_information.csv", metavar="FILE",
-                        type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-regulation", dest="regulation", required=False, help="reg_information.csv", metavar="FILE",
-                        type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-designs", dest="designs", required=True, help="dna_designs.csv", metavar="FILE",
-                        type=lambda x: is_valid_file(parser, x))
-    parser.add_argument("-output", dest="output_pdf", required=True, help="output pdf filename")
-    parser.add_argument("-reverse_char", dest="reverse_char", required=False, help="char to denote reverse orientation")
-    args = parser.parse_args()
-
-    # Process arguments
     cur_reverse_char = 'r'
-    if args.reverse_char:
-        cur_reverse_char = args.reverse_char
-    plot_params = load_plot_parameters(args.params.name)
-    part_info = load_part_information(args.parts.name)
-    dna_designs = load_dna_designs(args.designs.name, part_info, reverse_char=cur_reverse_char)
+    if reverse_char:
+        cur_reverse_char = reverse_char
+    plot_params = load_plot_parameters(params)
+    part_info = load_part_information(parts)
+    dna_designs = load_dna_designs(designs, part_info, reverse_char=cur_reverse_char)
 
     regs_info = None
-    if args.regulation:
-        regs_info = load_regulatory_information(args.regulation.name, part_info, dna_designs)
+    if regulation:
+        regs_info = load_regulatory_information(regulation, part_info, dna_designs)
 
-    plot_dna(dna_designs, args.output_pdf, plot_params, regs_info)
-
-
-if __name__ == "__main__":
-    main()
+    plot_dna(dna_designs, output, plot_params, regs_info)

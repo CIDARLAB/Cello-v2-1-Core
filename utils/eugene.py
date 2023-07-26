@@ -416,12 +416,10 @@ class EugeneObject:
             eug.write('\n')
 
             # Device Rules
-            print(self.structs_cas_dict)
             for device, cassette in self.structs_cas_dict.items():
                 eug.write(f'Rule {device}Rule0( ON {device}:\n')  # TODO: Always 'Rule0'?  Always ON?
                 sep = ""
                 for comp in cassette.inputs:
-                    print(self.parts_seq_dict[comp])
                     for rule in self.parts_seq_dict[comp].dev_rules:  # TODO: 2 'ALL_FORWARD's on pPhlF on and+Eco1
                         eug.write(f'{sep}    {rule}')
                     if not sep:

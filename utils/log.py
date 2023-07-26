@@ -27,6 +27,7 @@ def config_logger(vname: str, ucfname: str, ow: bool):
     log_file_name = 'logs/' + vname + '+' + ucfname + ((not ow) * datetime.now().strftime("_%Y-%m-%d_%H%M%S")) + '.log'
     logging.config.fileConfig('utils/logging.config', disable_existing_loggers=False,
                               defaults={'logfilename': log_file_name})
+    logging.getLogger('matplotlib.font_manager').disabled = True
     # sys.stdout = Logger(log_file_name)
 
 
