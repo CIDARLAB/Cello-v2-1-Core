@@ -213,9 +213,6 @@ class AssignGraph:
                 for g in self.gates:
                     if g.output == i_no:
                         prevs.append(g)
-                for o in self.outputs:
-                    if o.id == i_no:
-                        prevs.append(o)
                 for i in self.inputs:
                     if i.id == i_no:
                         prevs.append(i)
