@@ -185,8 +185,8 @@ class DNADesign:
                                 self.device_rule_sets[device].not_nextto.append(y)
                             else:
                                 self.device_rule_sets[device].nextto.append(y)
-
         # print(self.device_rule_sets)
+
         for device in self.cassettes:
             for part in list(self.cassettes[device].comps):
                 self.sequences[part].color = self.cassettes[device].color

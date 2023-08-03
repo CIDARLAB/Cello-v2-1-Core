@@ -401,7 +401,7 @@ class CELLO3:
             o_perms.append(o_perm)
         for g_perm in itertools.permutations(g_list, g):
             g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 1000 else 1000
+        max_fun = iter_ if iter_ < 100 else 100
 
         # DUAL ANNEALING SCIPY FUNC
         func = lambda x: self.prep_assign_for_scoring(x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
