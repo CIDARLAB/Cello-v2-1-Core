@@ -137,6 +137,7 @@ EugeneObject.structs_cas_dict{
         comps=['M1', 'L3S3P41'],
         outputs=['PM1'],
         color="3BA9E0",
+        dev_rules=[],
         cir_rules=[]  # TODO: Finish
     ),
 
@@ -146,6 +147,7 @@ EugeneObject.structs_cas_dict{
         comps=['M3', 'ECK120034435'],
         outputs=['PM3'],
         color="8FC73E",
+        dev_rules=[],
         cir_rules=[]
     ),
 
@@ -155,6 +157,7 @@ EugeneObject.structs_cas_dict{
         comps=['M4', 'ECK120033736'],
         outputs=['PM4'],
         color="E83C96",
+        dev_rules=[],
         cir_rules=[]
     ),
 
@@ -164,6 +167,7 @@ EugeneObject.structs_cas_dict{
         comps=['M4', 'ECK120033736'],
         outputs=['PM4'],
         color="E83C96",
+        dev_rules=[],
         cir_rules=[]
     ),
 
@@ -173,6 +177,7 @@ EugeneObject.structs_cas_dict{
         comps=['nanoluc_cassette'],
         outputs=[''],
         color="",
+        dev_rules=[],
         cir_rules=[]
     )
 
@@ -209,6 +214,7 @@ EugeneObject.structs_cas_dict{
 
 
 # OTHER INFO
+
     dnaplotlib types
         STD_PART_TYPES =
         [ 'Promoter',

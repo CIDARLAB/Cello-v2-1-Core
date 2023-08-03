@@ -60,7 +60,7 @@ class EugeneSequence:
     """name in UCF parts block, corresponds to 'outputs'/'components' from structures block"""
     parts_sequence: str = ""
     """dna sequence from UCF parts block"""
-    dev_rules: list[str] = field(default_factory=list[str])  # TODO: Account for other types of circuits not ALL_FORWARD
+    dev_rules: list[str] = field(default_factory=list[str])  # TODO: can probably remove this; captured better below...
     """all device rules for this part (that are relevant to this circuit)"""
     color: str = ""
     """"""
@@ -327,7 +327,7 @@ class EugeneObject:
         return self.structs_dict, self.structs_cas_dict, self.parts_seq_dict
 
     # NOTE: 3. GENERATE ADDITIONAL EUGENE OBJECTS ######################################################################
-    def generate_eugene_helpers(self) -> (dict[str], dict[str]):
+    def generate_eugene_helpers(self) -> (dict[str], dict[str], dict[[str]]):
         """
         Generate dicts of landing_pads/fenceposts/genetic_locations, as well as device_rules and circuit_rules.
 
@@ -369,8 +369,9 @@ class EugeneObject:
             self.genlocs_fenceposts[location['symbol']] = []
 
         # Includes parts, cassettes, and fenceposts, any of which could appear in the rule sets
-        all_things = list(self.parts_seq_dict.keys()) + list(self.structs_cas_dict.keys()) + list(
-            self.genlocs_fenceposts.keys())
+        all_things = list(self.parts_seq_dict.keys()) + \
+                     list(self.structs_cas_dict.keys()) + \
+                     list(self.genlocs_fenceposts.keys())
 
         # Get Device Rules
         device_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'device_rules')[0]
@@ -385,7 +386,7 @@ class EugeneObject:
                         device_rules.append(r)
                     self.parts_seq_dict[o].dev_rules.append(r)
             for device, cassette in self.structs_cas_dict.items():
-                if all([1 if o in cassette.inputs else 0 for o in operands]):
+                if all([1 if o in cassette.inputs else 0 for o in operands]):  # TODO: only check inputs?
                     if r not in device_rules:
                         device_rules.append(r)
                     cassette.dev_rules.append(r)
@@ -420,8 +421,9 @@ class EugeneObject:
         # log.cf.info(f'\nself.structs_cas_dict:\n{self.structs_cas_dict}')
         # log.cf.info(f'\nself.device_rules:\n{self.device_rules}')
         # log.cf.info(f'\nself.circuit_rules:\n{self.circuit_rules}')
+        # log.cf.info(f'\nself.genlocs_fenceposts:\n{self.genlocs_fenceposts}')
 
-        return self.device_rules, self.circuit_rules
+        return self.device_rules, self.circuit_rules, self.genlocs_fenceposts
 
     # NOTE: 4. CREATE, WRITE, AND CLOSE THE EUGENE FILE ################################################################
     def write_eugene(self, filepath: str) -> bool:

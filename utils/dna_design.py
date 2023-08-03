@@ -8,12 +8,14 @@ produces and the SBOL diagram...
 import os
 import csv
 from dataclasses import dataclass, field
+from cello_helpers import debug_print
+import log
 
 
 @dataclass
 class CirRuleSet:
     """
-
+    Circuit rules categorized by type.  (After rule conversions, before is not needed.)
     """
 
     after: list[str]
@@ -28,7 +30,7 @@ class CirRuleSet:
 @dataclass
 class DevRuleSet:
     """
-
+    Device rules categorized by type.  (After rule conversions, before is not needed.)
     """
 
     after: list[str]
@@ -50,49 +52,68 @@ class DNADesign:
     gen_seq()
     """
 
-    def __init__(self, structs, cassettes, sequences, device_rules, circuit_rules):
+    def __init__(self, structs, cassettes, sequences, device_rules, circuit_rules, fenceposts):
 
         self.structs = structs  # mainly used for regulatory info file
-        self.cassettes = cassettes  # contains the input, output, components, and color
+        self.cassettes = cassettes  # contains the input, output, components, color, dev_rules, and cir_rules (critical)
         self.sequences = sequences  # contains the part type and actual dna sequence
-        self.device_rules = device_rules  # rules govern short sequences of parts that make up devices
-        self.circuit_rules = circuit_rules  # rules govern the broader order of those devices
+        self.device_rules = device_rules  # rules that govern the short sequences of parts that make up devices
+        self.circuit_rules = circuit_rules  # rules that govern the broader order of those devices
+        self.fenceposts = fenceposts  # contains the fenceposts/genetic locations that become the nonce_pads
         # rules types: 'NOT', 'EQUALS', 'NEXTTO', 'CONTAINS', 'STARTSWITH', 'ENDSWITH', 'BEFORE', 'AFTER', 'ALL_FORWARD'
         #                       TODO                 TODO                                                      TODO
 
-        self.device_rule_sets: dict[DevRuleSet] = {}
-        self.circuit_rule_sets: dict[CirRuleSet] = {}
+        self.device_rule_sets: dict[DevRuleSet] = {}  # reformulated rules, simplified for processing
+        self.circuit_rule_sets: dict[CirRuleSet] = {}  # reformulated rules, simplified for processing
 
-        self.device_order: list[str] = []
-        self.part_order: list[str] = []
+        self.device_order: list[str] = []  # general order of devices (i.e. sets of parts) that make up self.part_order
+        self.part_order: list[str] = []  # order of every part across entire circuit, for output to dna-part-order
 
-    def gen_seq(self, filepath):
+    def gen_seq(self, filepath) -> list[str]:
         """
-        Traverses all parts in the cassettes, generating their order based on the provided rules.
-        *Generally*, the component order for a device cassette is:
-            1. 'output' from previous device
+        Traverses all parts in the cassettes and fenceposts, generating their order based on the provided rules.
+        Device order just follows the circuit rules.
+        Part order within a device *generally* goes:
+            1. inputs (i.e. 'output' from the previous device, which isn't necessarily the precedent in the part order)
             2. cassette components (in order, ending in Terminator...)
             3. next device (not necessarily the device to which the current device outputs)
-        '_nonce_pad' is inserted according to landing pad rules (?)
+            ('_nonce_pad' is inserted according to landing pad rules)
 
-        :return: part_order
+        :return: list[str]: part_order
         """
+
+        # Debugging info...
+        # debug_print('EUGENE OBJECTS:')
+        # log.cf.info(f'\nself.structs:\n{self.structs}')
+        # log.cf.info(f'\nself.sequences:\n{self.sequences}')
+        # log.cf.info(f'\nself.cassettes:\n{self.cassettes}')
+        # log.cf.info(f'\nself.device_rules:\n{self.device_rules}')
+        # log.cf.info(f'\nself.circuit_rules:\n{self.circuit_rules}')
+        # log.cf.info(f'\nself.fenceposts:\n{self.fenceposts}')
 
         devices_placed: list[str] = []  # for memoization
         parts_placed: list[str] = []
 
-        # Most rules are 'AFTER' and 'BEFORE' rules; these will be reformulated in terms of 'AFTER' rules for simplicity
-        # Permutations of these parameters include:
-        #     THIS AFTER  THAT -> THAT    *
-        # NOT THIS AFTER  THAT -> [None]
-        #     THAT AFTER  THIS -> [None]
-        # NOT THAT AFTER  THIS -> THAT    *
-        #     THIS BEFORE THAT -> [None]
-        # NOT THIS BEFORE THAT -> THAT    *
-        #     THAT BEFORE THIS -> THAT    *
-        # NOT THAT BEFORE THIS -> [None]
-
         def rule_conversion(rule: list[str], x: str, y: str = ""):
+            """
+            Simplifies rule sets by converting rules to (non-negated) AFTER rules (e.g. b/c the 'contrapositive' of a
+            true statement is always true).
+            Possible permutations of these parameters include:
+                    x AFTER  y -> y
+                NOT x AFTER  y -> [None; on separate func call, it will instead add x to device/part y]
+                    y AFTER  x -> [None; on separate func call, it will instead add x to device/part y]
+                NOT y AFTER  x -> y
+                    x BEFORE y -> [None; on separate func call, it will instead add x to device/part y]
+                NOT x BEFORE y -> y
+                    y BEFORE x -> y
+                NOT y BEFORE x -> [None; on separate func call, it will instead add x to device/part y]
+
+            :param rule: str
+            :param x: str: operand/device/part
+            :param y: str: operand/device/part
+            :return: str | bool: either the operand that x should appear after or else False if not applicable.
+            """
+
             if rule in [[x, 'AFTER', y], ['NOT', y, 'AFTER', x], ['NOT', x, 'BEFORE', y], [y, 'BEFORE', x]]:
                 # TODO: in case other rule absent...
                 return y
