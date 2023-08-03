@@ -43,6 +43,7 @@ class UCF:
     @staticmethod
     def __parse_helper(filepath, name):
         filepath = os.path.join(*filepath.split('/'))
+        comm_devices_filepath = os.path.join(*'utils/comm_devices.input.json'.split('/'))
         u = os.path.join(filepath, name + '.UCF.json')
         i = os.path.join(filepath, name + '.input.json')
         o = os.path.join(filepath, name + '.output.json')
@@ -52,6 +53,9 @@ class UCF:
             with open(f, 'r') as ucf:
                 try:
                     ucf = json.load(ucf)
+                    if f == i:
+                        with open(comm_devices_filepath, 'r') as comm_devices:
+                            ucf.extend(json.load(comm_devices))
                     out.append(ucf)
                 except Exception as e:
                     debug_print(f'FAILED TO LOAD UCF {name}\nlocated at path: {f}')

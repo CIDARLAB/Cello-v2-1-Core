@@ -7,6 +7,7 @@ import itertools
 import scipy
 import sys
 import os
+import csv
 
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from gate_assignment import *
@@ -34,17 +35,17 @@ class CELLO3:
         check_conditions()
         techmap()
           GraphParser Class (initialize in/out/gate assignments from UCF to netlist)
-          [append to node (i, o, g) lists, querying UCF]
+          append to node (i, o, g) lists, querying UCF
           simulated_annealing_assign() or exhaustive_assign()
-            [generate permutations of nodes]
+            generate permutations of nodes
             scipy.dual_annealing()
               prep_assign_for_scoring()
                 AssignGraph Class (map UCF parts to netlist)
                   score_circuit()
                     ...
-        [techmap() returns best graph]
-        [info printed]
-        [eugene file created]
+        techmap() returns best graph
+        info printed
+        eugene file created
         [end]
     """
 
@@ -147,10 +148,16 @@ class CELLO3:
                     log.cf.info(f' - {rnl_out} {str(g_out)}')
 
                 # TRUTH TABLE/GATE SCORING
+                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
                 log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
                 tb = [truth_table_labels] + truth_table
                 print_table(tb)
                 print('(See log for more precision)')
+                os.makedirs(os.path.dirname(f'temp_out/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
+                with open(filepath + '_activity-table' + '.csv', 'w', newline='') as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    csv_writer.writerows(zip(*tb))
+                    # csv_writer.writerows(tb)
 
                 if self.verbose:
                     debug_print("Truth Table (same as before, simpler format):")
@@ -158,7 +165,6 @@ class CELLO3:
                         log.cf.info(r)
 
                 # EUGENE FILE
-                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
                 eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
                                       graph_outputs_for_printing, best_graph)
                 log.cf.info('\n\nEUGENE FILE:')
@@ -221,6 +227,7 @@ class CELLO3:
             log.cf.info(f'isvalid: {netlist_valid}')
 
         in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
+        print(in_sensors)
         num_ucf_input_sensors = len(in_sensors)
         num_ucf_input_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
         num_ucf_input_models = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
@@ -230,11 +237,11 @@ class CELLO3:
                        (num_ucf_input_models == num_ucf_input_structures == num_ucf_input_parts) and \
                        (num_ucf_input_parts >= num_netlist_inputs)
         if verbose:
-            log.cf.info(f'\nINPUTS:'
-                        f'num IN-SENSORS in {self.ucf_name} in-UCF: {num_ucf_input_sensors}'
-                        f'num IN-STRUCTURES in {self.ucf_name} in-UCF: {num_ucf_input_structures}'
-                        f'num IN-MODELS in {self.ucf_name} in-UCF: {num_ucf_input_models}'
-                        f'num IN-PARTS in {self.ucf_name} in-UCF: {num_ucf_input_parts}'
+            log.cf.info(f'\nINPUTS (including the communication devices): \n'
+                        f'num IN-SENSORS in {self.ucf_name} in-UCF: {num_ucf_input_sensors}\n'
+                        f'num IN-STRUCTURES in {self.ucf_name} in-UCF: {num_ucf_input_structures}\n'
+                        f'num IN-MODELS in {self.ucf_name} in-UCF: {num_ucf_input_models}\n'
+                        f'num IN-PARTS in {self.ucf_name} in-UCF: {num_ucf_input_parts}\n'
                         f'num IN-NODES in {self.verilog_name} netlist: {num_netlist_inputs}')
 
         if verbose:
@@ -251,11 +258,11 @@ class CELLO3:
                         (num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and \
                         (num_ucf_output_parts >= num_netlist_outputs)
         if verbose:
-            log.cf.info(f'\nOUTPUTS:'
-                        f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}'
-                        f'num OUT-STRUCTURES in {self.ucf_name} out-UCF: {num_ucf_output_structures}'
-                        f'num OUT-MODELS in {self.ucf_name} out-UCF: {num_ucf_output_models}'
-                        f'num OUT-PARTS in {self.ucf_name} out-UCF: {num_ucf_output_parts}'
+            log.cf.info(f'\nOUTPUTS: \n'
+                        f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}\n'
+                        f'num OUT-STRUCTURES in {self.ucf_name} out-UCF: {num_ucf_output_structures}\n'
+                        f'num OUT-MODELS in {self.ucf_name} out-UCF: {num_ucf_output_models}\n'
+                        f'num OUT-PARTS in {self.ucf_name} out-UCF: {num_ucf_output_parts}\n'
                         f'num OUT-NODES in {self.verilog_name} netlist: {num_netlist_outputs}')
 
             log.cf.info([out['name'] for out in out_sensors])
@@ -276,11 +283,11 @@ class CELLO3:
         num_groups = len(g_list)
         # numFunctions = len(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions'))
         if verbose:
-            log.cf.info(f'\nGATES:'
-                        f'num PARTS in {self.ucf_name} UCF: {num_parts}'
-                        # f'(ref only) num FUNCTIONS in {self.ucf_name} UCF: {numFunctions}'
-                        f'num STRUCTURES in {self.ucf_name} UCF: {num_structs}'
-                        f'num MODELS in {self.ucf_name} UCF: {num_models}'
+            log.cf.info(f'\nGATES: \n'
+                        f'num PARTS in {self.ucf_name} UCF: {num_parts}\n'
+                        # f'(ref only) num FUNCTIONS in {self.ucf_name} UCF: {numFunctions}\n'
+                        f'num STRUCTURES in {self.ucf_name} UCF: {num_structs}\n'
+                        f'num MODELS in {self.ucf_name} UCF: {num_models}\n'
                         f'num GATES in {self.ucf_name} UCF: {num_gates}')
 
         num_gates_available = []
@@ -599,7 +606,7 @@ class CELLO3:
         input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
 
         if self.print_iters:
-            debug_print(f'Assignment configuration: {repr(graph)}')
+            debug_print(f'Assignment configuration: {repr(graph)}', False)
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
@@ -784,9 +791,6 @@ class CELLO3:
                     log.cf.info('\n')
                     raise RecursionError
 
-            # if self.print_iters:
-            #     print_table([truth_table_labels] + truth_table)
-
             for graph_output in graph.outputs:
                 # TODO: add function to test whether g_output is intermediate or final?
                 output_name = graph_output.name
@@ -849,7 +853,7 @@ class CELLO3:
             print(truth_table_vis)
             print(truth_tested_output_values)
             print('\n')
-            print_table([truth_table_labels] + truth_table)
+            print_table([truth_table_labels] + truth_table, False)
         # take the output columns of the truth table, and calculate the outputs
 
         # NOTE: **return the lower-scored output of the multiple outputs**
@@ -946,12 +950,13 @@ if __name__ == '__main__':
             if not os.path.isdir('logs'):
                 os.mkdir('logs')
 
-            # 'Bth1C1G1T1': (3 in, 2 out,  7 gate_groups)
-            # 'Eco1C1G1T1': (4 in, 2 out, 12 gate_groups)
-            # 'Eco1C2G2T2': (4 in, 2 out, 18 gate_groups) # FIXME: uses a tandem Hill function...
-            # 'Eco2C1G3T1': (7 in, 2 out,  6 gate_groups)
-            # 'Eco2C1G5T1': (7 in, 3 out, 13 gate_groups) # FIXME: seemingly has incomplete input file...
-            # 'SC1C1G1T1' : (3 in, 2 out,  9 gate_groups)
+            # 'Bth1C1G1T1': (3 in,  2 out,  7 gate_groups)
+            # 'Eco1C1G1T1': (4 in,  2 out, 12 gate_groups)
+            # 'Eco1C2G2T2': (4 in,  2 out, 18 gate_groups)  # FIXME: uses a tandem Hill function...
+            # 'Eco2C1G3T1': (7 in,  2 out,  6 gate_groups)
+            # 'Eco2C1G5T1': (7 in,  3 out, 13 gate_groups)  # FIXME: seemingly incomplete input file...
+            # 'Eco2C1G6T1': (11 in, 3 out, 16 gate_groups)
+            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)
             log.cf.info(ucf_name_ := input(
                 f'\n\nWhich one of the following UCF (User Constraint File) do you want to use? \n'
                 f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'

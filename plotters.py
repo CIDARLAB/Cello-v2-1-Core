@@ -18,7 +18,7 @@
 # Set the backend to use (important for headless servers)  # FIXME: require install of matplotlib and dnaplotlib
 import matplotlib
 
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # FIXME: Add to readme?
 
 import sys
 import getopt
@@ -305,7 +305,7 @@ def plotter(params, parts, regulation, designs, output, reverse_char=""):
     """
 
     """
-    cur_reverse_char = 'r'
+    cur_reverse_char = 'r'  # FIXME: What exactly is the reverse character?
     if reverse_char:
         cur_reverse_char = reverse_char
     plot_params = load_plot_parameters(params)
