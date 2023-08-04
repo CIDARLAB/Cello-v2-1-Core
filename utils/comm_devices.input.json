@@ -3,13 +3,14 @@
 		"collection": "input_sensors",
 		"name": "OC6",
 		"model": "OC6_model",
-		"structure": "OC6_structure"
+		"structure": "OC6_structure",
+		"description": "comms_device"
 	},
 	{
 		"collection": "models",
 		"name": "OC6_model",
 		"functions": {
-			"response_function": "sensor_response"
+			"response_function": "Hill_response"
 		},
 		"parameters": [
 			{
@@ -45,13 +46,14 @@
 		"collection": "input_sensors",
 		"name": "OHC12",
 		"model": "OHC12_model",
-		"structure": "OHC12_structure"
+		"structure": "OHC12_structure",
+		"description": "comms_device"
 	},
 	{
 		"collection": "models",
 		"name": "OHC12_model",
 		"functions": {
-			"response_function": "sensor_response"
+			"response_function": "Hill_response"
 		},
 		"parameters": [
 			{
@@ -87,13 +89,14 @@
 		"collection": "input_sensors",
 		"name": "pC-HSL",
 		"model": "pC-HSL_model",
-		"structure": "pC-HSL_structure"
+		"structure": "pC-HSL_structure",
+		"description": "comms_device"
 	},
 	{
 		"collection": "models",
 		"name": "pC-HSL_model",
 		"functions": {
-			"response_function": "sensor_response"
+			"response_function": "Hill_response"
 		},
 		"parameters": [
 			{
@@ -129,13 +132,14 @@
 		"collection": "input_sensors",
 		"name": "DAPG",
 		"model": "DAPG_model",
-		"structure": "DAPG_structure"
+		"structure": "DAPG_structure",
+		"description": "comms_device"
 	},
 	{
 		"collection": "models",
 		"name": "DAPG_model",
 		"functions": {
-			"response_function": "sensor_response"
+			"response_function": "Hill_response"
 		},
 		"parameters": [
 			{
@@ -167,21 +171,35 @@
 			"pPhl"
 		]
 	},
-	{
-		"collection": "functions",
-		"name": "sensor_response",
-		"equation": "$STATE * (ymax - ymin) + ymin",
-		"parameters": [
-			{
-				"name": "ymax",
-				"map": "#//model/parameters/ymax"
-			},
-			{
-				"name": "ymin",
-				"map": "#//model/parameters/ymin"
-			}
-		]
-	},
+    {
+        "collection": "functions",
+        "name": "Hill_response",
+        "equation": "ymin + (ymax - ymin) / (1.0 + (x / kd)^n)",
+        "variables": [
+            {
+                "name": "x",
+                "map": "#//model/functions/input_composition"
+            }
+        ],
+        "parameters": [
+            {
+                "name": "ymax",
+                "map": "#//model/parameters/ymax"
+            },
+            {
+                "name": "ymin",
+                "map": "#//model/parameters/ymin"
+            },
+            {
+                "name": "kd",
+                "map": "#//model/parameters/kd"
+            },
+            {
+                "name": "n",
+                "map": "#//model/parameters/n"
+            }
+        ]
+    },
 	{
 		"collection": "parts",
 		"type": "promoter",

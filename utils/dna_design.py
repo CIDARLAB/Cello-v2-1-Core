@@ -10,6 +10,7 @@ import csv
 from dataclasses import dataclass, field
 from cello_helpers import debug_print
 import log
+import re
 
 
 @dataclass
@@ -25,6 +26,7 @@ class CirRuleSet:
     not_endswith: bool
     nextto: list[str]
     not_nextto: list[str]
+    equals: int
 
 
 @dataclass
@@ -40,6 +42,7 @@ class DevRuleSet:
     not_endswith: bool
     nextto: list[str]
     not_nextto: list[str]
+    equals: int
 
 
 class DNADesign:
@@ -56,12 +59,12 @@ class DNADesign:
 
         self.structs = structs  # mainly used for regulatory info file
         self.cassettes = cassettes  # contains the input, output, components, color, dev_rules, and cir_rules (critical)
-        self.sequences = sequences  # contains the part type and actual dna sequence
+        self.sequences = sequences  # contains the part type and actual dna sequence; also contains scars
         self.device_rules = device_rules  # rules that govern the short sequences of parts that make up devices
         self.circuit_rules = circuit_rules  # rules that govern the broader order of those devices
         self.fenceposts = fenceposts  # contains the fenceposts/genetic locations that become the nonce_pads
         # rules types: 'NOT', 'EQUALS', 'NEXTTO', 'CONTAINS', 'STARTSWITH', 'ENDSWITH', 'BEFORE', 'AFTER', 'ALL_FORWARD'
-        #                       TODO                 TODO                                                      TODO
+        #                                            TODO                                                      TODO
 
         self.device_rule_sets: dict[DevRuleSet] = {}  # reformulated rules, simplified for processing
         self.circuit_rule_sets: dict[CirRuleSet] = {}  # reformulated rules, simplified for processing
@@ -92,7 +95,7 @@ class DNADesign:
         # log.cf.info(f'\nself.fenceposts:\n{self.fenceposts}')
 
         devices_placed: list[str] = []  # for memoization
-        parts_placed: list[str] = []
+        parts_placed: list[str] = []  # for memoization
 
         def rule_conversion(rule: list[str], x: str, y: str = ""):
             """
@@ -120,53 +123,101 @@ class DNADesign:
             else:
                 return False
 
-        # Reformulate Cir Rules
-        for device, cassette in self.cassettes.items():
-            self.circuit_rule_sets[device] = CirRuleSet([], False, False, False, False, [], [])
-            for rule in cassette.cir_rules:  # TODO: Account for Equals
-                if 'Loc' not in rule:
-                    if 'AFTER' in rule or 'BEFORE' in rule:
-                        words = rule.split()
-                        y = ""
-                        for word in words:
-                            if word not in [device, 'NOT', 'AFTER', 'BEFORE']:
-                                y = word
-                                break
-                        res = rule_conversion(rule.split(), device, y)
-                        if res and res not in self.circuit_rule_sets[device].after:
-                            self.circuit_rule_sets[device].after.append(res)
-                    elif 'STARTSWITH' in rule:
-                        if 'NOT' in rule:
-                            self.circuit_rule_sets[device].not_startswith = True
-                        else:
-                            self.device_order.append(device)
-                            self.circuit_rule_sets[device].startswith = True
-                    elif 'ENDSWITH' in rule:
-                        if 'NOT' in rule:
-                            self.circuit_rule_sets[device].not_endswith = True
-                        else:
-                            self.circuit_rule_sets[device].endswith = True
-                    elif 'NEXTTO' in rule:
-                        words = rule.split()
-                        y = ""
-                        for word in words:
-                            if word not in [device, 'NOT', 'NEXTTO']:
-                                y = word
-                        if 'NOT' in rule:
-                            self.circuit_rule_sets[device].not_nextto.append(y)
-                        else:
-                            self.circuit_rule_sets[device].nextto.append(y)
-        # print(self.circuit_rule_sets)
+        def trace_next_tos(device):
+            if len(self.circuit_rule_sets[device].after) == 0 and device in devices:
+                if next_tos := self.circuit_rule_sets[device].nextto:
 
-        # Place devices
-        devices = list(self.cassettes)
+            # CHECK NEXTTO
+            # CHECK ENDSWITH
+            # CHECK NOT STARTSWITH
+
+        # TODO
+        # 1. combine parts (from seqs) with circuit rules, cassettes (from structs_cas), and fenceposts,
+        # all with corresponding circuit rules into a dictionary
+        # 2. reformulate rules
+        # 3. distribute rules into CirRuleSet object...
+        # 4. traverse rule types in appropriate order...
+
+        # Consolidate Devices
+        consolidated_devices = {}
+        for device, cassette in self.cassettes.items():
+            consolidated_devices[cassette.struct_var_name] = cassette.cir_rules
+        for loc, rules in self.fenceposts.items():
+            consolidated_devices[loc] = rules
+        for part, part_info in self.sequences.items():
+            if part_info.cir_rules:
+                consolidated_devices[part] = part_info.cir_rules
+        # print(consolidated_devices)
+
+        # Reformulate Cir Rules
+        max_index = 0
+        for device, rules in consolidated_devices.items():
+            self.circuit_rule_sets[device] = CirRuleSet([], False, False, False, False, [], [], [])
+            for rule in rules:
+                if 'AFTER' in rule or 'BEFORE' in rule:
+                    words = rule.split()
+                    y = ""
+                    for word in words:
+                        if word not in [device, 'NOT', 'AFTER', 'BEFORE']:
+                            y = word
+                            break
+                    res = rule_conversion(rule.split(), device, y)
+                    if res and res not in self.circuit_rule_sets[device].after:
+                        self.circuit_rule_sets[device].after.append(res)
+                elif 'STARTSWITH' in rule:
+                    if 'NOT' in rule:
+                        self.circuit_rule_sets[device].not_startswith = True
+                    else:
+                        self.device_order.append(device)
+                        self.circuit_rule_sets[device].startswith = True
+                elif 'ENDSWITH' in rule:
+                    if 'NOT' in rule:
+                        self.circuit_rule_sets[device].not_endswith = True
+                    else:
+                        self.circuit_rule_sets[device].endswith = True
+                elif 'NEXTTO' in rule:
+                    words = rule.split()
+                    y = ""
+                    for word in words:
+                        if word not in [device, 'NOT', 'NEXTTO']:
+                            y = word
+                    if 'NOT' in rule:
+                        self.circuit_rule_sets[device].not_nextto.append(y)
+                    else:
+                        self.circuit_rule_sets[device].nextto.append(y)
+                elif 'EQUALS' in rule:
+                    index = int(re.search('(?<=\\[)(.*)(?=\\])', rule)[0])
+                    self.circuit_rule_sets[device].equals = index
+                    if index > max_index:
+                        max_index = index
+        print(self.circuit_rule_sets)
+
+        # Place devices across circuit
+        devices = list(self.circuit_rule_sets)
+        # EQUALS
+        if max_index > 0:
+            devices_placed = [''] * (max_index + 1)
+            print(devices_placed)
+            for device, rule_set in self.circuit_rule_sets.items():
+                if rule_set.equals or rule_set.equals == 0:
+                    devices_placed[rule_set.equals] = str(device)
+        # STARTSWITH
+        for device, rule_set in self.circuit_rule_sets.items():
+            if rule_set.startswith:
+                devices_placed[0] = str(device)  # TODO: Ever need to be placed after scar?
+        print(devices_placed)
+        # AFTER and NEXTTO (check ENDSWITH)
         while len(devices) > 0:
-            for device in list(self.cassettes):
+            for device in list(self.circuit_rule_sets):
                 self.circuit_rule_sets[device].after = [rule for rule in self.circuit_rule_sets[device].after
                                                         if rule not in devices_placed]
-                if len(self.circuit_rule_sets[device].after) == 0 and device in devices:
-                    devices_placed.append(device)
-                    devices.remove(device)
+                if next_to_set := trace_next_tos(device):  # NOTE: Key recursive func
+                    for index, value in devices_placed:
+                        if not value:
+                            devices_placed[index] = next_to_set[0]
+                            devices.remove(next_to_set[0])
+                            next_to_set.pop(0)
+
         # print(devices_placed)
 
         # Reformulate Dev Rules  # NOTE: For UCFs that only have the 'ALL_FORWARD' device rule, this block has no effect

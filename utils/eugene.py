@@ -51,7 +51,7 @@ class EugeneSequence:
 
     <type> <name>(.SEQUENCE("<dnasequence>"));
 
-    Attributes: parts_type, parts_name, parts_sequence, dev_rules
+    Attributes: parts_type, parts_name, parts_sequence, dev_rules, cir_rules, color
     """
 
     parts_type: str = ""
@@ -62,6 +62,8 @@ class EugeneSequence:
     """dna sequence from UCF parts block"""
     dev_rules: list[str] = field(default_factory=list[str])  # TODO: can probably remove this; captured better below...
     """all device rules for this part (that are relevant to this circuit)"""
+    cir_rules: list[str] = field(default_factory=list[str])
+    """circuit rules associated with each part (mostly for scars)"""
     color: str = ""
     """"""
 
@@ -77,7 +79,7 @@ class EugeneCassette:
 
     Once established, this set of objects are iterated throughout the eugene file.
 
-    Attributes: struct_var_name, struct_cas_name, type, inputs, comps, outputs, color, cir_rules
+    Attributes: struct_var_name, struct_cas_name, type, inputs, comps, outputs, color, dev_rules, cir_rules
     """
 
     struct_var_name: str = ""
@@ -249,11 +251,11 @@ class EugeneObject:
         return True
 
     # NOTE: 2. GENERATE EUGENE CASSETTES FROM EUGENE STRUCTS ###########################################################
-    def generate_eugene_cassettes(self) -> (dict, dict, dict):
+    def generate_eugene_cassettes(self) -> bool:
         """
         Generates dict of EugeneCassettes used for Eugene file, DNA design, and other files.
 
-        :return: (dict[EugeneCassette], dict[EugeneSequence])
+        :return: bool: True
         """
 
         # Get PartTypes and Sequences
@@ -282,7 +284,7 @@ class EugeneObject:
             if p in ins or t in ['scar']:
                 if t not in self.parts_types:
                     self.parts_types.append(t)
-                self.parts_seq_dict[p] = EugeneSequence(t, p, in_part['dnasequence'], ['ALL_FORWARD'])
+                self.parts_seq_dict[p] = EugeneSequence(t, p, in_part['dnasequence'], ['ALL_FORWARD'], [])
         main_parts = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'parts')
         for main_part in main_parts:
             p = main_part['name']
@@ -290,7 +292,7 @@ class EugeneObject:
             if p in mains or t in ['scar']:
                 if t not in self.parts_types:
                     self.parts_types.append(t)
-                self.parts_seq_dict[p] = EugeneSequence(t, p, main_part['dnasequence'], ['ALL_FORWARD'])
+                self.parts_seq_dict[p] = EugeneSequence(t, p, main_part['dnasequence'], ['ALL_FORWARD'], [])
         out_parts = self.ucf.query_top_level_collection(self.ucf.UCFout, 'parts')
         for out_part in out_parts:
             p = out_part['name']
@@ -298,7 +300,7 @@ class EugeneObject:
             if p in outs or t in ['scar']:
                 if t not in self.parts_types:
                     self.parts_types.append(t)
-                self.parts_seq_dict[p] = EugeneSequence(t, p, out_part['dnasequence'], ['ALL_FORWARD'])
+                self.parts_seq_dict[p] = EugeneSequence(t, p, out_part['dnasequence'], ['ALL_FORWARD'], [])
 
         # Get Cassettes/Devices
         # Need to cover all netlist Inputs; start with 1st cassette, use all its inputs; to next cassette as needed
@@ -324,14 +326,14 @@ class EugeneObject:
                                 input_ += 1
                                 self.structs_cas_dict[c[0]].inputs.append(output)
 
-        return self.structs_dict, self.structs_cas_dict, self.parts_seq_dict
+        return True
 
     # NOTE: 3. GENERATE ADDITIONAL EUGENE OBJECTS ######################################################################
-    def generate_eugene_helpers(self) -> (dict[str], dict[str], dict[[str]]):
+    def generate_eugene_helpers(self) -> (dict, dict, dict, dict[str], dict[str], dict[[str]]):
         """
         Generate dicts of landing_pads/fenceposts/genetic_locations, as well as device_rules and circuit_rules.
 
-        :return: (dict[device_rule], dict[circuit_rule])
+        :return:
         """
 
         def extract_rules(rule_sets) -> list[str]:
@@ -408,6 +410,10 @@ class EugeneObject:
                         if r not in circuit_rules:
                             circuit_rules.append(r)
                         self.structs_cas_dict[o].cir_rules.append(r)
+                    if o in self.parts_seq_dict.keys():
+                        if r not in circuit_rules:
+                            circuit_rules.append(r)
+                        self.parts_seq_dict[o].cir_rules.append(r)
                     if o in self.genlocs_fenceposts.keys():
                         if r not in circuit_rules:
                             circuit_rules.append(r)
@@ -423,7 +429,8 @@ class EugeneObject:
         # log.cf.info(f'\nself.circuit_rules:\n{self.circuit_rules}')
         # log.cf.info(f'\nself.genlocs_fenceposts:\n{self.genlocs_fenceposts}')
 
-        return self.device_rules, self.circuit_rules, self.genlocs_fenceposts
+        return self.structs_dict, self.structs_cas_dict, self.parts_seq_dict, self.device_rules, self.circuit_rules, \
+               self.genlocs_fenceposts
 
     # NOTE: 4. CREATE, WRITE, AND CLOSE THE EUGENE FILE ################################################################
     def write_eugene(self, filepath: str) -> bool:

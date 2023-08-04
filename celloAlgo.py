@@ -170,11 +170,11 @@ class CELLO3:
                 log.cf.info('\n\nEUGENE FILE:')
                 if eugene.generate_eugene_structs():
                     log.cf.info(" - Eugene object and structs created...")
-                structs, cassettes, sequences = eugene.generate_eugene_cassettes()
-                if structs and cassettes and sequences:
+                if eugene.generate_eugene_cassettes():
                     log.cf.info(" - Eugene cassettes created...")
-                device_rules, circuit_rules, fenceposts = eugene.generate_eugene_helpers()
-                if device_rules and circuit_rules and fenceposts:
+                structs, cassettes, sequences, device_rules, circuit_rules, fenceposts = \
+                    eugene.generate_eugene_helpers()
+                if structs and cassettes and sequences and device_rules and circuit_rules and fenceposts:
                     log.cf.info(" - Eugene helpers created...")
                 if eugene.write_eugene(filepath + "_eugene.eug"):
                     log.cf.info(f" - Eugene script written to {filepath}_eugene.eug")
