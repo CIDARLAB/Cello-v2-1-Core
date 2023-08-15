@@ -1,16 +1,16 @@
 [
 	{
 		"collection": "input_sensors",
-		"name": "OC6",
-		"model": "OC6_model",
-		"structure": "OC6_structure",
+		"name": "OC6_in",
+		"model": "OC6_in_model",
+		"structure": "OC6_in_structure",
 		"description": "comms_device"
 	},
 	{
 		"collection": "models",
-		"name": "OC6_model",
+		"name": "OC6_in_model",
 		"functions": {
-			"response_function": "Hill_response"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -22,38 +22,28 @@
 				"name": "ymin",
 				"value": 0.06,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "n",
-				"value": 1.9,
-				"description": ""
-			},
-			{
-				"name": "kd",
-				"value": 0.1,
-				"description": ""
 			}
 		]
 	},
 	{
 		"collection": "structures",
-		"name": "OC6_structure",
+		"name": "OC6_in_structure",
 		"outputs": [
-			"pLux"
+			"rLux"
 		]
 	},
 	{
 		"collection": "input_sensors",
-		"name": "OHC12",
-		"model": "OHC12_model",
-		"structure": "OHC12_structure",
+		"name": "OHC12_in",
+		"model": "OHC12_in_model",
+		"structure": "OHC12_in_structure",
 		"description": "comms_device"
 	},
 	{
 		"collection": "models",
-		"name": "OHC12_model",
+		"name": "OHC12_in_model",
 		"functions": {
-			"response_function": "Hill_response"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -65,38 +55,28 @@
 				"name": "ymin",
 				"value": 0.01,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "n",
-				"value": 3.9,
-				"description": ""
-			},
-			{
-				"name": "kd",
-				"value": 0.3,
-				"description": ""
 			}
 		]
 	},
 	{
 		"collection": "structures",
-		"name": "OHC12_structure",
+		"name": "OHC12_in_structure",
 		"outputs": [
-			"pCin"
+			"rCin"
 		]
 	},
 	{
 		"collection": "input_sensors",
-		"name": "pC-HSL",
-		"model": "pC-HSL_model",
-		"structure": "pC-HSL_structure",
+		"name": "pC-HSL_in",
+		"model": "pC-HSL_in_model",
+		"structure": "pC-HSL_in_structure",
 		"description": "comms_device"
 	},
 	{
 		"collection": "models",
-		"name": "pC-HSL_model",
+		"name": "pC-HSL_in_model",
 		"functions": {
-			"response_function": "Hill_response"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -108,38 +88,28 @@
 				"name": "ymin",
 				"value": 0.02,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "n",
-				"value": 2,
-				"description": ""
-			},
-			{
-				"name": "kd",
-				"value": 0.2,
-				"description": ""
 			}
 		]
 	},
 	{
 		"collection": "structures",
-		"name": "pC-HSL_structure",
+		"name": "pC-HSL_in_structure",
 		"outputs": [
-			"pRpa"
+			"rRpa"
 		]
 	},
 	{
 		"collection": "input_sensors",
-		"name": "DAPG",
-		"model": "DAPG_model",
-		"structure": "DAPG_structure",
+		"name": "DAPG_in",
+		"model": "DAPG_in_model",
+		"structure": "DAPG_in_structure",
 		"description": "comms_device"
 	},
 	{
 		"collection": "models",
-		"name": "DAPG_model",
+		"name": "DAPG_in_model",
 		"functions": {
-			"response_function": "Hill_response"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -151,77 +121,59 @@
 				"name": "ymin",
 				"value": 0.02,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "n",
-				"value": 4,
-				"description": ""
-			},
-			{
-				"name": "kd",
-				"value": 0.15,
-				"description": ""
 			}
 		]
 	},
 	{
 		"collection": "structures",
-		"name": "DAPG_structure",
+		"name": "DAPG_in_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			}
+		],
 		"outputs": [
-			"pPhl"
+			"rPhl"
 		]
 	},
-    {
-        "collection": "functions",
-        "name": "Hill_response",
-        "equation": "ymin + (ymax - ymin) / (1.0 + (x / kd)^n)",
-        "variables": [
-            {
-                "name": "x",
-                "map": "#//model/functions/input_composition"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "ymax",
-                "map": "#//model/parameters/ymax"
-            },
-            {
-                "name": "ymin",
-                "map": "#//model/parameters/ymin"
-            },
-            {
-                "name": "kd",
-                "map": "#//model/parameters/kd"
-            },
-            {
-                "name": "n",
-                "map": "#//model/parameters/n"
-            }
-        ]
-    },
+	{
+		"collection": "functions",
+		"name": "sensor_response",
+		"equation": "$STATE * (ymax - ymin) + ymin",
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			}
+		]
+	},
 	{
 		"collection": "parts",
 		"type": "promoter",
-		"name": "pLux",
+		"name": "rLux",
 		"dnasequence": "ACCTGTAGGATCGTACAGGTTTACGCAAGAAAATGGTTTGTTACAGTCGAATAAAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
 	},
 	{
 		"collection": "parts",
 		"type": "promoter",
-		"name": "pCin",
+		"name": "rCin",
 		"dnasequence": "gaatcgcaccaagacaggtttgtccaccctttgtgcgtccaaacggacgcacggcgctctaaagcgggtcgcgatctttcagattcgctcctcgcgctttcagtctttgttttggcgcatgtcgttatcgcaaaaccgctgcacacttttgcgcgacatgctctgatccccctcatctgggggggcctatctgagggaatttccgatccggctcgcctgaaccattctgctttccacgaacttgaaaacgctCGTAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
 	},
 	{
 		"collection": "parts",
 		"type": "promoter",
-		"name": "pRpa",
+		"name": "rRpa",
 		"dnasequence": "aggaaaaattAAAGGGGAGATAAAATCCCCCCTTTttggttaactctattacagacgaatcagacccagtgtcagtgcttttgcaactgctgcggtacgatttgctgcatccagtttacgtgctgcttcaatcagatgaaatttaacggtgcgttcggtaatacacagaataacgctaatttcccatgcggttttaccctgtgctgcccactgcagaatttcacattcacgcggtgtcagacgattacgacgaatcggtttcggacggctcagtacacgcagacggctatgtgcataaatgctaaccagctgcattacaccacgggctgccggactcagatcaggatcttcacctgccatactaattgctgcgctaccatcatcgtaatgcagcggaatacaataaccttcaaccagaccaaattctgctgcacgggtcataacacgatgtgctgcctgatcacggtcacgatcatacggtgcatcactccaaacaaacggatgaacagtggttgcaccataacgcggaaccggatcaactgcgctaaagttttcgctaacatacagatcaaaccaatcacgaggccaaccatttgccagggtcagttccggcagaccggcattacggctcggcagacctgccatgatataggcggtaaaaccacagcttgcaatcaggctttcaaaacggctaatcagtgccggtgcttccagacgttcaacgctatcaacaaattccagtgtacgacgaccccacagctgatcttcacccacaatCATTaCTGTTACCCTAAGTATCGCTtTTAAACAAAATTATTTGTAGAGGATACCGTTTCGGACTTTTGTACTCTTCAGGTGAGACACACATCCCACTACAGCATCTagtagctagcactgtacctaggactgagctagccgtcaaGGCTCCTTTTGGAGCCTTTTTTTTTgcttaacgatcgttggctgacctgtccgatcggacaatattacgcaagaaaatggtttgttactttcgaataaaCGTAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
 	},
 	{
 		"collection": "parts",
 		"type": "promoter",
-		"name": "pPhl",
+		"name": "rPhl",
 		"dnasequence": "aacgatcgttggctgcgacgtacggtggaatctgattcgttaccaattgacatgatacgaaacgtaccgtatcgttaaggtAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
 	}
 ]

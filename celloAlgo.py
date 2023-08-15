@@ -409,7 +409,7 @@ class CELLO3:
             o_perms.append(o_perm)
         for g_perm in itertools.permutations(g_list, g):
             g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 100 else 100
+        max_fun = iter_ if iter_ < 1000 else 1000
 
         # DUAL ANNEALING SCIPY FUNC
         func = lambda x: self.prep_assign_for_scoring(x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
@@ -598,12 +598,17 @@ class CELLO3:
         '''
 
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
-        input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')[0]
-        input_function_str = input_function_json['equation'][1:]  # remove the '$' sign
+        # CK: Now that we're using CMs, will change to have each gate independently use their own UCF-specified function
+        input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
+        input_function_str = input_function_json[0]['equation'].replace('$', '')
 
         input_model_names = [i.name + '_model' for i in graph.inputs]
         input_params = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
                                     input_model_names)
+        # For using hill_response func in input...
+        # input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_params}
+        # input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
+        #                    input_functions.items() if (e['name'] == f)}
         input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
 
         if self.print_iters:
@@ -611,7 +616,7 @@ class CELLO3:
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
-            print(f'input_response = {input_function_str}\n')
+            print(f'input_response = {input_function_str}\n')  # TODO: Fix to print mult functions? w/ CM, mult possible
             # print(f'Parameters in sensor_response function json: \n{input_function_params}\n')
 
         gate_groups = [(g.gate_id, g.gate_type) for g in graph.gates]
@@ -658,7 +663,8 @@ class CELLO3:
 
         # adding parameters to inputs
         for graph_input in graph.inputs:
-            if repr(graph_input) in input_params:
+            if repr(graph_input) in input_params:  # and repr(graph_input) in input_equations:
+                # Make 1st param: input_equations[repr(graph_input)] (and other changes) to use Hill_response w/ inputs
                 graph_input.add_eval_params(input_function_str, input_params[repr(graph_input)])
 
         # adding parameters to outputs
