@@ -148,7 +148,8 @@ class CELLO3:
                     log.cf.info(f' - {rnl_out} {str(g_out)}')
 
                 # TRUTH TABLE/GATE SCORING
-                filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
+                # filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
+                filepath = f"temp_out/{self.verilog_name}/{self.verilog_name}"
                 log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
                 tb = [truth_table_labels] + truth_table
                 print_table(tb)
@@ -180,15 +181,18 @@ class CELLO3:
                     log.cf.info(f" - Eugene script written to {filepath}_eugene.eug")
 
                 # DNA DESIGN
-                dna_design_part_order = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules,
-                                                  fenceposts)
-                dna_design_part_order.gen_seq(filepath)
+                dna_designs = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
+                dna_designs.gen_seq(filepath)
+                dna_designs.write_dna_parts_info(filepath)
+                dna_designs.write_dna_parts_order(filepath)
+                dna_designs.write_plot_params(filepath)
+                dna_designs.write_regulatory_info(filepath)
 
                 # SBOL DIAGRAM
                 log.cf.info("\n\nSBOL:")
-                plotter(f"{filepath}_plot-parameters.csv", f"{filepath}_dna-part-info.csv",
-                        f"{filepath}_regulatory-info.csv", f"{filepath}_dna-part-order.csv",
-                        f"{filepath}_sbol-diagram.pdf")
+                plotter(f"{filepath}_plot_parameters.csv", f"{filepath}_dpl_part_information.csv",
+                        f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
+                        f"{filepath}_dpl.pdf")
                 log.cf.info('\n')
 
         else:

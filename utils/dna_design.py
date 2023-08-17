@@ -8,41 +8,29 @@ produces and the SBOL diagram...
 import os
 import csv
 from dataclasses import dataclass
+from cello_helpers import debug_print
+from copy import deepcopy
+import log
 import re
+import random
 
 
 @dataclass
-class CirRuleSet:
+class RuleSet:
     """
     Circuit rules categorized by type.  (After rule conversions, before is not needed.)
+    after[], before[], startswith, endswith, not_startswith, not_endswith, nextto[], not_nextto[], equals[]
     """
 
-    after: list[str]
-    before: list[str]
+    after: set[str]
+    before: set[str]
     startswith: bool
     endswith: bool
     not_startswith: bool
     not_endswith: bool
-    nextto: list[str]
-    not_nextto: list[str]
-    equals: int
-
-
-@dataclass
-class DevRuleSet:
-    """
-    Device rules categorized by type.  (After rule conversions, before is not needed.)
-    """
-
-    after: list[str]
-    before: list[str]
-    startswith: bool
-    endswith: bool
-    not_startswith: bool
-    not_endswith: bool
-    nextto: list[str]
-    not_nextto: list[str]
-    equals: int
+    nextto: set[str]
+    not_nextto: set[str]
+    equals: any
 
 
 @dataclass
@@ -54,6 +42,17 @@ class DevChain:
     after: list[str]  # excluding internal rules (already validated against these)
     before: list[str]  # excluding internal rules (already validated against these)
     reversible: bool  # whether the chain can be reversed and still be internally valid
+
+
+def deep_copy_params(to_call):
+    """
+
+    :param to_call:
+    :return:
+    """
+    def f(*args, **kwargs):
+        return to_call(*deepcopy(args), **deepcopy(kwargs))
+    return f
 
 
 def hex_to_rgb(hex_value):
@@ -91,11 +90,11 @@ class DNADesign:
         # rules types: 'NOT', 'EQUALS', 'NEXTTO', 'CONTAINS', 'STARTSWITH', 'ENDSWITH', 'BEFORE', 'AFTER', 'ALL_FORWARD'
         #                                            TODO                                                      TODO
 
-        self.dev_parts: dict[DevRuleSet] = {}
-        self.cir_devices: dict[CirRuleSet] = {}
+        self.dev_parts: dict[RuleSet] = {}
+        self.cir_devices: dict[RuleSet] = {}
         self.chains: list[DevChain] = []
         self.valid_dev_orders: list[list[str]] = []
-        self.valid_circuits: list[str] = []
+        self.valid_circuits: list[list[str]] = []
 
         # Debugging info...
         # debug_print('EUGENE OBJECTS:')
@@ -112,7 +111,7 @@ class DNADesign:
 
         :param filepath:
         """
-        dna_part_info_path = filepath + '_dna-part-info.csv'
+        dna_part_info_path = filepath + '_dpl_part_information.csv'
         os.makedirs(os.path.dirname(dna_part_info_path), exist_ok=True)
         with open(dna_part_info_path, 'w', newline='') as dna_part_info:
             csv_writer = csv.writer(dna_part_info)
@@ -139,15 +138,16 @@ class DNADesign:
 
         :param filepath:
         """
-        dna_part_order_path = filepath + '_dna-part-order.csv'
+        dna_part_order_path = filepath + '_dpl_dna_designs.csv'
         os.makedirs(os.path.dirname(dna_part_order_path), exist_ok=True)
         with open(dna_part_order_path, 'w', newline='') as dna_part_order:
             csv_writer = csv.writer(dna_part_order)
             csv_writer.writerow(['design_name', 'parts'])
-            new_row = ['first_device']
-            for part in self.valid_circuits:
-                new_row.append(part)
-            csv_writer.writerow(new_row)
+            for i, circuit in enumerate(self.valid_circuits):
+                new_row = [i]
+                for part in circuit:
+                    new_row.append(part)
+                csv_writer.writerow(new_row)
             dna_part_order.close()
 
     def write_plot_params(self, filepath) -> None:  # equivalent of 2.0 plot_parameters.csv
@@ -155,7 +155,7 @@ class DNADesign:
 
         :param filepath:
         """
-        plot_parameters = filepath + '_plot-parameters.csv'
+        plot_parameters = filepath + '_plot_parameters.csv'
         os.makedirs(os.path.dirname(plot_parameters), exist_ok=True)
         with open(plot_parameters, 'w', newline='') as plot_params:
             csv_writer = csv.writer(plot_params)
@@ -174,7 +174,7 @@ class DNADesign:
 
         :param filepath:
         """
-        regulatory_info = filepath + '_regulatory-info.csv'
+        regulatory_info = filepath + '_dpl_regulatory_information.csv'
         os.makedirs(os.path.dirname(regulatory_info), exist_ok=True)
         with open(regulatory_info, 'w', newline='') as reg_info:
             csv_writer = csv.writer(reg_info)
@@ -188,7 +188,7 @@ class DNADesign:
             reg_info.close()
 
     # NOTE: GENERATE INFO PROVIDED TO FILE CREATION FUNCTIONS ABOVE ####################################################
-    def gen_seq(self, filepath) -> list[str]:
+    def gen_seq(self, filepath) -> list[list[str]]:
         """
         Traverses all parts in the cassettes and fenceposts, generating their order based on the provided rules.
         Device order just follows the circuit rules.
@@ -198,43 +198,16 @@ class DNADesign:
             3. next device (not necessarily the device to which the current device outputs)
             ('_nonce_pad' is inserted according to landing pad rules)
 
+        General process:
+            1. prepare the devices (consolidate devices from inputs and get part colors)
+            2. simplify the rules (e.g. NOT x BEFORE y -> x AFTER y)
+            3. create chains of devices based on the NEXTTO rules
+            4. place the chains of devices, checking all other rules as needed
+
         :return: list[str]: part_order
         """
 
-        def check_rules(dev, index, dev_placed):
-            """
-
-            :param dev:
-            :param index:
-            :param dev_placed:
-            :return:
-            """
-            if index >= (end := len(dev_placed)):
-                print('Past end')
-                return False
-            elif dev_placed[index] != '':
-                print('Already taken')
-                return False
-            elif index == 0 and self.cir_devices[dev].not_startswith:
-                print('Startswith violated')
-                return False
-                # TODO: add func to check after cond outside the chain (b/c rules could be invalid)
-                # TODO: if not_endswith condition
-            elif self.cir_devices[dev].not_nextto == dev_placed[index - 1]:
-                print('Not_NextTo violated')
-                return False
-            elif index + 1 < end and self.cir_devices[dev].not_nextto == dev_placed[index + 1] or \
-                    (equals_index := self.cir_devices[dev].equals) and index != equals_index:
-                print('Equals violated')
-                return False
-            elif [d for i, d in enumerate(dev_placed) if i < index and d in self.cir_devices[dev].before] or \
-                    [d for i, d in enumerate(dev_placed) if i > index and d in self.cir_devices[dev].after]:
-                print('After/Before violated')
-                return False
-            else:
-                return True
-
-        # NOTE: 1. PREPARE THE DEVICES
+        # NOTE: 1. FUNCS TO PREPARE THE DEVICES/PARTS
         def consolidate_devices() -> dict:
             """
 
@@ -244,13 +217,13 @@ class DNADesign:
                 consolidated_devices[cassette.struct_var_name] = cassette.cir_rules
             for loc, rules in self.fenceposts.items():
                 consolidated_devices[loc] = rules
-            for part, part_info in self.sequences.items():
+            for part, part_info in self.sequences.items():  # primarily for capturing any scars
                 if part_info.cir_rules:
                     consolidated_devices[part] = part_info.cir_rules
+            # log.cf.info(f'\nconsolidated_devices: {consolidated_devices}')
             return consolidated_devices
-            # print(consolidated_devices)
 
-        def get_device_colors() -> None:
+        def transfer_part_colors() -> None:
             """
 
             """
@@ -261,16 +234,17 @@ class DNADesign:
                     self.sequences[part].color = self.cassettes[device].color
 
         # NOTE: 2. FUNCS TO SIMPLIFY THE RULES
-        def reformulate_rules():
+        # rules types: 'NOT', 'EQUALS', 'NEXTTO', 'CONTAINS', 'STARTSWITH', 'ENDSWITH', 'BEFORE', 'AFTER', 'ALL_FORWARD'
+        def reformulate_rules(consolidated_devices):
             """
 
             :return:
             """
-            def rule_simplification(rule: list[str], x: str, y: str):
+            def rule_simplification(rule: list[str], x: str, y: str) -> None:
                 """
                 Simplifies rule sets by converting rules to (non-negated) AFTER and BEFORE rules (e.g. b/c the
                 'contrapositive' of a true statement is always true).
-                Possible permutations of these parameters include:
+                Possible permutations of these parameters include:  (x = device, y = other_operand)
                         x AFTER  y -> y
                     NOT x AFTER  y -> x
                         y AFTER  x -> x
@@ -281,41 +255,29 @@ class DNADesign:
                     NOT y BEFORE x -> x
 
                 :param rule: str
-                :param x: str: operand/device/part
-                :param y: str: operand/device/part
-                :return: str | bool
+                :param x: str: device/part (from looping over devices/parts)
+                :param y: str: other device/part mentioned in the rule
+                :return: None
                 """
 
                 if rule in [[x, 'AFTER', y], ['NOT', y, 'AFTER', x], ['NOT', x, 'BEFORE', y], [y, 'BEFORE', x]]:
-                    return 'AFTER'
+                    self.cir_devices[device].after.add(y)
                 if rule in [['NOT', x, 'AFTER', y], [y, 'AFTER', x], [x, 'BEFORE', y], ['NOT', y, 'BEFORE', x]]:
-                    return 'BEFORE'
-                else:  # TODO: error handling
-                    return False
+                    self.cir_devices[device].before.add(y)
 
-            max_index = 0
-            for device, rules in consolidated_devices.items():  # TODO: convert EQUALS 0 to STARTSWITH?
-                self.cir_devices[device] = CirRuleSet([], [], False, False, False, False, [], [], 0)
+            for device, rules in consolidated_devices.items():
+                # after[], before[], startswith, endswith, not_startswith, not_endswith, nextto[], not_nextto[], equals
+                self.cir_devices[device] = RuleSet(set(), set(), False, False, False, False, set(), set(), None)
                 for rule in rules:
                     if 'AFTER' in rule or 'BEFORE' in rule:
                         words = rule.split()
-                        y = ""
-                        for word in words:
-                            if word not in [device, 'NOT', 'AFTER', 'BEFORE']:
-                                y = word
-                                break
-                        res = rule_simplification(rule.split(), device, y)
-                        if res == 'AFTER':
-                            if res not in self.cir_devices[device].after:
-                                self.cir_devices[device].after.append(y)
-                        elif res == 'BEFORE':
-                            if res not in self.cir_devices[device].before:
-                                self.cir_devices[device].before.append(y)
+                        other_operand = next(word for word in words if word not in [device, 'NOT', 'AFTER', 'BEFORE'])
+                        rule_simplification(rule.split(), device, other_operand)
                     elif 'STARTSWITH' in rule:
                         if 'NOT' in rule:
                             self.cir_devices[device].not_startswith = True
                         else:
-                            self.cir_devices[device].startswith = True
+                            self.cir_devices[device].equals = 0  # Convert STARTSWITH to an EQUALS rule
                     elif 'ENDSWITH' in rule:
                         if 'NOT' in rule:
                             self.cir_devices[device].not_endswith = True
@@ -323,23 +285,18 @@ class DNADesign:
                             self.cir_devices[device].endswith = True
                     elif 'NEXTTO' in rule:
                         words = rule.split()
-                        y = ""
-                        for word in words:
-                            if word not in [device, 'NOT', 'NEXTTO']:
-                                y = word
+                        other_operand = next(word for word in words if word not in [device, 'NOT', 'NEXTTO'])
                         if 'NOT' in rule:
-                            self.cir_devices[device].not_nextto.append(y)
+                            self.cir_devices[device].not_nextto.add(other_operand)
                         else:
-                            self.cir_devices[device].nextto.append(y)
+                            self.cir_devices[device].nextto.add(other_operand)
                     elif 'EQUALS' in rule:
                         index = int(re.search('(?<=\\[)(.*)(?=\\])', rule)[0])
                         self.cir_devices[device].equals = index
-                        if index > max_index:
-                            max_index = index
-            # print('\ncircuit rule sets', self.cir_devices)
+            # log.cf.info(f'\ncircuit rule sets: {self.cir_devices}')
 
-        # NOTE: 3. FUNCS TO CREATE CHAINS OF DEVICES
-        def create_chains() -> None:
+        # NOTE: 3. FUNCS TO CREATE CHAINS OF DEVICES/PARTS
+        def create_chains(devices_left) -> None:
             """
             Create chains based on NEXTTO rules
             :return: None
@@ -351,45 +308,33 @@ class DNADesign:
                 :return:
                 """
                 chain = [device]
-                after = self.cir_devices[device].after
-                before = self.cir_devices[device].before
-                end = False
-                while not end:
-                    end = True
-                    for adj_dev in self.cir_devices[device].nextto:
-                        if adj_dev not in chain:
-                            if not [d for d in self.cir_devices[adj_dev].before if d in chain]:
-                                chain.append(adj_dev)
-                                after.extend(self.cir_devices[adj_dev].after)
-                                before.extend(self.cir_devices[adj_dev].before)
-                                device = adj_dev
-                                end = False
-                            else:
-                                return None, None, None
-                return chain, after, before
-
-            devices_left = list(self.cir_devices)
-            chained_devices = []
-            chain_sets = []
-            for device in devices_left:
-                if device not in chained_devices:
-                    chain, after, before = chain_devices(device)
-                    if after:
-                        after = [x for x in after if x not in chain]
-                    if before:
-                        before = [x for x in before if x not in chain]
-                    if chain:  # if invalid, the reverse order captured at another time, should be valid
-                        if set(chain) in chain_sets:
-                            i = chain_sets.index(set(chain))
-                            self.chains[i].reversible = True
+                after_rules = self.cir_devices[device].after
+                before_rules = self.cir_devices[device].before
+                for adj_dev in self.cir_devices[device].nextto:
+                    if adj_dev not in chain:
+                        if not [d for d in self.cir_devices[adj_dev].before if d in chain]:
+                            chain.append(adj_dev)
+                            after_rules.update(x for x in self.cir_devices[adj_dev].after)
+                            before_rules.update(x for x in self.cir_devices[adj_dev].before)
                         else:
-                            chained_devices.append(chain)
-                            chain_sets.append(set(chain))
-                            self.chains.append(DevChain(chain, list(set(after)), list(set(before)), False))
-            # print('self.chains', self.chains)
+                            return None, None, None  # violates BEFORE rule, so not vaild order
+                after_rules.difference_update(set(chain))
+                before_rules.difference_update(set(chain))
+                return chain, after_rules, before_rules
 
-        # NOTE: 4. FUNCS TO PLACE THE CHAINS OF DEVICES
-        def place_chains(chain, chain_num, rev, dev_placed, dev_left, chains):
+            for device in devices_left:
+                if len(self.cir_devices[device].nextto) < 2:
+                    chain, after, before = chain_devices(device)
+                    if chain:  # else, reverse order should be captured in another loop
+                        if index := next((i for i, c in enumerate(self.chains) if set(c.chain) == set(chain)), None):
+                            self.chains[index].reversible = True
+                        else:
+                            self.chains.append(DevChain(chain, list(set(after)), list(set(before)), False))
+            # log.cf.info(f'\nself.chains: {self.chains}')
+
+        # NOTE: 4. FUNCS TO PLACE THE CHAINS OF DEVICES/PARTS
+        @deep_copy_params
+        def place_chains(chain_obj, chains_obj, chain_num, dev_placed):
             """
 
             :param chain:
@@ -399,72 +344,140 @@ class DNADesign:
             :param dev_left:
             :param chains:
             """
-            def place_remaining_devices(chains, dev_placed, dev_left):
+            def check_rules(dev, ind, placed):
                 """
 
-                :param chains:
-                :param dev_placed:
-                :param dev_left:
+                :param dev:
+                :param ind:
+                :param placed:
+                :return:
                 """
-                if len(dev_left) == 0:
-                    self.valid_dev_orders.append(dev_placed)
+                if ind < 0:
+                    # log.cf.info('Index less than 0')
+                    return False
+                elif placed[ind] != '':
+                    # log.cf.info('Already taken')
+                    return False
+                elif ind == 0 and self.cir_devices[dev].not_startswith:
+                    # log.cf.info('Startswith violated')
+                    return False
+                elif next((d for d in placed[0:ind] if d != '' and self.cir_devices[d].endswith), None):
+                    # log.cf.info('Endswith violated')
+                    return False
+                elif placed[ind - 1] in self.cir_devices[dev].not_nextto or \
+                     (ind + 1 < len(placed) and placed[ind + 1] in self.cir_devices[dev].not_nextto):
+                    # log.cf.info('Not_NextTo violated')
+                    return False
+                elif (equals_index := self.cir_devices[dev].equals) and ind != equals_index:
+                    # log.cf.info('Equals violated')
+                    return False
+                elif [d for i, d in enumerate(placed) if (i < ind and d in self.cir_devices[dev].before)] or \
+                     [d for i, d in enumerate(placed) if (i > ind and d in self.cir_devices[dev].after)]:
+                    # log.cf.info('Before or After violated')
+                    return False
+                # TODO: add func to check after/before cond outside the chain (b/c rules could be invalid)
                 else:
-                    for chain in list(chains):
-                        print('for chain')
-                        if not [x for x in chain.after if x in dev_left]:  # should always be met for at least 1 chain
-                            f = max([i for i, x in enumerate(dev_placed) if x in chain.after], default=0)
-                            b = min([i for i, x in enumerate(dev_placed) if x in chain.before], default=len(dev_placed))
-                            print('outer while: ', f, b, f + len(chain.chain))
-                            while f + len(chain.chain) - 1 < b:
-                                print(f + len(chain.chain))
-                                print('b', b)
-                                temp_dev_placed = dev_placed
-                                temp_dev_left = dev_left
-                                failed = False
-                                print('while')
-                                for ind, dev in enumerate(chain.chain):
-                                    print('\nplaced: ', temp_dev_placed)
-                                    print('left: ', temp_dev_left)
-                                    print('dev: ', dev)
-                                    if check_rules(dev, f + ind, temp_dev_placed):
-                                        temp_dev_placed[f + ind] = dev
-                                        temp_dev_left.remove(dev)
-                                    else:
-                                        failed = True
-                                        break
-                                if not failed:
-                                    chains.remove(chain)
-                                    place_remaining_devices(chains, temp_dev_placed, temp_dev_left)
-                                f += 1
+                    # log.cf.info('Valid placement')
+                    return True
 
-            # if any device in the chain has an equals rule, determine start pos of first dev and proceed
-            # TODO: equals could be 0, which would be truthy false...
-            temp_dev_placed = dev_placed
-            temp_dev_left = dev_left
-            failed = False
-            if rev:
-                place_chains(chain[::-1], chain_num, False, dev_placed, dev_left, chains)
-            if eq_loc := next(((i, eq) for i, d in enumerate(chain) if (eq := self.cir_devices[d].equals)), None):
-                start_loc = eq_loc[1] - eq_loc[0]
-                for ind, dev in enumerate(list(chain)):
-                    print(start_loc + ind - 1)
-                    if check_rules(dev, ind, temp_dev_placed):
-                        temp_dev_placed[ind] = dev
-                        temp_dev_left.remove(dev)
-                if not failed:
-                    dev_placed = temp_dev_placed
-                    dev_left = temp_dev_left
-                    chains.remove(chain)  # TODO: chain not present...
-            if (i := chain_num + 1) < len(self.chains):
-                place_chains(self.chains[i].chain, i, self.chains[i].reversible, dev_placed, dev_left, chains)
+            def place_remaining_chains(c_objs, d_placed, d_left):
+
+                def reset():
+                    c_objs_copy = deepcopy(c_objs)
+                    d_placed_copy = deepcopy(d_placed)
+                    d_left_copy = deepcopy(d_left)
+                    return c_objs_copy, d_placed_copy, d_left_copy
+
+                if not d_left and d_placed not in self.valid_dev_orders:
+                    self.valid_dev_orders.append(d_placed)
+                    # log.cf.info(f'\nPLACED: {d_placed}')
+                    return
+                else:
+                    poss_next_chains = [c for c in c_objs if not any(d for d in c.after if d in d_left)]
+                    for chain in poss_next_chains:
+                        c_objs_copy, d_placed_copy, d_left_copy = reset()
+                        # index = 0
+                        index = max([i for i, v in enumerate(d_placed_copy) if v in chain.after], default=0)
+                        while 0 <= index <= len(d_placed_copy) - len(chain.chain):
+                            c_objs_copy, d_placed_copy, d_left_copy = reset()
+                            if all([check_rules(dev, index, d_placed_copy) for ind, dev in enumerate(chain.chain)]):
+                                d_placed_copy[index:index + len(chain.chain)] = chain.chain
+                                c_objs_copy.remove(chain)
+                                d_left_copy = [d for d in d_left_copy if d not in chain.chain]
+                                # print('\nCHAIN: ', chain)
+                                # print('PLACED: ', d_placed_copy)
+                                place_remaining_chains(c_objs_copy, d_placed_copy, d_left_copy)
+                                break
+                            index += 1
+
+            success = False
+            if eq := next(((eq_ind, i) for i, x in enumerate(chain_obj.chain)
+                           if (eq_ind := self.cir_devices[x].equals) is not None), None):
+                start = eq[0] - eq[1]
+                if len(dev_placed) < start + len(chain_obj.chain):
+                    dev_placed += ['']*(start + len(chain_obj.chain) - len(dev_placed))
+                if all([check_rules(dev, start + ind, dev_placed) for ind, dev in enumerate(chain_obj.chain)]):
+                    dev_placed[start:start+len(chain_obj.chain)] = chain_obj.chain
+                    success = True
+            if success:
+                chains_obj.pop(chain_num)
             else:
-                place_remaining_devices(chains, dev_placed, dev_left)  # chains w/ no 'equals' rules
+                chain_num += 1
+            if chain_num < len(chains_obj):
+                place_chains(chains_obj[chain_num], chains_obj, chain_num, dev_placed)
+                if chains_obj[chain_num].reversible:
+                    reversed = deepcopy(chains_obj[chain_num])
+                    reversed.chain.reverse()
+                    place_chains(reversed, chains_obj, chain_num, dev_placed)
+            else:
+                dev_left = []
+                for chain in chains_obj:
+                    for d in chain.chain:
+                        dev_left.append(d)
+
+                place_remaining_chains(chains_obj, dev_placed + ['']*len(dev_left), dev_left)
+
 
         # NOTE: MAIN SCRIPT TO EXECUTE FUNCTIONS ABOVE FOR FILE GENERATION #############################################
+        # First: Prep
+        consolidated_devices = consolidate_devices()
+        transfer_part_colors()
+        reformulate_rules(consolidated_devices)
         devices_left = list(self.cir_devices)
-        temp_devices_placed = [''] * len(devices_left)  # TODO: if equals go beyond this?
-        chains = self.chains
-        place_chains(chains[0].chain, 0, chains[0].reversible, temp_devices_placed, devices_left, chains)
-        print('VALID DEVICE ORDERS: ', self.valid_dev_orders)
+        create_chains(devices_left)
+        # log.cf.info(f'\nDevices: {self.cir_devices}')
+
+        # Second: Generate device orders
+        chains_copy = deepcopy(self.chains)
+        place_chains(chains_copy[0], chains_copy, 0, [])
+        if chains_copy[0].reversible:
+            reversed = deepcopy(chains_copy[0])
+            reversed.chain.reverse()
+            place_chains(reversed, chains_copy, 0, [])
+        # log.cf.info(f'\nValid Device Orders: {self.valid_dev_orders}')
+
+        # Third: Generate final part orders
+        selected_device_orders = []
+        for index in random.sample(range(0, len(self.valid_dev_orders)), min(5, len(self.valid_dev_orders))):
+            selected_device_orders.append(self.valid_dev_orders[index])
+        # log.cf.info(f'\nSelected Device Orders: {selected_device_orders}')
+
+        for order in selected_device_orders:
+            main_devices = []
+            for device in order:
+                if device in list(self.cassettes) or device in list(self.fenceposts):
+                    main_devices.append(device)
+            parts = []
+            for i, device in enumerate(main_devices):
+                if device in list(self.fenceposts):
+                    if len(parts) != 0 and i != len(main_devices) - 1:
+                        parts.append('_NONCE_PAD')
+                else:
+                    parts.extend(self.cassettes[device].inputs)
+                    parts.extend(self.cassettes[device].comps)
+            self.valid_circuits.append(parts)
+        log.cf.info(f'\nDPL FILES:'
+                    f'\n - Circuits Orders Selected')
+        log.cf.info(f'Selected Circuit Orders: {self.valid_circuits}')
 
         return self.valid_circuits
