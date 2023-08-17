@@ -21,19 +21,20 @@ last_log = "[None]"
 def config_logger(vname: str, ucfname: str, ow: bool):
     """
     Generates log file and initializes the Logger class (for print() statements) every time a Cello process is created.
-    :return: void
+    :return: None
     """
 
     log_file_name = 'logs/' + vname + '+' + ucfname + ((not ow) * datetime.now().strftime("_%Y-%m-%d_%H%M%S")) + '.log'
     logging.config.fileConfig('utils/logging.config', disable_existing_loggers=False,
                               defaults={'logfilename': log_file_name})
+    logging.getLogger('matplotlib.font_manager').disabled = True
     # sys.stdout = Logger(log_file_name)
 
 
 def reset_logs():
     """
     Resets the issue counts every time a new Cello process object is created.
-    :return: void
+    :return: None
     """
 
     global iter_num

@@ -43,6 +43,11 @@ class UCF:
     @staticmethod
     def __parse_helper(filepath, name):
         filepath = os.path.join(*filepath.split('/'))
+        # Communication Molecule filepaths
+        # CM_in_filepath = os.path.join(*'utils/comm_devices.input.json'.split('/'))         # normal sensor resp func
+        # CM_main_filepath = os.path.join(*'utils/comm_devices.json'.split('/'))             # hill response func
+        # CM_out_HR_filepath = os.path.join(*'utils/comm_devices.output.json'.split('/'))    # hill response func
+        # CM_out_UC_filepath = os.path.join(*'utils/comm_devices_c.output.json'.split('/'))  # normal unit conv func
         u = os.path.join(filepath, name + '.UCF.json')
         i = os.path.join(filepath, name + '.input.json')
         o = os.path.join(filepath, name + '.output.json')
@@ -52,6 +57,15 @@ class UCF:
             with open(f, 'r') as ucf:
                 try:
                     ucf = json.load(ucf)
+                    # if f == i:
+                    #     with open(CM_in_filepath, 'r') as comm_devices:
+                    #         ucf.extend(json.load(comm_devices))
+                    # elif f == u:
+                    #     with open(CM_main_filepath, 'r') as comm_devices:
+                    #         ucf.extend(json.load(comm_devices))
+                    # elif f == o:
+                    #     with open(CM_out_UC_filepath, 'r') as comm_devices:
+                    #         ucf.extend(json.load(comm_devices))
                     out.append(ucf)
                 except Exception as e:
                     debug_print(f'FAILED TO LOAD UCF {name}\nlocated at path: {f}')

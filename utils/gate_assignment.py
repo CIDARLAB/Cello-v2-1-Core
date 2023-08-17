@@ -96,11 +96,24 @@ class Input(IO):
             # self.states['high'] = self.ymax
             # self.states['low'] = self.ymin
             try:
+                # self.function = self.function.replace('^', '**')
+                # self.function = self.function.replace('$', '')
                 for p in params.keys():
                     locals()[p] = params[p]
                 for (lvl, val) in self.states.items():
                     STATE = val
+                    # NOTE: Assumes each input constitutes a single value and is either 'STATE' or 'x' in UCF-in
+                    # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
+                    #     STATE = val
+                    # elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
+                    #     x = val
+                    # else:
+                    #     log.cf.error("Cannot identify UCF-in function input parameter")
                     self.out_scores[lvl] = eval(self.function)
+                    # print('\n', self.name)
+                    # print(self.function)
+                    # print(self.params)
+                    # print(self.out_scores)
             except Exception as e:
                 debug_print(f'ERROR calculating input score for {str(self)}, with function {self.function}\n{e}')
         except Exception as e:
@@ -133,6 +146,12 @@ class Output(IO):
         """
         try:
             self.function = function
+            # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
+            #     STATE = val
+            # elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
+            #     x = val
+            # else:
+            #     log.cf.error("Cannot identify UCF-in function input parameter")
             self.unit_conversion = params['unit_conversion']
         except Exception as e:
             debug_print(f'Error adding evaluation parameters to {str(self)}\n{e}\n{function} | {params}')
@@ -214,7 +233,11 @@ class Gate:
         eval_params = self.gate_params[gate_name]
         for k in eval_params.keys():
             locals()[k] = eval_params[k]
-        x = in_comp  # UCF has to use 'x' as input_composition in the gate response_function
+        x = in_comp  # NOTE: UCF has to use 'x' as input_composition in the gate response_function
+        # print('\n', gate_name)
+        # print(eval_params)
+        # print(x)
+        # print(eval(self.hill_response))
         return eval(self.hill_response), gate_name
 
     def __str__(self):

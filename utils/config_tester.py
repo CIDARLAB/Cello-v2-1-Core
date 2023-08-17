@@ -57,8 +57,12 @@ def test_all_configs():
                     best = 0
                     try:
                         cello_config_test = CELLO3(v_name, ucf_name, 'sample_inputs/', 'test_all_configs_out/',
-                                            options={'yosys_cmd_choice': 1, 'verbose': False,    'log_overwrite': True,
-                                                     'print_iters': False,  'exhaustive': False, 'test_configs': True})
+                                                   options={'yosys_cmd_choice': 1,
+                                                            'verbose': False,
+                                                            'log_overwrite': True,
+                                                            'print_iters': False,
+                                                            'exhaustive': False,
+                                                            'test_configs': True})
                         exception = "Done"
                     except Exception as e:
                         log.cf.info("FAILED with error (will go to next iteration)!")

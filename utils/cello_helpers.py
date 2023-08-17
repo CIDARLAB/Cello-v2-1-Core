@@ -152,7 +152,7 @@ def print_json(chunk):
     log.cf.info(json.dumps(chunk, indent=4))
     
 
-def print_table(table):
+def print_table(table, also_logfile: bool = True) -> None:
     """
 
     :param table:
@@ -162,8 +162,11 @@ def print_table(table):
         log.cf.info("Table is empty.")
         return
 
-    for format in ['log', 'console']:  # For printing full decimals to log, fewer to console
-        if format == 'console':
+    formats = ['console']
+    if also_logfile:
+        formats.append('log')
+    for format in formats:  # For printing full decimals to log, fewer to console
+        if format == 'console':  # FIXME: only round in console
             rounded = []
             for r in table[1:]:
                 rounded_row = [round(v, 4) for v in r]
