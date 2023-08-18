@@ -96,24 +96,21 @@ class Input(IO):
             # self.states['high'] = self.ymax
             # self.states['low'] = self.ymin
             try:
-                # self.function = self.function.replace('^', '**')
-                # self.function = self.function.replace('$', '')
+                self.function = self.function.replace('^', '**')
+                self.function = self.function.replace('$', '')
                 for p in params.keys():
                     locals()[p] = params[p]
                 for (lvl, val) in self.states.items():
                     STATE = val
                     # NOTE: Assumes each input constitutes a single value and is either 'STATE' or 'x' in UCF-in
-                    # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
-                    #     STATE = val
-                    # elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
-                    #     x = val
-                    # else:
-                    #     log.cf.error("Cannot identify UCF-in function input parameter")
+                    if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
+                        STATE = val
+                    elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
+                        x = val
+                    else:
+                        log.cf.error("Cannot identify UCF-in function input parameter")
                     self.out_scores[lvl] = eval(self.function)
-                    # print('\n', self.name)
-                    # print(self.function)
-                    # print(self.params)
-                    # print(self.out_scores)
+                # print(f'\nIN - {self.name}: {self.params} -> {self.out_scores}')
             except Exception as e:
                 debug_print(f'ERROR calculating input score for {str(self)}, with function {self.function}\n{e}')
         except Exception as e:
@@ -135,7 +132,7 @@ class Output(IO):
         self.function = None
         self.unit_conversion = None
         self.out_score = None
-        self.params = []
+        self.params = {}
         self.IO = None
 
     def add_eval_params(self, function, params):
@@ -145,14 +142,15 @@ class Output(IO):
         :param params:
         """
         try:
-            self.function = function
-            # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
-            #     STATE = val
-            # elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
-            #     x = val
-            # else:
-            #     log.cf.error("Cannot identify UCF-in function input parameter")
-            self.unit_conversion = params['unit_conversion']
+            self.function = function.replace('^', '**')
+            if function == 'c * x':
+                # print('NORMAL')
+                self.unit_conversion = params['unit_conversion']
+            elif 'ymax' in function or 'ymin' in function:  # Usually: Hill response for Comm Molecule
+                # print('HILL')
+                self.params = params
+            else:
+                log.cf.error("Cannot identify UCF-in function input parameter")
         except Exception as e:
             debug_print(f'Error adding evaluation parameters to {str(self)}\n{e}\n{function} | {params}')
 
@@ -164,7 +162,10 @@ class Output(IO):
         """
         x = input_score
         c = self.unit_conversion
+        for p in self.params.keys():
+            locals()[p] = self.params[p]
         score = eval(self.function)
+        # print(f'\nOUT - {self.name}: {self.params} -> {score}')
         self.out_score = score
         return score
 
@@ -357,7 +358,7 @@ class AssignGraph:
                 input_scores = [self.get_score(x) for x in self.find_prev(node)]
                 x1 = input_scores[0]
                 x2 = input_scores[1]
-                x = eval(node.input_composition)  # basically x = x1 + x2
+                x = eval(node.input_composition)  # basically x = x1 + x2  # FIXME: Need to add this to CM outs?
             else:
                 # there shouldn't be gates other than NOR/NOT
                 raise Exception

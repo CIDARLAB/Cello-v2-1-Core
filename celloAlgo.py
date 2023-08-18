@@ -6,7 +6,6 @@ TODO: Link to articles and other sources
 import itertools
 import scipy
 import sys
-import os
 import csv
 
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
@@ -134,18 +133,26 @@ class CELLO3:
                             f' - Best Circuit Score: {self.best_score}')
 
                 log.cf.info(f'\nInputs ( input_response = {best_graph.inputs[0].function} ):')
+                in_labels = {}
                 for rnl_in, g_in in graph_inputs_for_printing:
                     log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of'
                                 f' {str(list(g_in.out_scores.items()))}')
+                    in_labels[rnl_in[0]] = g_in.name
 
                 log.cf.info(f'\nGates ( hill_response = {best_graph.gates[0].hill_response}, '
                             f'input_composition = {best_graph.gates[0].input_composition} ):')
+                gate_labels = {}
                 for rnl_g, g_g in graph_gates_for_printing:
-                    log.cf.info(f' - {rnl_g} {str(g_g)}')
+                    log.cf.info(f' - {rnl_g} {g_g}')
+                    gate_labels[rnl_g] = g_g.gate_in_use
 
                 log.cf.info(f'\nOutputs ( unit_conversion = {best_graph.outputs[0].function} ):')
+                out_labels = {}
                 for rnl_out, g_out in graph_outputs_for_printing:
                     log.cf.info(f' - {rnl_out} {str(g_out)}')
+                    out_labels[rnl_out[0]] = g_out.name
+
+                replace_diagram_labels(self.verilog_name, gate_labels, in_labels, out_labels)
 
                 # TRUTH TABLE/GATE SCORING
                 # filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
@@ -602,17 +609,13 @@ class CELLO3:
         '''
 
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
-        # CK: Now that we're using CMs, will change to have each gate independently use their own UCF-specified function
         input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
-        input_function_str = input_function_json[0]['equation'].replace('$', '')
-
         input_model_names = [i.name + '_model' for i in graph.inputs]
         input_params = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
                                     input_model_names)
-        # For using hill_response func in input...
-        # input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_params}
-        # input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
-        #                    input_functions.items() if (e['name'] == f)}
+        input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_params}
+        input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
+                           input_functions.items() if (e['name'] == f)}
         input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
 
         if self.print_iters:
@@ -620,8 +623,8 @@ class CELLO3:
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
-            print(f'input_response = {input_function_str}\n')  # TODO: Fix to print mult functions? w/ CM, mult possible
-            # print(f'Parameters in sensor_response function json: \n{input_function_params}\n')
+            print(f'input_response = {input_equations}\n')  # TODO: Fix to print mult functions w/ CM
+            print(f'Parameters in sensor_response function json: \n{input_params}\n')
 
         gate_groups = [(g.gate_id, g.gate_type) for g in graph.gates]
         gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
@@ -651,30 +654,32 @@ class CELLO3:
             print(f'linear_input_composition = {linear_input_composition}')
             print('\n')
 
+        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
+        output_function_str = output_function_json[0]['equation']
         output_names = [o.name for o in graph.outputs]
         output_model_names = [o + '_model' for o in output_names]
         output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
                                     output_model_names)
         output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in output_jsons}
-        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')[0]
-        output_function_str = output_function_json['equation']
+        output_functions = {c['name'][:-6]: c['functions']['response_function'] for c in output_jsons}
+        output_equations = {k: (e['equation']) for e in output_function_json for (k, f) in
+                           output_functions.items() if (e['name'] == f)}
 
         if self.print_iters:
             print('OUTPUT parameters: ')
             for op in output_params:
                 print(f'{op} {output_params[op]}')
-            print(f'output_response = {output_function_str}\n')
+            print(f'output_response = {output_equations}\n')
 
         # adding parameters to inputs
         for graph_input in graph.inputs:
-            if repr(graph_input) in input_params:  # and repr(graph_input) in input_equations:
-                # Make 1st param: input_equations[repr(graph_input)] (and other changes) to use Hill_response w/ inputs
-                graph_input.add_eval_params(input_function_str, input_params[repr(graph_input)])
+            if repr(graph_input) in input_params and repr(graph_input) in input_equations:
+                graph_input.add_eval_params(input_equations[repr(graph_input)], input_params[repr(graph_input)])
 
         # adding parameters to outputs
         for graph_output in graph.outputs:
-            if repr(graph_output) in output_params:
-                graph_output.add_eval_params(output_function_str, output_params[repr(graph_output)])
+            if repr(graph_output) in output_params and repr(graph_output) in output_equations:
+                graph_output.add_eval_params(output_equations[repr(graph_output)], output_params[repr(graph_output)])
 
         # adding parameters and individual gates to gates
         for (gate_group, gate_name) in gate_ids:
