@@ -15,10 +15,10 @@
                                  -output     OUT_FILENAME
 """
 
-# Set the backend to use (important for headless servers)  # FIXME: require install of matplotlib and dnaplotlib
+# Set the backend to use (important for headless servers)  # FIXME: req matplotlib, dnaplotlib installs & update readme
 import matplotlib
 
-matplotlib.use('Agg')  # FIXME: Add to readme?
+matplotlib.use('Agg')
 
 import sys
 import getopt

@@ -5,6 +5,7 @@
 		"group": "OC6",
 		"regulator": "OC6",
 		"gate_type": "NOR",
+		"color": "000000",
 		"model": "OC6_model",
 		"structure": "OC6_structure",
 		"description": "comms_device"
@@ -53,7 +54,7 @@
 			}
 		],
 		"outputs": [
-			"pLuxB"
+			"sLux"
 		],
 		"devices": [
 			{
@@ -67,7 +68,6 @@
 			{
 				"name": "OC6_a_cassette",
 				"components": [
-					"sLux",
 					"rLux"
 				]
 			}
@@ -79,6 +79,7 @@
 		"group": "OHC12",
 		"regulator": "OHC12",
 		"gate_type": "NOR",
+		"color": "000000",
 		"model": "OHC12_model",
 		"structure": "OHC12_structure",
 		"description": "comms_device"
@@ -127,7 +128,7 @@
 			}
 		],
 		"outputs": [
-			"pCin"
+			"sCin"
 		],
 		"devices": [
 			{
@@ -141,7 +142,6 @@
 			{
 				"name": "OHC12_a_cassette",
 				"components": [
-					"sCin",
 					"rCin"
 				]
 			}
@@ -153,6 +153,7 @@
 		"group": "pC-HSL",
 		"regulator": "pC-HSL",
 		"gate_type": "NOR",
+		"color": "000000",
 		"model": "pC-HSL_model",
 		"structure": "pC-HSL_structure",
 		"description": "comms_device"
@@ -202,7 +203,7 @@
 			}
 		],
 		"outputs": [
-			"pRpa"
+			"sRpa"
 		],
 		"devices": [
 			{
@@ -216,7 +217,6 @@
 			{
 				"name": "HSL_a_cassette",
 				"components": [
-					"sRpa",
 					"RpaR-AM2",
 					"rRpa"
 				]
@@ -229,6 +229,7 @@
 		"group": "DAPG",
 		"regulator": "DAPG",
 		"gate_type": "NOR",
+		"color": "000000",
 		"model": "DAPG_model",
 		"structure": "DAPG_structure",
 		"description": "comms_device"
@@ -277,7 +278,7 @@
 			}
 		],
 		"outputs": [
-			"pPhlF"
+			"sPhl"
 		],
 		"devices": [
 			{
@@ -291,7 +292,6 @@
 			{
 				"name": "DAPG_a_cassette",
 				"components": [
-					"sPhl",
 					"rPhl"
 				]
 			}

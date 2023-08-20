@@ -64,13 +64,13 @@ class UCF:
                     #     with open(CM_in_filepath, 'r') as comm_devices:
                     #         ucf.extend(json.load(comm_devices))
 
-                    # if f == u:  # FIXME: Add colors for gates or can't generate files...
+                    # if f == u:  # FIXME: If using this, make sure UCF parts/devs correct so diagram has requisite info
                     #     with open(CM_main_filepath, 'r') as comm_devices:
                     #         ucf.extend(json.load(comm_devices))
 
-                    if f == o:
-                        with open(CM_out_HR_filepath, 'r') as comm_devices:
-                            ucf.extend(json.load(comm_devices))
+                    # if f == o:
+                    #     with open(CM_out_HR_filepath, 'r') as comm_devices:
+                    #         ucf.extend(json.load(comm_devices))
 
                     # if f == o:
                     #     with open(CM_out_UC_filepath, 'r') as comm_devices:

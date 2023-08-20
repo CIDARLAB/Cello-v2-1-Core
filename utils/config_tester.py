@@ -1,5 +1,5 @@
 """
-Tests all possible combinations of Verilogs and UCFs in the sample_inputs folder. By default does 1000 dual_annealing
+Tests all possible combinations of Verilogs and UCFs in the inputs folder. By default does 1000 dual_annealing
 iterations per config.  Also produces a csv that summarizes the results.
 TEAM: Note this is still being fixed up since merge & not fully working!\n\n'  # TODO: Remove line
 """
@@ -13,10 +13,10 @@ import csv
 
 
 # TODO: implement more robust exception handling
-def test_all_configs():
+def test_all_configs(input_folder: str):
     """
     This utility will run through every combination of configuration files currently
-    available in the sample_inputs folder (matching every .v to every .ucf/input/out),
+    available in the inputs folder (matching every .v to every .ucf/input/out),
     completing the first 100 iterations, logging the outputs, and producing a CSV of
     the results. Intended for testing the validity of all configurations.
     """
@@ -24,21 +24,21 @@ def test_all_configs():
     # SCAN FILES
     v_names = []
     ucf_names = []
-    for f in listdir('sample_inputs/'):
-        if isfile(join('sample_inputs/', f)):
+    for f in listdir(f'{input_folder}'):
+        if isfile(join(f'{input_folder}', f)):
             if f.endswith('.v'):
                 v_names.append(f.split('.')[0])
             elif f.endswith('.UCF.json'):
                 ucf_names.append(f.split('.')[0])
 
     start_test = input(
-        '\n\nThis utility tests the validity of all combos of verilogs & UCFs in "sample_inputs" (not subdirectories).\n'
-        'By default, each valid config will only run for the first 1000 iterations to check for errors.\n'
-        '(Note: log overwrite is turned on by default.)\n'
-        'Each config produces a log file of the terminal output, and a csv summarizing all results is generated.\n\n'
-        'Total number of configurations to be tested: ' + str(len(v_names) * len(ucf_names)) + '\n'
-        '(Depending on the number of valid configs, this may take awhile to complete...)\n'
-        '\nDo you want to proceed? (y/n) ')
+        f'\n\nThis utility tests the validity of all combos of verilogs & UCFs in "{input_folder}" (not subfolders).\n'
+        f'By default, each valid config will only run for the first 1000 iterations to check for errors.\n'
+        f'(Note: log overwrite is turned on by default.)\n'
+        f'Each config produces a log file of the terminal output, and a csv summarizing all results is generated.\n\n'
+        f'Total number of configurations to be tested: ' + str(len(v_names) * len(ucf_names)) + '\n'
+        f'(Depending on the number of valid configs, this may take awhile to complete...)\n'
+        f'\nDo you want to proceed? (y/n) ')
 
     if start_test == 'y' or start_test == 'Y':
 
@@ -56,7 +56,7 @@ def test_all_configs():
                     # NOTE: Do *not* enable verbose
                     best = 0
                     try:
-                        cello_config_test = CELLO3(v_name, ucf_name, 'sample_inputs/', 'test_all_configs_out/',
+                        cello_config_test = CELLO3(v_name, ucf_name, f'{input_folder}', 'test_all_configs_out/',
                                                    options={'yosys_cmd_choice': 1,
                                                             'verbose': False,
                                                             'log_overwrite': True,

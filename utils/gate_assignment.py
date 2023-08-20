@@ -12,7 +12,6 @@ from ucf_class import *
 import log
 
 
-
 def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):
     """
 
@@ -188,12 +187,14 @@ class Gate:
         self.uid = ','.join(str(i) for i in self.inputs) + '-' + str(self.output)
         self.gate_params = {}
         self.hill_response = None
-        self.input_composition = None
+        self.response_func = None
+        self.input_comp = None
+        self.tandem_factor = None
         self.gate_in_use = None
         self.best_score = None
         self.IO = None
 
-    def add_eval_params(self, hill_response, input_composition, g_name, params):
+    def add_eval_params(self, gate_funcs, g_name, params):
         """
 
         :param hill_response:
@@ -201,8 +202,20 @@ class Gate:
         :param g_name:
         :param params:
         """
-        self.hill_response = hill_response
-        self.input_composition = input_composition
+        if 'response_function' in gate_funcs.keys():
+            self.response_func = gate_funcs['response_function'].replace('^', '**')
+        else:
+            log.cf.error("Cannot find gate response_function in UCF; is it named 'response_function'?")
+        if 'input_composition' in gate_funcs.keys():
+            self.input_comp = gate_funcs['input_composition'].replace('^', '**')
+        else:
+            log.cf.error("Cannot find gate input_composition function in UCF; is it named 'input_composition'?")
+        if 'tandem_interference_factor' in gate_funcs.keys():
+            self.tandem_factor = gate_funcs['tandem_interference_factor'].replace('^', '**')
+            self.input_comp = self.input_comp.replace('t1', f'({self.tandem_factor})')
+            # TODO: Generalize tandem_inter_factor param
+        # self.hill_response = hill_response
+        # self.input_comp = input_composition
         self.gate_params[g_name] = params
 
     def eval_gates(self, in_comp):
@@ -213,7 +226,7 @@ class Gate:
         :return:
         """
 
-        if self.hill_response is not None and self.input_composition is not None:
+        if self.response_func is not None and self.input_comp is not None:
             # this means that add_eval_params was already called
             gate_scores = []
             for gname in self.gate_params.keys():
@@ -239,10 +252,10 @@ class Gate:
         # print(eval_params)
         # print(x)
         # print(eval(self.hill_response))
-        return eval(self.hill_response), gate_name
+        return eval(self.response_func), gate_name
 
     def __str__(self):
-        if self.hill_response is not None:
+        if self.response_func is not None:
             if self.gate_in_use is not None:
                 return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and ' \
                        f'output {self.output}, and best_gate = {self.gate_in_use}'
@@ -358,7 +371,11 @@ class AssignGraph:
                 input_scores = [self.get_score(x) for x in self.find_prev(node)]
                 x1 = input_scores[0]
                 x2 = input_scores[1]
-                x = eval(node.input_composition)  # basically x = x1 + x2  # FIXME: Need to add this to CM outs?
+                eval_params = node.gate_params
+                for k in eval_params.values():  # TODO: finish tandem function implementation
+                    for r in k:
+                        locals()[r] = k[r]
+                x = eval(node.input_comp)  # basically x = x1 + x2
             else:
                 # there shouldn't be gates other than NOR/NOT
                 raise Exception

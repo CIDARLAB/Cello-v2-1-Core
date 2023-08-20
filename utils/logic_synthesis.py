@@ -124,7 +124,7 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=Fals
     return True
 
 
-def replace_diagram_labels(v_name: str, gate_labels: dict[str], in_labels: dict[str], out_labels: dict[str]):
+def replace_techmap_diagram_labels(path: str, gate_labels: dict[str], in_labels: dict[str], out_labels: dict[str]):
     """
     Cleans up labels in YOSYS circuit diagram by using regex on the .dot file and regenerating the PDF via dot shell cmd
     :param v_name: str
@@ -132,9 +132,9 @@ def replace_diagram_labels(v_name: str, gate_labels: dict[str], in_labels: dict[
     :param in_labels: dict[str]
     :param out_labels: dict[str]
     """
-    with open(f'temp_out/{v_name}/{v_name}_yosys.dot', 'r') as dot_old:
+    with open(f'{path}_yosys.dot', 'r') as dot_old:
         lines = dot_old.readlines()
-        with open(f'temp_out/{v_name}/{v_name}_yosys.dot', 'w') as dot_new:
+        with open(f'{path}_yosys.dot', 'w') as dot_new:
             for line in lines:
                 if old_label := re.search(r'(shape=record.*)(?<=\$)(.+)(?=\\n\$)', line):
                     new_label = gate_labels[old_label[2]]
@@ -151,6 +151,5 @@ def replace_diagram_labels(v_name: str, gate_labels: dict[str], in_labels: dict[
                                       f'{old_label[2]}\\\\nPRIMARY_OUTPUT\\\\n{new_label}', line)
                 dot_new.write(line)
 
-    os.system(f'dot -otemp_out/{v_name}/{v_name}_technologyMapping.pdf -Tpdf '
-              f'temp_out/{v_name}/{v_name}_yosys.dot')
-    os.remove(f'temp_out/{v_name}/{v_name}_yosys.pdf')
+    os.system(f'dot -o{path}_technologyMapping.pdf -Tpdf {path}_yosys.dot')
+    os.remove(f'{path}_yosys.pdf')

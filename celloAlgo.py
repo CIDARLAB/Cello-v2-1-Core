@@ -140,7 +140,7 @@ class CELLO3:
                     in_labels[rnl_in[0]] = g_in.name
 
                 log.cf.info(f'\nGates ( hill_response = {best_graph.gates[0].hill_response}, '
-                            f'input_composition = {best_graph.gates[0].input_composition} ):')
+                            f'input_composition = {best_graph.gates[0].input_comp} ):')
                 gate_labels = {}
                 for rnl_g, g_g in graph_gates_for_printing:
                     log.cf.info(f' - {rnl_g} {g_g}')
@@ -152,16 +152,16 @@ class CELLO3:
                     log.cf.info(f' - {rnl_out} {str(g_out)}')
                     out_labels[rnl_out[0]] = g_out.name
 
-                replace_diagram_labels(self.verilog_name, gate_labels, in_labels, out_labels)
+                replace_techmap_diagram_labels(f'{out_path_}/{v_name}/{v_name}', gate_labels, in_labels, out_labels)
 
                 # TRUTH TABLE/GATE SCORING
-                # filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
-                filepath = f"temp_out/{self.verilog_name}/{self.verilog_name}"
+                # filepath = f"{out_path_}/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
+                filepath = f"{out_path_}{self.verilog_name}/{self.verilog_name}"
                 log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
                 tb = [truth_table_labels] + truth_table
                 print_table(tb)
                 print('(See log for more precision)')
-                os.makedirs(os.path.dirname(f'temp_out/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
+                os.makedirs(os.path.dirname(f'{out_path_}/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
                 with open(filepath + '_activity-table' + '.csv', 'w', newline='') as csvfile:
                     csv_writer = csv.writer(csvfile)
                     csv_writer.writerows(zip(*tb))
@@ -196,11 +196,11 @@ class CELLO3:
                 dna_designs.write_regulatory_info(filepath)
 
                 # SBOL DIAGRAM
-                log.cf.info("\n\nSBOL:")
+                print(' - ', end='')
                 plotter(f"{filepath}_plot_parameters.csv", f"{filepath}_dpl_part_information.csv",
                         f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
                         f"{filepath}_dpl.pdf")
-                log.cf.info('\n')
+                log.cf.info(' - SBOL and other DPL files generated')
 
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
@@ -631,6 +631,7 @@ class CELLO3:
         gate_query = query_helper(gates, 'group', [g[0] for g in gate_groups])
         gate_ids = [(g['group'], g['name']) for g in gate_query]
         gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
+        gate_func_names = gate_functions[0]['functions']
         gate_id_names = [i[1] + '_model' for i in gate_ids]
         gate_functions = query_helper(gate_functions, 'name', gate_id_names)
         gate_params = {
@@ -642,17 +643,20 @@ class CELLO3:
                 print(f'{f} {gate_params[f]}')
 
         ucf_main_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions')
-        hill_response = query_helper(ucf_main_functions, 'name', ['Hill_response'])[0]
-        try:
-            input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
-        except Exception as e:
-            raise Exception(f"UCF contains 'tandem' or no input_composition...") from e  # TODO: handle tandem?
-        hill_response_equation = hill_response['equation'].replace('^', '**')  # substitute power operator
-        linear_input_composition = input_composition['equation']
-        if self.print_iters:
-            print(f'hill_response = {hill_response_equation}')
-            print(f'linear_input_composition = {linear_input_composition}')
-            print('\n')
+        gate_funcs = {}
+        for func_type, func_name in gate_func_names.items():
+            if func_type not in ['toxicity', 'cytometry']:  # TODO: add cytometry and toxicity evaluation
+                gate_funcs[func_type] = query_helper(ucf_main_functions, 'name', [func_name])[0]['equation']
+        # try:
+        #     input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
+        # except Exception as e:
+        #     raise Exception(f"UCF contains 'tandem' or no input_composition...") from e  # TODO: handle tandem?
+        # hill_response_equation = gate_funcs['Hill_response']['equation'].replace('^', '**')  # substitute power operator
+        # linear_input_composition = gate_funcs['linear_input_composition']['equation']
+        # if self.print_iters:
+        #     print(f'hill_response = {hill_response_equation}')
+        #     print(f'linear_input_composition = {linear_input_composition}')
+        #     print('\n')
 
         output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
         output_function_str = output_function_json[0]['equation']
@@ -686,7 +690,7 @@ class CELLO3:
             gate_param = gate_params[gate_name]
             for graph_gate in graph.gates:
                 if graph_gate.gate_id == gate_group:
-                    graph_gate.add_eval_params(hill_response_equation, linear_input_composition, gate_name, gate_param)
+                    graph_gate.add_eval_params(gate_funcs, gate_name, gate_param)
 
         # NOTE: creating a truth table for each graph assignment
         num_inputs = len(graph.inputs)
@@ -895,6 +899,10 @@ if __name__ == '__main__':
     exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
     test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
 
+    # TODO: source UCF files from CELLO-UCF instead
+    in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
+    out_path_ = 'temp_out/'  # (any path to a local folder)
+
     figlet = r"""
     
     
@@ -918,9 +926,9 @@ if __name__ == '__main__':
         v_name_ = ""
         # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
         print(user_input := input(
-            '\n\nFor which Verilog file do you want a genetic circuit design and score to be generated?\n'
-            '(Hint: ___.v, without the .v, from the sample_inputs folder...or type \'help\' for more info.)\n\n'
-            'Verilog File: '))
+            f'\n\nFor which Verilog file do you want a genetic circuit design and score to be generated?\n'
+            f'(Hint: ___.v, without the .v, from the {in_path_[:-1]} folder...or type \'help\' for more info.)\n\n'
+            f'Verilog File: '))
 
         if user_input == 'help':
             print(f'\n\nHELP INFO:\n'
@@ -958,7 +966,7 @@ if __name__ == '__main__':
                 os.mkdir('test_all_configs_out')
             if not os.path.isdir('logs'):
                 os.mkdir('logs')
-            test_all_configs()
+            test_all_configs(out_path_)
 
         else:
             at_menus = False
@@ -1006,10 +1014,6 @@ if __name__ == '__main__':
                 print_iters = True
             if 'ex' in options_list:
                 exhaustive = True
-
-            # TODO: source UCF files from CELLO-UCF instead
-            in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
-            out_path_ = 'temp_out/'  # (any path to a local folder)
 
             Cello3Process = CELLO3(v_name_, ucf_name_, in_path_, out_path_,
                                    options={'yosys_cmd_choice': yosys_cmd_choice,

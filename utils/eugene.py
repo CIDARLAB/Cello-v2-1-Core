@@ -116,11 +116,11 @@ class EugeneObject:
         self.best_graphs = best_graphs
 
         # NOTE: first term corresponds to the UCF block from which the data were taken
-        self.structs_dict: dict[str, {}] = {}
+        self.structs_dict: dict[str, EugeneStruct] = {}
         '''in/gate/out name: EugeneStruct [See 'example_eugene_objects' for example data...]'''
-        self.parts_seq_dict: dict[str, {}] = {}
+        self.parts_seq_dict: dict[str, EugeneSequence] = {}
         '''part name: EugeneSequence [See 'example_eugene_objects' for example data...]'''
-        self.structs_cas_dict: dict[str, {}] = {}
+        self.structs_cas_dict: dict[str, EugeneCassette] = {}
         '''device var name: EugeneCassette [See 'example_eugene_objects' for example data...]'''
 
         self.parts_types: [str] = ['spacer', 'scar']  # always present; *all* associated parts used  # and terminator?
@@ -209,8 +209,7 @@ class EugeneObject:
                                         if c[1] == d['name']:
                                             c[3] = components
                                 else:  # TODO: improve robustness
-                                    cassette = ["", "", 0,
-                                                []]  # [~'X_a' name, 'X_cassette' name, #in cnt, [components]]
+                                    cassette = ["", "", 0, []]  # [~'X_a' name, 'X_cassette' name, #in cnt,[components]]
                                     for c in d['components']:
                                         if c.startswith('#in'):
                                             cassette[2] += 1
@@ -315,12 +314,12 @@ class EugeneObject:
                                                                      struct_cas_name=c[1],
                                                                      type=eu.type,
                                                                      inputs=[],
-                                                                     comps=c[3],
+                                                                     comps=list(c[3]),
                                                                      outputs=eu.outputs,
                                                                      color=eu.color,
                                                                      dev_rules=[],
                                                                      cir_rules=[])
-                        for i in range(c[2]):
+                        for i in range(int(c[2])):
                             if input_ < len(eu.inputs):
                                 output = self.structs_dict[eu.inputs[input_]].outputs[0]  # TODO: Only ever 1 'outputs'?
                                 input_ += 1
@@ -336,28 +335,31 @@ class EugeneObject:
         :return:
         """
 
-        def extract_rules(rule_sets) -> list[str]:
+        def extract_rules(rule_sets, func_type = 'AND') -> list[str]:  # FIXME: UCF5/6 have rules w/ non-extant device??
             """
             Recursively extract all rules from circuit or device ruleset and returns as a flat list of rules.
             :param rule_sets: List/dict of rules from 'device_rules' or 'circuit_rules' in UCFs
             :return: list[str]: Flat list of rules
             """
             flat_rules = []
+            if func_type == 'OR':
+                rule_sets = rule_sets[0]  # FIXME: Traverse all OR branches
             if type(rule_sets) == list:
                 for rule_set in rule_sets:
                     flat_rules.extend(extract_rules(rule_set))
                 return flat_rules
             elif type(rule_sets) == dict:
-                for k, v in rule_sets.items():
-                    if k == 'rules':
-                        flat_rules.extend(extract_rules(v))
+                if 'function' not in rule_sets.keys() or rule_sets['function'] == 'AND':
+                    flat_rules.extend(extract_rules(rule_sets['rules']))
+                else:
+                    flat_rules.extend(extract_rules(rule_sets['rules'], 'OR'))
             elif type(rule_sets) == str:  # i.e. a rule, at deepest layer
                 flat_rules = [rule_sets]
             else:
                 log.cf.error('rule_set type is unrecognized; cannot parse or flatten rule_sets.')
             return flat_rules
 
-        # TODO: comprehensive rule keywords?
+        # NOTE: Only comprehensive for our default set of UCFs
         rules_keywords = ['NOT', 'EQUALS',
                           'NEXTTO', 'CONTAINS',
                           'STARTSWITH', 'ENDSWITH',
@@ -397,6 +399,7 @@ class EugeneObject:
         # Get Circuit Rules  # FIXME: Needs to be extended for more complex rule layout (e.g. Eco5/6)
         circuit_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules')[0]
         self.circuit_rules = extract_rules(circuit_rules)
+        # print('FLATTENED RULES!: ', self.circuit_rules)
         circuit_rules = []
         for r in self.circuit_rules:
             # if r != 'ALL_FORWARD':
@@ -409,15 +412,15 @@ class EugeneObject:
                     if o in self.structs_cas_dict.keys():
                         if r not in circuit_rules:
                             circuit_rules.append(r)
-                        self.structs_cas_dict[o].cir_rules.append(r)
+                        # self.structs_cas_dict[o].cir_rules.append(r)
                     if o in self.parts_seq_dict.keys():
                         if r not in circuit_rules:
                             circuit_rules.append(r)
-                        self.parts_seq_dict[o].cir_rules.append(r)
+                        # self.parts_seq_dict[o].cir_rules.append(r)
                     if o in self.genlocs_fenceposts.keys():
                         if r not in circuit_rules:
                             circuit_rules.append(r)
-                        self.genlocs_fenceposts[o].append(r)
+                        # self.genlocs_fenceposts[o].append(r)
         self.circuit_rules = circuit_rules
 
         # Debugging info...
@@ -427,7 +430,7 @@ class EugeneObject:
         # log.cf.info(f'\nself.structs_cas_dict:\n{self.structs_cas_dict}')
         # log.cf.info(f'\nself.device_rules:\n{self.device_rules}')
         # log.cf.info(f'\nself.circuit_rules:\n{self.circuit_rules}')
-        # log.cf.info(f'\nself.genlocs_fenceposts:\n{self.genlocs_fenceposts}')
+        # log.cf.info(f'\nself.genlocs_fenceposts:\n{self.genlocs_fenceposts}\n')
 
         return self.structs_dict, self.structs_cas_dict, self.parts_seq_dict, self.device_rules, self.circuit_rules, \
                self.genlocs_fenceposts
