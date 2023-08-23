@@ -1,6 +1,8 @@
 """
 This software package is for designing genetic circuits based on logic gate designs written in the Verilog format.
 TODO: Link to articles and other sources
+TODO: Add space/time complexity metrics for simulated annealing to the readme?
+TODO: Also update examples and assets folder...
 """
 
 import itertools
@@ -8,6 +10,7 @@ import scipy
 import sys
 import os
 import csv
+import time
 
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from gate_assignment import *
@@ -134,27 +137,35 @@ class CELLO3:
                             f' - Best Circuit Score: {self.best_score}')
 
                 log.cf.info(f'\nInputs ( input_response = {best_graph.inputs[0].function} ):')
+                in_labels = {}
                 for rnl_in, g_in in graph_inputs_for_printing:
                     log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of'
                                 f' {str(list(g_in.out_scores.items()))}')
+                    in_labels[rnl_in[0]] = g_in.name
 
                 log.cf.info(f'\nGates ( hill_response = {best_graph.gates[0].hill_response}, '
-                            f'input_composition = {best_graph.gates[0].input_composition} ):')
+                            f'input_composition = {best_graph.gates[0].input_comp} ):')
+                gate_labels = {}
                 for rnl_g, g_g in graph_gates_for_printing:
-                    log.cf.info(f' - {rnl_g} {str(g_g)}')
+                    log.cf.info(f' - {rnl_g} {g_g}')
+                    gate_labels[rnl_g] = g_g.gate_in_use
 
                 log.cf.info(f'\nOutputs ( unit_conversion = {best_graph.outputs[0].function} ):')
+                out_labels = {}
                 for rnl_out, g_out in graph_outputs_for_printing:
                     log.cf.info(f' - {rnl_out} {str(g_out)}')
+                    out_labels[rnl_out[0]] = g_out.name
+
+                replace_techmap_diagram_labels(f'{out_path_}/{v_name}/{v_name}', gate_labels, in_labels, out_labels)
 
                 # TRUTH TABLE/GATE SCORING
-                # filepath = f"temp_out/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
-                filepath = f"temp_out/{self.verilog_name}/{self.verilog_name}"
+                # filepath = f"{out_path_}/{self.verilog_name}/{self.ucf_name}/{self.verilog_name}+{self.ucf_name}"
+                filepath = f"{out_path_}{self.verilog_name}/{self.verilog_name}"
                 log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
                 tb = [truth_table_labels] + truth_table
                 print_table(tb)
                 print('(See log for more precision)')
-                os.makedirs(os.path.dirname(f'temp_out/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
+                os.makedirs(os.path.dirname(f'{out_path_}/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
                 with open(filepath + '_activity-table' + '.csv', 'w', newline='') as csvfile:
                     csv_writer = csv.writer(csvfile)
                     csv_writer.writerows(zip(*tb))
@@ -189,11 +200,11 @@ class CELLO3:
                 dna_designs.write_regulatory_info(filepath)
 
                 # SBOL DIAGRAM
-                log.cf.info("\n\nSBOL:")
+                print(' - ', end='')
                 plotter(f"{filepath}_plot_parameters.csv", f"{filepath}_dpl_part_information.csv",
                         f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
                         f"{filepath}_dpl.pdf")
-                log.cf.info('\n')
+                log.cf.info(' - SBOL and other DPL files generated')
 
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
@@ -602,17 +613,13 @@ class CELLO3:
         '''
 
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
-        # CK: Now that we're using CMs, will change to have each gate independently use their own UCF-specified function
         input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
-        input_function_str = input_function_json[0]['equation'].replace('$', '')
-
         input_model_names = [i.name + '_model' for i in graph.inputs]
         input_params = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
                                     input_model_names)
-        # For using hill_response func in input...
-        # input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_params}
-        # input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
-        #                    input_functions.items() if (e['name'] == f)}
+        input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_params}
+        input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
+                           input_functions.items() if (e['name'] == f)}
         input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
 
         if self.print_iters:
@@ -620,14 +627,15 @@ class CELLO3:
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
-            print(f'input_response = {input_function_str}\n')  # TODO: Fix to print mult functions? w/ CM, mult possible
-            # print(f'Parameters in sensor_response function json: \n{input_function_params}\n')
+            print(f'input_response = {input_equations}\n')  # TODO: Fix to print mult functions w/ CM
+            print(f'Parameters in sensor_response function json: \n{input_params}\n')
 
         gate_groups = [(g.gate_id, g.gate_type) for g in graph.gates]
         gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
         gate_query = query_helper(gates, 'group', [g[0] for g in gate_groups])
         gate_ids = [(g['group'], g['name']) for g in gate_query]
         gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
+        gate_func_names = gate_functions[0]['functions']
         gate_id_names = [i[1] + '_model' for i in gate_ids]
         gate_functions = query_helper(gate_functions, 'name', gate_id_names)
         gate_params = {
@@ -639,49 +647,54 @@ class CELLO3:
                 print(f'{f} {gate_params[f]}')
 
         ucf_main_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions')
-        hill_response = query_helper(ucf_main_functions, 'name', ['Hill_response'])[0]
-        try:
-            input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
-        except Exception as e:
-            raise Exception(f"UCF contains 'tandem' or no input_composition...") from e  # TODO: handle tandem?
-        hill_response_equation = hill_response['equation'].replace('^', '**')  # substitute power operator
-        linear_input_composition = input_composition['equation']
-        if self.print_iters:
-            print(f'hill_response = {hill_response_equation}')
-            print(f'linear_input_composition = {linear_input_composition}')
-            print('\n')
+        gate_funcs = {}
+        for func_type, func_name in gate_func_names.items():
+            if func_type not in ['toxicity', 'cytometry']:  # TODO: add cytometry and toxicity evaluation
+                gate_funcs[func_type] = query_helper(ucf_main_functions, 'name', [func_name])[0]['equation']
+        # try:
+        #     input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
+        # except Exception as e:
+        #     raise Exception(f"UCF contains 'tandem' or no input_composition...") from e  # TODO: handle tandem?
+        # hill_response_equation = gate_funcs['Hill_response']['equation'].replace('^', '**')  # substitute power operator
+        # linear_input_composition = gate_funcs['linear_input_composition']['equation']
+        # if self.print_iters:
+        #     print(f'hill_response = {hill_response_equation}')
+        #     print(f'linear_input_composition = {linear_input_composition}')
+        #     print('\n')
 
+        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
+        output_function_str = output_function_json[0]['equation']
         output_names = [o.name for o in graph.outputs]
         output_model_names = [o + '_model' for o in output_names]
         output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
                                     output_model_names)
         output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in output_jsons}
-        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')[0]
-        output_function_str = output_function_json['equation']
+        output_functions = {c['name'][:-6]: c['functions']['response_function'] for c in output_jsons}
+        output_equations = {k: (e['equation']) for e in output_function_json for (k, f) in
+                           output_functions.items() if (e['name'] == f)}
 
         if self.print_iters:
             print('OUTPUT parameters: ')
             for op in output_params:
                 print(f'{op} {output_params[op]}')
-            print(f'output_response = {output_function_str}\n')
+            print(f'output_response = {output_equations}\n')
 
         # adding parameters to inputs
         for graph_input in graph.inputs:
-            if repr(graph_input) in input_params:  # and repr(graph_input) in input_equations:
-                # Make 1st param: input_equations[repr(graph_input)] (and other changes) to use Hill_response w/ inputs
-                graph_input.add_eval_params(input_function_str, input_params[repr(graph_input)])
+            if repr(graph_input) in input_params and repr(graph_input) in input_equations:
+                graph_input.add_eval_params(input_equations[repr(graph_input)], input_params[repr(graph_input)])
 
         # adding parameters to outputs
         for graph_output in graph.outputs:
-            if repr(graph_output) in output_params:
-                graph_output.add_eval_params(output_function_str, output_params[repr(graph_output)])
+            if repr(graph_output) in output_params and repr(graph_output) in output_equations:
+                graph_output.add_eval_params(output_equations[repr(graph_output)], output_params[repr(graph_output)])
 
         # adding parameters and individual gates to gates
         for (gate_group, gate_name) in gate_ids:
             gate_param = gate_params[gate_name]
             for graph_gate in graph.gates:
                 if graph_gate.gate_id == gate_group:
-                    graph_gate.add_eval_params(hill_response_equation, linear_input_composition, gate_name, gate_param)
+                    graph_gate.add_eval_params(gate_funcs, gate_name, gate_param)
 
         # NOTE: creating a truth table for each graph assignment
         num_inputs = len(graph.inputs)
@@ -697,10 +710,10 @@ class CELLO3:
 
         def get_tb_IO_index(node_name):
             """
-            TODO: add get_tb_IO_index docstring
+            returns index/col num of column with label ending in '_I/O'
 
             :param node_name: str
-            :return:
+            :return: int
             """
             return truth_table_labels.index(node_name + '_I/O')
 
@@ -731,10 +744,10 @@ class CELLO3:
 
             def get_tb_IO_val(node_name):
                 """
-                TODO: docstring
+                Uses get_tb_IO_index to return value of corresponding col.
 
-                :param node_name:
-                :return:
+                :param node_name: str
+                :return: float
                 """
                 tb_index_ = get_tb_IO_index(node_name)
                 return truth_table[r][tb_index_]
@@ -803,7 +816,6 @@ class CELLO3:
                     raise RecursionError
 
             for graph_output in graph.outputs:
-                # TODO: add function to test whether g_output is intermediate or final?
                 output_name = graph_output.name
                 graph_output_idx = truth_table_labels.index(output_name)
                 if truth_table[r][graph_output_idx] is None:
@@ -877,7 +889,7 @@ class CELLO3:
 
     def __del__(self):
 
-        log.cf.info('Cello object deleted...')
+        log.cf.info('Cello object deleted...\n')
 
 
 if __name__ == '__main__':
@@ -889,6 +901,10 @@ if __name__ == '__main__':
     print_iters = False  # Print to console info on *all* tested iterations (produces copious amounts of text)
     exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
     test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
+
+    # TODO: source UCF files from CELLO-UCF instead
+    in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
+    out_path_ = 'temp_out/'  # (any path to a local folder)
 
     figlet = r"""
     
@@ -913,9 +929,9 @@ if __name__ == '__main__':
         v_name_ = ""
         # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
         print(user_input := input(
-            '\n\nFor which Verilog file do you want a genetic circuit design and score to be generated?\n'
-            '(Hint: ___.v, without the .v, from the sample_inputs folder...or type \'help\' for more info.)\n\n'
-            'Verilog File: '))
+            f'\n\nFor which Verilog file do you want a genetic circuit design and score to be generated?\n'
+            f'(Hint: ___.v, without the .v, from the {in_path_[:-1]} folder...or type \'help\' for more info.)\n\n'
+            f'Verilog File: '))
 
         if user_input == 'help':
             print(f'\n\nHELP INFO:\n'
@@ -953,7 +969,7 @@ if __name__ == '__main__':
                 os.mkdir('test_all_configs_out')
             if not os.path.isdir('logs'):
                 os.mkdir('logs')
-            test_all_configs()
+            test_all_configs(out_path_)
 
         else:
             at_menus = False
@@ -963,11 +979,11 @@ if __name__ == '__main__':
 
             # 'Bth1C1G1T1': (3 in,  2 out,  7 gate_groups)
             # 'Eco1C1G1T1': (4 in,  2 out, 12 gate_groups)
-            # 'Eco1C2G2T2': (4 in,  2 out, 18 gate_groups)  # FIXME: uses a tandem Hill function...
+            # 'Eco1C2G2T2': (4 in,  2 out, 18 gate_groups)  # FIXME: uses a tandem Hill function... circular reference?
             # 'Eco2C1G3T1': (7 in,  2 out,  6 gate_groups)
-            # 'Eco2C1G5T1': (7 in,  3 out, 13 gate_groups)  # FIXME: seemingly incomplete input file...
-            # 'Eco2C1G6T1': (11 in, 3 out, 16 gate_groups)
-            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)
+            # 'Eco2C1G5T1': (7 in,  3 out, 13 gate_groups)  # FIXME: incomplete inputs? non-existent devices in rules
+            # 'Eco2C1G6T1': (11 in, 3 out, 16 gate_groups)  # FIXME: non-existent devices in rules
+            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)  # NOTE: longer execution times
             log.cf.info(ucf_name_ := input(
                 f'\n\nWhich one of the following UCF (User Constraint File) do you want to use? \n'
                 f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'
@@ -1002,10 +1018,7 @@ if __name__ == '__main__':
             if 'ex' in options_list:
                 exhaustive = True
 
-            # TODO: source UCF files from CELLO-UCF instead
-            in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
-            out_path_ = 'temp_out/'  # (any path to a local folder)
-
+            start_time = time.time()
             Cello3Process = CELLO3(v_name_, ucf_name_, in_path_, out_path_,
                                    options={'yosys_cmd_choice': yosys_cmd_choice,
                                             'verbose': verbose,
@@ -1013,5 +1026,6 @@ if __name__ == '__main__':
                                             'print_iters': print_iters,
                                             'exhaustive': exhaustive,
                                             'test_configs': test_configs})
+            log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
 
-    log.cf.info("\nExiting Cello...")
+    log.cf.info("Exiting Cello...")

@@ -11,3 +11,4 @@ __pycache__/
 temp_out/*
 outputs/*
 test_all_configs_out/*
+.bat

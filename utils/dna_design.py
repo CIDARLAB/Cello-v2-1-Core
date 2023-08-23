@@ -229,9 +229,15 @@ class DNADesign:
             """
             for device in self.cassettes:
                 for part in list(self.cassettes[device].comps):
-                    self.sequences[part].color = self.cassettes[device].color
+                    if self.cassettes[device].color:
+                        self.sequences[part].color = self.cassettes[device].color
+                    else:
+                        self.sequences[part].color = '000000'
                 for part in list(self.cassettes[device].outputs):
-                    self.sequences[part].color = self.cassettes[device].color
+                    if self.cassettes[device].color:
+                        self.sequences[part].color = self.cassettes[device].color
+                    else:
+                        self.sequences[part].color = '000000'
 
         # NOTE: 2. FUNCS TO SIMPLIFY THE RULES
         # rules types: 'NOT', 'EQUALS', 'NEXTTO', 'CONTAINS', 'STARTSWITH', 'ENDSWITH', 'BEFORE', 'AFTER', 'ALL_FORWARD'
@@ -337,12 +343,10 @@ class DNADesign:
         def place_chains(chain_obj, chains_obj, chain_num, dev_placed):
             """
 
-            :param chain:
+            :param chain_obj:
+            :param chains_obj:
             :param chain_num:
-            :param rev:
             :param dev_placed:
-            :param dev_left:
-            :param chains:
             """
             def check_rules(dev, ind, placed):
                 """
@@ -353,31 +357,31 @@ class DNADesign:
                 :return:
                 """
                 if ind < 0:
-                    # log.cf.info('Index less than 0')
+                    # print('Index less than 0')
                     return False
                 elif placed[ind] != '':
-                    # log.cf.info('Already taken')
+                    # print('Already taken')
                     return False
                 elif ind == 0 and self.cir_devices[dev].not_startswith:
-                    # log.cf.info('Startswith violated')
+                    # print('Startswith violated')
                     return False
                 elif next((d for d in placed[0:ind] if d != '' and self.cir_devices[d].endswith), None):
-                    # log.cf.info('Endswith violated')
+                    # print('Endswith violated')
                     return False
                 elif placed[ind - 1] in self.cir_devices[dev].not_nextto or \
                      (ind + 1 < len(placed) and placed[ind + 1] in self.cir_devices[dev].not_nextto):
-                    # log.cf.info('Not_NextTo violated')
+                    # print('Not_NextTo violated')
                     return False
                 elif (equals_index := self.cir_devices[dev].equals) and ind != equals_index:
-                    # log.cf.info('Equals violated')
+                    # print('Equals violated')
                     return False
                 elif [d for i, d in enumerate(placed) if (i < ind and d in self.cir_devices[dev].before)] or \
                      [d for i, d in enumerate(placed) if (i > ind and d in self.cir_devices[dev].after)]:
-                    # log.cf.info('Before or After violated')
+                    # print('Before or After violated')
                     return False
                 # TODO: add func to check after/before cond outside the chain (b/c rules could be invalid)
                 else:
-                    # log.cf.info('Valid placement')
+                    # print('Valid placement')
                     return True
 
             def place_remaining_chains(c_objs, d_placed, d_left):
@@ -390,15 +394,19 @@ class DNADesign:
 
                 if not d_left and d_placed not in self.valid_dev_orders:
                     self.valid_dev_orders.append(d_placed)
-                    # log.cf.info(f'\nPLACED: {d_placed}')
+                    log.cf.info(f'\nORDER VALID: {d_placed}')
                     return
-                else:
+                # else:
+                elif len(self.valid_dev_orders) < 15:  # TODO: Ensures sufficient variety of DPLs?  Appropriate #?
                     poss_next_chains = [c for c in c_objs if not any(d for d in c.after if d in d_left)]
+                    placed = 0
                     for chain in poss_next_chains:
                         c_objs_copy, d_placed_copy, d_left_copy = reset()
-                        # index = 0
+                        # index = 0  # TODO: narrow placement range?
+                        end = min([i for i, v in enumerate(d_placed_copy) if v in chain.before], default=len(d_placed_copy))
                         index = max([i for i, v in enumerate(d_placed_copy) if v in chain.after], default=0)
-                        while 0 <= index <= len(d_placed_copy) - len(chain.chain):
+                        while 0 <= index <= min(len(d_placed_copy) - len(chain.chain), end):  # TODO: Better?
+                        # while 0 <= index <= len(d_placed_copy) - len(chain.chain):
                             c_objs_copy, d_placed_copy, d_left_copy = reset()
                             if all([check_rules(dev, index, d_placed_copy) for ind, dev in enumerate(chain.chain)]):
                                 d_placed_copy[index:index + len(chain.chain)] = chain.chain
@@ -407,8 +415,11 @@ class DNADesign:
                                 # print('\nCHAIN: ', chain)
                                 # print('PLACED: ', d_placed_copy)
                                 place_remaining_chains(c_objs_copy, d_placed_copy, d_left_copy)
+                                placed += 1
                                 break
                             index += 1
+                        if placed > 2:  # TODO: Ensures valid result (at least for any demoed configs)?  Appropriate #?
+                            break
 
             success = False
             if eq := next(((eq_ind, i) for i, x in enumerate(chain_obj.chain)
@@ -435,10 +446,44 @@ class DNADesign:
                     for d in chain.chain:
                         dev_left.append(d)
 
+                # print(f'\nPARTIALLY PLACED: {dev_placed}')  # TODO: Doesn't know invalid via not_nextto ?
                 place_remaining_chains(chains_obj, dev_placed + ['']*len(dev_left), dev_left)
 
-
         # NOTE: MAIN SCRIPT TO EXECUTE FUNCTIONS ABOVE FOR FILE GENERATION #############################################
+
+        def cycle_thru_alt_rulesets():  # TODO: Finish setting up ruleset traversal
+
+            rules_keywords = ['NOT', 'EQUALS',
+                              'NEXTTO', 'CONTAINS',
+                              'STARTSWITH', 'ENDSWITH',
+                              'BEFORE', 'AFTER',
+                              'ALL_FORWARD']
+
+            all_things = list(self.sequences.keys()) + \
+                         list(self.cassettes.keys()) + \
+                         list(self.fenceposts.keys())
+
+            for r in self.circuit_rules:
+                operands = [word for word in r.split() if word not in rules_keywords and not word.startswith('[')]
+                if len(operands) == 0:
+                    if r not in self.circuit_rules:
+                        self.circuit_rules.append(r)
+                elif all([1 if o in all_things else 0 for o in operands]):
+                    for o in operands:
+                        if o in self.cassettes.keys():
+                            self.cassettes[o].cir_rules.append(r)
+                        if o in self.sequences.keys():
+                            self.sequences[o].cir_rules.append(r)
+                        if o in self.fenceposts.keys():
+                            self.fenceposts[o].append(r)
+
+            # print(self.circuit_rules)
+            # print(self.cassettes)
+            # print(self.sequences)
+            # print(self.fenceposts)
+
+        cycle_thru_alt_rulesets()
+
         # First: Prep
         consolidated_devices = consolidate_devices()
         transfer_part_colors()
@@ -462,7 +507,7 @@ class DNADesign:
             selected_device_orders.append(self.valid_dev_orders[index])
         # log.cf.info(f'\nSelected Device Orders: {selected_device_orders}')
 
-        for order in selected_device_orders:
+        for order in selected_device_orders:  # TODO: Stop at first 5?
             main_devices = []
             for device in order:
                 if device in list(self.cassettes) or device in list(self.fenceposts):
@@ -477,7 +522,8 @@ class DNADesign:
                     parts.extend(self.cassettes[device].comps)
             self.valid_circuits.append(parts)
         log.cf.info(f'\nDPL FILES:'
-                    f'\n - Circuits Orders Selected')
-        log.cf.info(f'Selected Circuit Orders: {self.valid_circuits}')
+                    f'\n - Circuit orders selected...')
+        for circuit_order in self.valid_circuits:
+            log.cf.info(f'   + {circuit_order}')
 
-        return self.valid_circuits
+        return self.valid_circuits  # FIXME: Add outer loop for Eco5/6, Fix tandem functions...

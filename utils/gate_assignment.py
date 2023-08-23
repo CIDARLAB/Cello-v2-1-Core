@@ -12,7 +12,6 @@ from ucf_class import *
 import log
 
 
-
 def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):
     """
 
@@ -96,24 +95,21 @@ class Input(IO):
             # self.states['high'] = self.ymax
             # self.states['low'] = self.ymin
             try:
-                # self.function = self.function.replace('^', '**')
-                # self.function = self.function.replace('$', '')
+                self.function = self.function.replace('^', '**')
+                self.function = self.function.replace('$', '')
                 for p in params.keys():
                     locals()[p] = params[p]
                 for (lvl, val) in self.states.items():
                     STATE = val
                     # NOTE: Assumes each input constitutes a single value and is either 'STATE' or 'x' in UCF-in
-                    # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
-                    #     STATE = val
-                    # elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
-                    #     x = val
-                    # else:
-                    #     log.cf.error("Cannot identify UCF-in function input parameter")
+                    if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
+                        STATE = val
+                    elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
+                        x = val
+                    else:
+                        log.cf.error("Cannot identify UCF-in function input parameter")
                     self.out_scores[lvl] = eval(self.function)
-                    # print('\n', self.name)
-                    # print(self.function)
-                    # print(self.params)
-                    # print(self.out_scores)
+                # print(f'\nIN - {self.name}: {self.params} -> {self.out_scores}')
             except Exception as e:
                 debug_print(f'ERROR calculating input score for {str(self)}, with function {self.function}\n{e}')
         except Exception as e:
@@ -135,7 +131,7 @@ class Output(IO):
         self.function = None
         self.unit_conversion = None
         self.out_score = None
-        self.params = []
+        self.params = {}
         self.IO = None
 
     def add_eval_params(self, function, params):
@@ -145,14 +141,15 @@ class Output(IO):
         :param params:
         """
         try:
-            self.function = function
-            # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
-            #     STATE = val
-            # elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
-            #     x = val
-            # else:
-            #     log.cf.error("Cannot identify UCF-in function input parameter")
-            self.unit_conversion = params['unit_conversion']
+            self.function = function.replace('^', '**')
+            if function == 'c * x':
+                # print('NORMAL')
+                self.unit_conversion = params['unit_conversion']
+            elif 'ymax' in function or 'ymin' in function:  # Usually: Hill response for Comm Molecule
+                # print('HILL')
+                self.params = params
+            else:
+                log.cf.error("Cannot identify UCF-in function input parameter")
         except Exception as e:
             debug_print(f'Error adding evaluation parameters to {str(self)}\n{e}\n{function} | {params}')
 
@@ -164,7 +161,10 @@ class Output(IO):
         """
         x = input_score
         c = self.unit_conversion
+        for p in self.params.keys():
+            locals()[p] = self.params[p]
         score = eval(self.function)
+        # print(f'\nOUT - {self.name}: {self.params} -> {score}')
         self.out_score = score
         return score
 
@@ -187,12 +187,14 @@ class Gate:
         self.uid = ','.join(str(i) for i in self.inputs) + '-' + str(self.output)
         self.gate_params = {}
         self.hill_response = None
-        self.input_composition = None
+        self.response_func = None
+        self.input_comp = None
+        self.tandem_factor = None
         self.gate_in_use = None
         self.best_score = None
         self.IO = None
 
-    def add_eval_params(self, hill_response, input_composition, g_name, params):
+    def add_eval_params(self, gate_funcs, g_name, params):
         """
 
         :param hill_response:
@@ -200,8 +202,20 @@ class Gate:
         :param g_name:
         :param params:
         """
-        self.hill_response = hill_response
-        self.input_composition = input_composition
+        if 'response_function' in gate_funcs.keys():
+            self.response_func = gate_funcs['response_function'].replace('^', '**')
+        else:
+            log.cf.error("Cannot find gate response_function in UCF; is it named 'response_function'?")
+        if 'input_composition' in gate_funcs.keys():
+            self.input_comp = gate_funcs['input_composition'].replace('^', '**')
+        else:
+            log.cf.error("Cannot find gate input_composition function in UCF; is it named 'input_composition'?")
+        if 'tandem_interference_factor' in gate_funcs.keys():
+            self.tandem_factor = gate_funcs['tandem_interference_factor'].replace('^', '**')
+            self.input_comp = self.input_comp.replace('t1', f'({self.tandem_factor})')
+            # TODO: Generalize tandem_inter_factor param
+        # self.hill_response = hill_response
+        # self.input_comp = input_composition
         self.gate_params[g_name] = params
 
     def eval_gates(self, in_comp):
@@ -212,7 +226,7 @@ class Gate:
         :return:
         """
 
-        if self.hill_response is not None and self.input_composition is not None:
+        if self.response_func is not None and self.input_comp is not None:
             # this means that add_eval_params was already called
             gate_scores = []
             for gname in self.gate_params.keys():
@@ -238,10 +252,10 @@ class Gate:
         # print(eval_params)
         # print(x)
         # print(eval(self.hill_response))
-        return eval(self.hill_response), gate_name
+        return eval(self.response_func), gate_name
 
     def __str__(self):
-        if self.hill_response is not None:
+        if self.response_func is not None:
             if self.gate_in_use is not None:
                 return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and ' \
                        f'output {self.output}, and best_gate = {self.gate_in_use}'
@@ -313,9 +327,9 @@ class AssignGraph:
                 for g in self.gates:
                     if g.output == i_no:
                         prevs.append(g)
-                for o in self.outputs:
-                    if o.id == i_no:
-                        prevs.append(o)
+                # for o in self.outputs:  # TODO: needed for consecutive outputs?  needed for CMs?
+                #     if o.id == i_no:
+                #         prevs.append(o)
                 for i in self.inputs:
                     if i.id == i_no:
                         prevs.append(i)
@@ -357,7 +371,11 @@ class AssignGraph:
                 input_scores = [self.get_score(x) for x in self.find_prev(node)]
                 x1 = input_scores[0]
                 x2 = input_scores[1]
-                x = eval(node.input_composition)  # basically x = x1 + x2
+                eval_params = node.gate_params
+                for k in eval_params.values():  # TODO: finish tandem function implementation
+                    for r in k:
+                        locals()[r] = k[r]
+                x = eval(node.input_comp)  # basically x = x1 + x2
             else:
                 # there shouldn't be gates other than NOR/NOT
                 raise Exception

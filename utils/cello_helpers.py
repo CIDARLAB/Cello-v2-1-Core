@@ -155,6 +155,7 @@ def print_json(chunk):
 def print_table(table, also_logfile: bool = True) -> None:
     """
 
+    :param also_logfile:
     :param table:
     :return:
     """
@@ -164,9 +165,9 @@ def print_table(table, also_logfile: bool = True) -> None:
 
     formats = ['console']
     if also_logfile:
-        formats.append('log')
+        formats.insert(0, 'log')
     for format in formats:  # For printing full decimals to log, fewer to console
-        if format == 'console':  # FIXME: only round in console
+        if format == 'console':
             rounded = []
             for r in table[1:]:
                 rounded_row = [round(v, 4) for v in r]
