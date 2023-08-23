@@ -335,7 +335,7 @@ class EugeneObject:
         :return:
         """
 
-        def extract_rules(rule_sets, func_type = 'AND') -> list[str]:  # FIXME: UCF5/6 have rules w/ non-extant device??
+        def extract_rules(rule_sets, func_type = 'AND') -> list[str]:  # FIXME: UCF5/6 have rules w/ non-extant devices?
             """
             Recursively extract all rules from circuit or device ruleset and returns as a flat list of rules.
             :param rule_sets: List/dict of rules from 'device_rules' or 'circuit_rules' in UCFs

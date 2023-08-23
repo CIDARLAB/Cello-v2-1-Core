@@ -1,12 +1,16 @@
 """
 This software package is for designing genetic circuits based on logic gate designs written in the Verilog format.
 TODO: Link to articles and other sources
+TODO: Add space/time complexity metrics for simulated annealing to the readme?
+TODO: Also update examples and assets folder...
 """
 
 import itertools
 import scipy
 import sys
+import os
 import csv
+import time
 
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from gate_assignment import *
@@ -706,10 +710,10 @@ class CELLO3:
 
         def get_tb_IO_index(node_name):
             """
-            TODO: add get_tb_IO_index docstring
+            returns index/col num of column with label ending in '_I/O'
 
             :param node_name: str
-            :return:
+            :return: int
             """
             return truth_table_labels.index(node_name + '_I/O')
 
@@ -740,10 +744,10 @@ class CELLO3:
 
             def get_tb_IO_val(node_name):
                 """
-                TODO: docstring
+                Uses get_tb_IO_index to return value of corresponding col.
 
-                :param node_name:
-                :return:
+                :param node_name: str
+                :return: float
                 """
                 tb_index_ = get_tb_IO_index(node_name)
                 return truth_table[r][tb_index_]
@@ -812,7 +816,6 @@ class CELLO3:
                     raise RecursionError
 
             for graph_output in graph.outputs:
-                # TODO: add function to test whether g_output is intermediate or final?
                 output_name = graph_output.name
                 graph_output_idx = truth_table_labels.index(output_name)
                 if truth_table[r][graph_output_idx] is None:
@@ -886,7 +889,7 @@ class CELLO3:
 
     def __del__(self):
 
-        log.cf.info('Cello object deleted...')
+        log.cf.info('Cello object deleted...\n')
 
 
 if __name__ == '__main__':
@@ -976,11 +979,11 @@ if __name__ == '__main__':
 
             # 'Bth1C1G1T1': (3 in,  2 out,  7 gate_groups)
             # 'Eco1C1G1T1': (4 in,  2 out, 12 gate_groups)
-            # 'Eco1C2G2T2': (4 in,  2 out, 18 gate_groups)  # FIXME: uses a tandem Hill function...
+            # 'Eco1C2G2T2': (4 in,  2 out, 18 gate_groups)  # FIXME: uses a tandem Hill function... circular reference?
             # 'Eco2C1G3T1': (7 in,  2 out,  6 gate_groups)
-            # 'Eco2C1G5T1': (7 in,  3 out, 13 gate_groups)  # FIXME: seemingly incomplete input file...
-            # 'Eco2C1G6T1': (11 in, 3 out, 16 gate_groups)
-            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)
+            # 'Eco2C1G5T1': (7 in,  3 out, 13 gate_groups)  # FIXME: incomplete inputs? non-existent devices in rules
+            # 'Eco2C1G6T1': (11 in, 3 out, 16 gate_groups)  # FIXME: non-existent devices in rules
+            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)  # NOTE: longer execution times
             log.cf.info(ucf_name_ := input(
                 f'\n\nWhich one of the following UCF (User Constraint File) do you want to use? \n'
                 f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'
@@ -1015,6 +1018,7 @@ if __name__ == '__main__':
             if 'ex' in options_list:
                 exhaustive = True
 
+            start_time = time.time()
             Cello3Process = CELLO3(v_name_, ucf_name_, in_path_, out_path_,
                                    options={'yosys_cmd_choice': yosys_cmd_choice,
                                             'verbose': verbose,
@@ -1022,5 +1026,6 @@ if __name__ == '__main__':
                                             'print_iters': print_iters,
                                             'exhaustive': exhaustive,
                                             'test_configs': test_configs})
+            log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
 
-    log.cf.info("\nExiting Cello...")
+    log.cf.info("Exiting Cello...")

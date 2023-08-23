@@ -339,7 +339,7 @@ class DNADesign:
             # log.cf.info(f'\nself.chains: {self.chains}')
 
         # NOTE: 4. FUNCS TO PLACE THE CHAINS OF DEVICES/PARTS
-        @deep_copy_params  # TODO: remove?
+        @deep_copy_params
         def place_chains(chain_obj, chains_obj, chain_num, dev_placed):
             """
 
@@ -394,15 +394,19 @@ class DNADesign:
 
                 if not d_left and d_placed not in self.valid_dev_orders:
                     self.valid_dev_orders.append(d_placed)
-                    # log.cf.info(f'\nORDER VALID: {d_placed}')
+                    log.cf.info(f'\nORDER VALID: {d_placed}')
                     return
-                else:
+                # else:
+                elif len(self.valid_dev_orders) < 15:  # TODO: Ensures sufficient variety of DPLs?  Appropriate #?
                     poss_next_chains = [c for c in c_objs if not any(d for d in c.after if d in d_left)]
+                    placed = 0
                     for chain in poss_next_chains:
                         c_objs_copy, d_placed_copy, d_left_copy = reset()
-                        # index = 0  # TODO: narrow placement range
+                        # index = 0  # TODO: narrow placement range?
+                        end = min([i for i, v in enumerate(d_placed_copy) if v in chain.before], default=len(d_placed_copy))
                         index = max([i for i, v in enumerate(d_placed_copy) if v in chain.after], default=0)
-                        while 0 <= index <= len(d_placed_copy) - len(chain.chain):
+                        while 0 <= index <= min(len(d_placed_copy) - len(chain.chain), end):  # TODO: Better?
+                        # while 0 <= index <= len(d_placed_copy) - len(chain.chain):
                             c_objs_copy, d_placed_copy, d_left_copy = reset()
                             if all([check_rules(dev, index, d_placed_copy) for ind, dev in enumerate(chain.chain)]):
                                 d_placed_copy[index:index + len(chain.chain)] = chain.chain
@@ -411,8 +415,11 @@ class DNADesign:
                                 # print('\nCHAIN: ', chain)
                                 # print('PLACED: ', d_placed_copy)
                                 place_remaining_chains(c_objs_copy, d_placed_copy, d_left_copy)
+                                placed += 1
                                 break
                             index += 1
+                        if placed > 2:  # TODO: Ensures valid result (at least for any demoed configs)?  Appropriate #?
+                            break
 
             success = False
             if eq := next(((eq_ind, i) for i, x in enumerate(chain_obj.chain)
