@@ -10,9 +10,9 @@ cd Cello-v3-Core/
 
 #
 ## Installing Python Packages
-You will need to install the Python packages for Graphviz, SciPy, Matplotlib, and DNAplotlib by running:
+You will need to install the Python packages for Graphviz, SciPy, Matplotlib, DNAplotlib, and Py4J by running:
 ```
-pip install graphviz scipy matplotlib dnaplotlib
+pip install graphviz scipy matplotlib dnaplotlib py4j
 ```
 
 #
@@ -80,28 +80,6 @@ You will see the results and the optimized design in the *outpath* folder.
 Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
 #
-### Try Oriole: 
-The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole](https://github.com/CIDARLAB/genetic-circuit-partitioning-new.git) to partition the design into smaller circuits, and then feed them into CELLO-3.0. 
-
-#
-### Complexity:
-Time Complexity (exhaustive algorithm):
-
-$$
-O((I)P(i) \cdot (G)P(g) \cdot (O)P(o))
-$$
-
-Where capital letters represent the available set of Inputs, Gates, and Outputs from the UCF, and lowercase letters represent the set of Inputs, Gates, and Outputs required by the logic circuit.
-
-Space Complexity (exhaustive algorithm):
-
-$$
-O(2^i \cdot (i+g+o))
-$$
-
-Only one iteration is stored in the memory at a time in the exhaustive pass. Each iteration has to store a truth table where each row has inputs toggled ON/OFF. The circuit for the intermediate logic circuit design placement is stored in memory with different data for each row.
-
-#
 ### Sample Inputs
 Can be found in the [inputs](/inputs/) folder. This includes the UCF files for Cello, as well as a few dozen 
 Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different a different folder to store them by speifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
@@ -115,6 +93,28 @@ Example resulting design outputted by Cello.
 ![example output](assets/ExampleOutput_Nand+Eco111.png)
 
 Please check the [assets](assets/) folder for further supplementary information.
+
+#
+### Try Oriole
+The size of the design that CELLO-3.0 can handle is limited by the number of genetic parts specified in the UCF files. To achieve intra-cellular partitioning for large circuit designs, consider first using [Oriole](https://github.com/CIDARLAB/genetic-circuit-partitioning-new.git) to partition the design into smaller circuits, and then feed them into CELLO-3.0. 
+
+#
+### Complexity
+**Time Complexity (exhaustive algorithm):**
+
+$$
+O((I)P(i) \cdot (G)P(g) \cdot (O)P(o))
+$$
+
+Where capital letters represent the available set of Inputs, Gates, and Outputs from the UCF, and lowercase letters represent the set of Inputs, Gates, and Outputs required by the logic circuit.
+
+**Space Complexity (exhaustive algorithm):**
+
+$$
+O(2^i \cdot (i+g+o))
+$$
+
+Only one iteration is stored in the memory at a time in the exhaustive pass. Each iteration has to store a truth table where each row has inputs toggled ON/OFF. The circuit for the intermediate logic circuit design placement is stored in memory with different data for each row.
 
 #
 ## Other Info
