@@ -73,7 +73,7 @@ class DNADesign:
     """
     Object that generates DNA design (i.e. order of parts/dna sequences).
     Produces a csv of the part order. (Corresponds to v2.0 'dpl_dna_designs.csv'.)
-    Relies heavily on the eugene.py object:
+    Relies heavily on the make_eugene_script.py object:
         ~ EugeneObject.structs_cas_dict{EugeneCassette{cassette name, inputs, outputs, components}}
 
     gen_seq()
