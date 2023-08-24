@@ -15,7 +15,7 @@ from gate_assignment import *
 from logic_synthesis import *
 from netlist_class import Netlist
 from ucf_class import UCF
-from eugene import *
+from make_eugene_script import *
 from dna_design import *
 from plotters import plotter
 
@@ -481,6 +481,7 @@ class CELLO3:
         :return: list: self.best_graphs: [(circuit_score, graph, tb, tb_labels)]
         """
         print_centered('Running EXHAUSTIVE gate-assignment algorithm...')
+        log.cf.info('Scoring potential gate assignments...')
         for I_perm in itertools.permutations(i_list, i):
             for O_perm in itertools.permutations(o_list, o):
                 for G_perm in itertools.permutations(g_list, g):
@@ -542,13 +543,13 @@ class CELLO3:
 
             block = '\u2588'  # str: █,   utf-8: '\u2588',   byte: b'\xe2\x96\x88'
             # block = '#'
-            num_blocks = int(round(self.iter_count / max_fun, 2) * 100)
-            ph_pb = '_' * 100
+            num_blocks = int(round(self.iter_count / max_fun, 2) * 50)
+            ph_pb = '_' * 50
             format_cnt = format(self.iter_count, ',')
             format_itr = format(max_fun, ',')
 
-            print(f'{ph_pb} #{format_cnt}/{format_itr} | Best Score: {self.best_score} | '
-                  f'Current Score: {circuit_score}\r'
+            print(f'{ph_pb} #{format_cnt}/{format_itr} | Best: {round(self.best_score, 2)} | '
+                  f'Current: {round(circuit_score, 2)}\r'
                   f'{num_blocks * block}', end='\r')
 
             if self.print_iters:
