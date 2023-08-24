@@ -394,7 +394,7 @@ class DNADesign:
 
                 if not d_left and d_placed not in self.valid_dev_orders:
                     self.valid_dev_orders.append(d_placed)
-                    log.cf.info(f'\nORDER VALID: {d_placed}')
+                    # log.cf.info(f'\nORDER VALID: {d_placed}')
                     return
                 # else:
                 elif len(self.valid_dev_orders) < 15:  # TODO: Ensures sufficient variety of DPLs?  Appropriate #?
