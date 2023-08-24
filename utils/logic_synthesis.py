@@ -151,5 +151,5 @@ def replace_techmap_diagram_labels(path: str, gate_labels: dict[str], in_labels:
                                       f'{old_label[2]}\\\\nPRIMARY_OUTPUT\\\\n{new_label}', line)
                 dot_new.write(line)
 
-    os.system(f'dot -o{path}_technologyMapping.pdf -Tpdf {path}_yosys.dot')
+    os.system(f'dot -o{path}_technologyMapping.png -Tpng {path}_yosys.dot')
     os.remove(f'{path}_yosys.pdf')
