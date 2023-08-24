@@ -187,6 +187,22 @@ class DNADesign:
                     csv_writer.writerow(new_row)
             reg_info.close()
 
+    def write_dna_sequences(self, filepath) -> None:
+        """
+
+        :param filepath:
+        """
+        dna_sequences = filepath + '_dna_sequences.csv'
+        os.makedirs(os.path.dirname(dna_sequences), exist_ok=True)
+        with open(dna_sequences, 'w', newline='') as dna_seq:
+            csv_writer = csv.writer(dna_seq)
+            csv_writer.writerow(['part', 'sequence'])
+            for seq in self.valid_circuits[0]:
+                if seq != '_NONCE_PAD':
+                    csv_writer.writerow([seq, self.sequences[seq].parts_sequence])
+                else:
+                    csv_writer.writerow([seq])
+
     # NOTE: GENERATE INFO PROVIDED TO FILE CREATION FUNCTIONS ABOVE ####################################################
     def gen_seq(self, filepath) -> list[list[str]]:
         """

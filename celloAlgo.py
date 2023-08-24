@@ -196,6 +196,7 @@ class CELLO3:
                 dna_designs.write_dna_parts_order(filepath)
                 dna_designs.write_plot_params(filepath)
                 dna_designs.write_regulatory_info(filepath)
+                dna_designs.write_dna_sequences(filepath)
 
                 # SBOL DIAGRAM
                 print(' - ', end='')
