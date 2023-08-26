@@ -166,8 +166,10 @@ class CELLO3:
                 os.makedirs(os.path.dirname(f'{out_path_}/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
                 with open(filepath + '_activity-table' + '.csv', 'w', newline='') as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerows(zip(*[row for row in zip(*tb) if not row[0].endswith('_I/O')]))
-                    csv_writer.writerow([])
+                    csv_writer.writerow(['Scores...'])
+                    csv_writer.writerows(zip(*[["{:.2e}".format(float(c)) if i > 0 else c for i, c in enumerate(row)]
+                                               for row in zip(*tb) if not row[0].endswith('_I/O')]))
+                    csv_writer.writerows([[''], ['Binary...']])
                     csv_writer.writerows(zip(*[row for row in zip(*tb) if row[0].endswith('_I/O')]))
 
                 if self.verbose:
