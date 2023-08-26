@@ -196,12 +196,17 @@ class DNADesign:
         os.makedirs(os.path.dirname(dna_sequences), exist_ok=True)
         with open(dna_sequences, 'w', newline='') as dna_seq:
             csv_writer = csv.writer(dna_seq)
-            csv_writer.writerow(['part', 'sequence'])
-            for seq in self.valid_circuits[0]:
-                if seq != '_NONCE_PAD':
-                    csv_writer.writerow([seq, self.sequences[seq].parts_sequence])
-                else:
-                    csv_writer.writerow([seq])
+            csv_writer.writerow(['', 'Segment 1', 'Segment 2', 'Segment 3', 'Segment 4'])  # TODO: count # of pads?
+            for num, order in enumerate(self.valid_circuits):
+                sequence = [f'Part Order {num + 1}:', '']
+                index = 1
+                for seq in order:
+                    if seq != '_NONCE_PAD':
+                        sequence[index] += self.sequences[seq].parts_sequence
+                    else:
+                        index += 1
+                        sequence.append('')
+                csv_writer.writerow(sequence)
 
     # NOTE: GENERATE INFO PROVIDED TO FILE CREATION FUNCTIONS ABOVE ####################################################
     def gen_seq(self, filepath) -> list[list[str]]:
