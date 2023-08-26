@@ -417,8 +417,8 @@ class DNADesign:
                     self.valid_dev_orders.append(d_placed)
                     # log.cf.info(f'\nORDER VALID: {d_placed}')
                     return
-                # else:
-                elif len(self.valid_dev_orders) < 15:  # TODO: Ensures sufficient variety of DPLs?  Appropriate #?
+                else:
+                # elif len(self.valid_dev_orders) < 15:  # TODO: Ensures sufficient variety of DPLs?  Appropriate #?
                     poss_next_chains = [c for c in c_objs if not any(d for d in c.after if d in d_left)]
                     placed = 0
                     for chain in poss_next_chains:
@@ -426,8 +426,8 @@ class DNADesign:
                         # index = 0  # TODO: narrow placement range?
                         end = min([i for i, v in enumerate(d_placed_copy) if v in chain.before], default=len(d_placed_copy))
                         index = max([i for i, v in enumerate(d_placed_copy) if v in chain.after], default=0)
-                        while 0 <= index <= min(len(d_placed_copy) - len(chain.chain), end):  # TODO: Better?
-                        # while 0 <= index <= len(d_placed_copy) - len(chain.chain):
+                        # while 0 <= index <= min(len(d_placed_copy) - len(chain.chain), end):  # TODO: Better?
+                        while 0 <= index <= len(d_placed_copy) - len(chain.chain):
                             c_objs_copy, d_placed_copy, d_left_copy = reset()
                             if all([check_rules(dev, index, d_placed_copy) for ind, dev in enumerate(chain.chain)]):
                                 d_placed_copy[index:index + len(chain.chain)] = chain.chain

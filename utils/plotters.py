@@ -199,7 +199,7 @@ def load_regulatory_information(filename, part_info, dna_designs):
     return regs_info
 
 
-def plot_dna(dna_designs, out_filename, plot_params, regs_info):
+def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
     """
 
     :param dna_designs:
@@ -283,7 +283,8 @@ def plot_dna(dna_designs, out_filename, plot_params, regs_info):
 
     # Save the figure
     plt.tight_layout()
-    fig.savefig(out_filename, dpi=300)
+    fig.savefig(png_filename, dpi=300)
+    fig.savefig(pdf_filename, transparent=True, dpi=300)
     # Clear the plotting cache
     plt.close('all')
 
@@ -301,7 +302,7 @@ def is_valid_file(parser, arg):
         return open(arg, 'r')  # return an open file handle
 
 
-def plotter(params, parts, regulation, designs, output, reverse_char=""):
+def plotter(params, parts, regulation, designs, png_output, pdf_output, reverse_char=""):
     """
 
     """
@@ -316,4 +317,4 @@ def plotter(params, parts, regulation, designs, output, reverse_char=""):
     if regulation:
         regs_info = load_regulatory_information(regulation, part_info, dna_designs)
 
-    plot_dna(dna_designs, output, plot_params, regs_info)
+    plot_dna(dna_designs, png_output, pdf_output, plot_params, regs_info)

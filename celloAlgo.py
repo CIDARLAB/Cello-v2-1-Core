@@ -202,7 +202,7 @@ class CELLO3:
                 print(' - ', end='')
                 plotter(f"{filepath}_plot_parameters.csv", f"{filepath}_dpl_part_information.csv",
                         f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
-                        f"{filepath}_dpl.png")
+                        f"{filepath}_dpl.png", f"{filepath}_dpl.pdf")
                 log.cf.info(' - SBOL and other DPL files generated')
 
         else:
