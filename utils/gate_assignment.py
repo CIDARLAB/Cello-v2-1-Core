@@ -328,7 +328,7 @@ class AssignGraph:
                     if g.output == i_no:
                         prevs.append(g)
                 # for o in self.outputs:  # TODO: needed for consecutive outputs?  needed for CMs?
-                #     if o.id == i_no:
+                #     if o.id == i_no:    # QUEST: OK that conversion factor of output not part of next node score?
                 #         prevs.append(o)
                 for i in self.inputs:
                     if i.id == i_no:
