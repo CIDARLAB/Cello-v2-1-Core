@@ -166,8 +166,9 @@ class CELLO3:
                 os.makedirs(os.path.dirname(f'{out_path_}/{self.verilog_name}/{self.ucf_name}/'), exist_ok=True)
                 with open(filepath + '_activity-table' + '.csv', 'w', newline='') as csvfile:
                     csv_writer = csv.writer(csvfile)
-                    csv_writer.writerows(zip(*tb))
-                    # csv_writer.writerows(tb)
+                    csv_writer.writerows(zip(*[row for row in zip(*tb) if not row[0].endswith('_I/O')]))
+                    csv_writer.writerow([])
+                    csv_writer.writerows(zip(*[row for row in zip(*tb) if row[0].endswith('_I/O')]))
 
                 if self.verbose:
                     debug_print("Truth Table (same as before, simpler format):")
