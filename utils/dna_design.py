@@ -115,8 +115,8 @@ class DNADesign:
         os.makedirs(os.path.dirname(dna_part_info_path), exist_ok=True)
         with open(dna_part_info_path, 'w', newline='') as dna_part_info:
             csv_writer = csv.writer(dna_part_info)
-            csv_writer.writerow(['part_name', 'type', 'x_extent', 'y_extent', 'start_pad', 'end_pad', 'color',
-                                 'hatch', 'arrowhead_height', 'arrowhead_length', 'linestyle', 'linewidth',
+            csv_writer.writerow(['part_name', 'type', 'x_extent', 'y_extent', 'start_pad', 'end_pad',
+                                 'color', 'hatch', 'arrowhead_height', 'arrowhead_length', 'linestyle', 'linewidth',
                                  'label', 'x_pos', 'y_pos', 'other'])
             csv_writer.writerow(['_NONCE_PAD', 'UserDefined', '30', '', '', '', '1.00;1.00;1.00', '', '', '', '', ''])
             for seq in self.sequences.values():
