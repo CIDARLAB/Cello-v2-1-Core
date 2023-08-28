@@ -20,6 +20,7 @@ import matplotlib
 
 matplotlib.use('Agg')
 
+from contextlib import redirect_stdout, redirect_stderr
 import sys
 import getopt
 import csv
