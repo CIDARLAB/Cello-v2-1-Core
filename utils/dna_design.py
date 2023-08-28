@@ -116,21 +116,26 @@ class DNADesign:
         with open(dna_part_info_path, 'w', newline='') as dna_part_info:
             csv_writer = csv.writer(dna_part_info)
             csv_writer.writerow(['part_name', 'type', 'x_extent', 'y_extent', 'start_pad', 'end_pad', 'color',
-                                 'hatch', 'arrowhead_height', 'arrowhead_length', 'linestyle', 'linewidth'])
+                                 'hatch', 'arrowhead_height', 'arrowhead_length', 'linestyle', 'linewidth',
+                                 'label', 'x_pos', 'y_pos', 'other'])
             csv_writer.writerow(['_NONCE_PAD', 'UserDefined', '30', '', '', '', '1.00;1.00;1.00', '', '', '', '', ''])
             for seq in self.sequences.values():
                 if seq.parts_type == 'cassette':
                     csv_writer.writerow(
-                        [seq.parts_name, 'UserDefined', 25, 5, '', '', '0.00;0.00;0.00', '', '', '', '', ''])
+                        [seq.parts_name, 'UserDefined', 25, 5, '', '',
+                         '0.00;0.00;0.00', '', '', '', '', '',
+                         seq.parts_name, '', '', ''])
                 elif seq.parts_type in ['cds', 'rbs']:
                     csv_writer.writerow(
-                        [seq.parts_name, seq.parts_type.upper(), '', '', '', '', hex_to_rgb(seq.color), '', '', '', '',
-                         ''])
+                        [seq.parts_name, seq.parts_type.upper(), '', '', '', '',
+                         hex_to_rgb(seq.color), '', '', '', '', '',
+                         seq.parts_name, '', '', ''])
                 elif seq.parts_type == 'scar':
                     continue
                 else:
                     csv_writer.writerow([seq.parts_name, seq.parts_type.capitalize(), '', '', '', '',
-                                         hex_to_rgb(seq.color), '', '', '', '', ''])
+                                         hex_to_rgb(seq.color), '', '', '', '', '',
+                                         seq.parts_name, '', '', ''])
             dna_part_info.close()
 
     def write_dna_parts_order(self, filepath) -> None:  # equivalent of 2.0 dpl_dna_designs.csv
