@@ -433,7 +433,7 @@ class CELLO3:
         lo = [0, 0, 0]
         hi = [len(i_perms), len(o_perms), len(g_perms)]
         bounds = list(zip(lo, hi))
-        # TODO: CK: Implement seed
+        # TODO: CK: Implement seed (test in simplified script; test other scipy func seeding)
         # TODO: CK: Implement toxicity check...
         ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
         """
@@ -447,7 +447,6 @@ class CELLO3:
         :param bounds:  Upper and lower bounds for each dimension/variable being passed into func
         :param maxiter: Max number of ~global searches (to identify neighborhoods with potential local maxima)
         :param max_fun: Max number of total function calls/circuit iterations, including local minimization searches
-        :param seed:    For replicating the same results across runs
         :param no_local_search: Enable to function more like traditional simulated annealing
         Note: Additional parameters specified in URL above...
 
