@@ -177,6 +177,11 @@ class CELLO3:
                     for r in tb:
                         log.cf.info(r)
 
+                # CIRCUIT SCORE FILE
+                with open(filepath + '_circuit-score' + '.csv', 'w', newline='') as csvfile:
+                    csv_writer = csv.writer(csvfile)
+                    csv_writer.writerow(['circuit_score', self.best_score])
+
                 # EUGENE FILE
                 eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
                                       graph_outputs_for_printing, best_graph)
