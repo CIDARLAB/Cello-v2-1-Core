@@ -265,7 +265,7 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
         if max_dna_len < dna_len:
             max_dna_len = dna_len
         ax_list.append(ax)
-    for ax in ax_list:
+    for i, ax in enumerate(ax_list):
         ax.set_xticks([])
         ax.set_yticks([])
         # Set bounds
@@ -274,6 +274,7 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
         ax.set_ylim([-plot_params['axis_y'], plot_params['axis_y']])
         ax.set_aspect('equal')
         ax.set_axis_off()
+        ax.set_title(f'Part Order {i + 1}', fontsize=5, loc='left')
 
     # Update the size of the figure to fit the constructs drawn
     fig_x_dim = max_dna_len / 70.0
