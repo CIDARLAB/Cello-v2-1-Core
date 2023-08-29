@@ -9,6 +9,7 @@ import itertools
 import scipy
 import sys
 import time
+import shutil
 
 sys.path.insert(0, 'utils/')  # links the utils folder to the search path
 from gate_assignment import *
@@ -212,6 +213,10 @@ class CELLO3:
                         f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
                         f"{filepath}_dpl.png", f"{filepath}_dpl.pdf")
                 log.cf.info(' - SBOL and other DPL files generated')
+
+                # ZIPFILE
+                shutil.make_archive(f'{self.verilog_name}_all-files', 'zip', f'{out_path_}{self.verilog_name}')
+                shutil.move(f'{self.verilog_name}_all-files.zip', f'{out_path_}{self.verilog_name}')
 
         else:
             log.cf.info(f'\nCondition check passed? {valid}\n')  # Specific mismatch was a 'warning'
