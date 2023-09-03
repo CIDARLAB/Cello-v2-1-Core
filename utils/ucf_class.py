@@ -44,10 +44,11 @@ class UCF:
     def __parse_helper(filepath, name):
         filepath = os.path.join(*filepath.split('/'))
         # Communication Molecule filepaths
-        CM_in_filepath = os.path.join(*'utils/comm_devices.input.json'.split('/'))         # normal sensor resp func
-        CM_main_filepath = os.path.join(*'utils/comm_devices.json'.split('/'))             # hill response func
-        CM_out_HR_filepath = os.path.join(*'utils/comm_devices.output.json'.split('/'))    # hill response func
-        CM_out_UC_filepath = os.path.join(*'utils/comm_devices_c.output.json'.split('/'))  # normal unit conv func
+        CM_in_SR_filepath = os.path.join(*'utils/comm_devices_sr.input.json'.split('/'))      # normal sensor resp func
+        CM_in_HR_filepath = os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))      # hill response in func
+        CM_main_filepath = os.path.join(*'utils/comm_devices.json'.split('/'))                # hill response func
+        CM_out_HR_filepath = os.path.join(*'utils/comm_devices_hr.output.json'.split('/'))    # hill response out func
+        CM_out_UC_filepath = os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))    # normal unit conv func
         u = os.path.join(filepath, name + '.UCF.json')
         i = os.path.join(filepath, name + '.input.json')
         o = os.path.join(filepath, name + '.output.json')
@@ -61,7 +62,11 @@ class UCF:
                     # TOGGLE THESE TO TOGGLE CMs: OC6, OHC12, pC-HSL, DAPG
 
                     # if f == i:
-                    #     with open(CM_in_filepath, 'r') as comm_devices:
+                    #     with open(CM_in_SR_filepath, 'r') as comm_devices:
+                    #         ucf.extend(json.load(comm_devices))
+
+                    # if f == i:
+                    #     with open(CM_in_HR_filepath, 'r') as comm_devices:
                     #         ucf.extend(json.load(comm_devices))
 
                     # if f == u:  # FIXME: If using this, make sure UCF parts/devs correct so diagram has requisite info
