@@ -200,9 +200,9 @@ class CELLO3:
                     log.cf.info(f" - Eugene script written to {filepath}_eugene.eug")
 
                 # DNA DESIGN
-                # call_mini_eugene([], 7)
                 dna_designs = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
-                dna_designs.gen_seq(filepath)
+                dna_designs.get_part_orders()  # Calls miniEugene
+                # dna_designs.gen_seq(filepath)  # Alternative to miniEugene
                 dna_designs.write_dna_parts_info(filepath)
                 dna_designs.write_dna_parts_order(filepath)
                 dna_designs.write_plot_params(filepath)
