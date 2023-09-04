@@ -19,6 +19,7 @@ from ucf_class import UCF
 from make_eugene_script import *
 from dna_design import *
 from plotters import plotter
+from run_eugene_script import call_mini_eugene
 
 
 class CELLO3:
@@ -199,6 +200,7 @@ class CELLO3:
                     log.cf.info(f" - Eugene script written to {filepath}_eugene.eug")
 
                 # DNA DESIGN
+                # call_mini_eugene([], 7)
                 dna_designs = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
                 dna_designs.gen_seq(filepath)
                 dna_designs.write_dna_parts_info(filepath)
@@ -212,7 +214,7 @@ class CELLO3:
                 plotter(f"{filepath}_plot_parameters.csv", f"{filepath}_dpl_part_information.csv",
                         f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
                         f"{filepath}_dpl.png", f"{filepath}_dpl.pdf")
-                log.cf.info(' - SBOL and other DPL files generated')
+                log.cf.info('SBOL and other DPL files generated')
 
                 # ZIPFILE
                 shutil.make_archive(f'{self.verilog_name}_all-files', 'zip', f'{out_path_}{self.verilog_name}')

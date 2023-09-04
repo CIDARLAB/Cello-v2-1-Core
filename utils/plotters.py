@@ -17,6 +17,7 @@
 
 # Set the backend to use (important for headless servers)  # FIXME: req matplotlib, dnaplotlib installs & update readme
 import matplotlib
+import logging
 
 matplotlib.use('Agg')
 
@@ -208,6 +209,12 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
     :param plot_params:
     :param regs_info:
     """
+
+    # Suppress (useless) console output
+    matplotlib_logger = logging.getLogger("matplotlib")
+    matplotlib_logger.setLevel(logging.INFO)
+    logging.disable(logging.INFO)
+
     # Create the renderer
     if 'axis_y' not in list(plot_params.keys()):
         plot_params['axis_y'] = 35
@@ -289,6 +296,8 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
     fig.savefig(pdf_filename, transparent=True, dpi=300)
     # Clear the plotting cache
     plt.close('all')
+
+    logging.disable(logging.NOTSET)  # Re-enable console output
 
 
 def is_valid_file(parser, arg):
