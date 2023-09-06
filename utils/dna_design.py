@@ -158,7 +158,8 @@ class DNADesign:
             return consolidated_devices
 
         for loc in self.fenceposts.keys():
-            self.circuit_rules.append(f'CONTAINS {loc}')
+            if f'CONTAINS {loc}' not in self.circuit_rules:
+                self.circuit_rules.append(f'CONTAINS {loc}')
         consolidated_devices = consolidate_devices()  # len(consolidated_devices)
         selected_device_orders = call_mini_eugene(self.circuit_rules)  # NOTE: miniEugene
         for order in selected_device_orders:
