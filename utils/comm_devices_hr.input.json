@@ -203,7 +203,7 @@
             },
             {
                 "name": "kd",
-                "map": "#//model/parameters/K"
+                "map": "#//model/parameters/kd"
             },
             {
                 "name": "n",

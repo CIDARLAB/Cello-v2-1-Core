@@ -60,6 +60,8 @@ class CELLO3:
         self.exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
         self.test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
         self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of log from equivalent config
+        self.cm_in_option = 0
+        self.cm_out_option = 0
 
         if 'yosys_cmd_choice' in options:
             yosys_cmd_choice = options['yosys_cmd_choice']
@@ -73,6 +75,10 @@ class CELLO3:
             self.log_overwrite = options['log_overwrite']
         if 'exhaustive' in options:
             self.exhaustive = options['exhaustive']  # Normally uses Scipy's dual annealing
+        if 'cm_in_option' in options:
+            self.cm_in_option = options['cm_in_option']
+        if 'cm_out_option' in options:
+            self.cm_out_option = options['cm_out_option']
 
         self.in_path = in_path
         self.out_path = out_path
@@ -94,7 +100,7 @@ class CELLO3:
         if not cont:
             return  # break if run into problem with yosys, call_YOSYS() will show the error.
 
-        self.ucf = UCF(in_path, ucf_name)  # initialize UCF from file
+        self.ucf = UCF(in_path, ucf_name, self.cm_in_option, self.cm_out_option)  # initialize UCF from file
 
         if not self.ucf.valid:
             return  # breaks early if UCF file has errors
@@ -363,13 +369,6 @@ class CELLO3:
         # NOTE: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
         print_centered('Beginning GATE ASSIGNMENT')
 
-        circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
-
-        log.cf.info('Netlist de-construction: ')
-        log.cf.info(circuit.inputs)
-        log.cf.info(circuit.gates)
-        log.cf.info(circuit.outputs)
-
         in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
         i_list = []
         for sensor in in_sensors:
@@ -391,6 +390,23 @@ class CELLO3:
         log.cf.info(i_list)
         log.cf.info(o_list)
         log.cf.info(g_list)
+
+        # For finding UCF unit conversion factor for use by CMs  TODO: Address
+        # out_names = [o + '_model' for o in o_list]
+        # out_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name', out_names)
+        # output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in out_jsons}
+        # ucf_c_val = next((op['unit_conversion'] for op in output_params.values() if op['unit_conversion'] != 1.0), 0)
+        # if not ucf_c_val:
+        #     ucf_c_val = 1.0
+        # global ucf_c_value
+        # ucf_c_value = ucf_c_val
+
+        circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
+
+        log.cf.info('Netlist de-construction: ')
+        log.cf.info(circuit.inputs)
+        log.cf.info(circuit.gates)
+        log.cf.info(circuit.outputs)
 
         log.cf.info('\nNetlist requirements: ')
         i = len(self.rnl.inputs)
@@ -629,12 +645,12 @@ class CELLO3:
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
         input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
         input_model_names = [i.name + '_model' for i in graph.inputs]
-        input_params = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
+        input_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
                                     input_model_names)
-        input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_params}
+        input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_info}
         input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
-                           input_functions.items() if (e['name'] == f)}
-        input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_params}
+                           input_functions.items() if (e['name'] == f)}  # FIXME: redo to properly trace params & vars
+        input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_info}
 
         if self.print_iters:
             debug_print(f'Assignment configuration: {repr(graph)}', False)
@@ -652,9 +668,7 @@ class CELLO3:
         gate_func_names = gate_functions[0]['functions']
         gate_id_names = [i[1] + '_model' for i in gate_ids]
         gate_functions = query_helper(gate_functions, 'name', gate_id_names)
-        gate_params = {
-            gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']}
-            for gf in gate_functions}
+        gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_functions}
         if self.print_iters:
             print(f'GATE parameters: ')
             for f in gate_params:
@@ -695,12 +709,12 @@ class CELLO3:
 
         # adding parameters to inputs
         for graph_input in graph.inputs:
-            if repr(graph_input) in input_params and repr(graph_input) in input_equations:
+            if all([repr(graph_input) in x for x in [input_params, input_equations]]):
                 graph_input.add_eval_params(input_equations[repr(graph_input)], input_params[repr(graph_input)])
 
         # adding parameters to outputs
         for graph_output in graph.outputs:
-            if repr(graph_output) in output_params and repr(graph_output) in output_equations:
+            if all([repr(graph_output) in x for x in [output_params, output_equations]]):
                 graph_output.add_eval_params(output_equations[repr(graph_output)], output_params[repr(graph_output)])
 
         # adding parameters and individual gates to gates
@@ -916,6 +930,9 @@ if __name__ == '__main__':
     exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
     test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
 
+    cm_in_option = 0
+    cm_out_option = 0
+
     # TODO: source UCF files from CELLO-UCF instead
     in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
     out_path_ = 'temp_out/'  # (any path to a local folder)
@@ -1008,6 +1025,26 @@ if __name__ == '__main__':
                 log.cf.info('Cello was unable to identify the UCF you specified...')
                 log.cf.info(e)
 
+            log.cf.info(cm_in_selection := input(
+                f'\n\nDo you want to use Actuators/Communication Molecules as inputs?\n'
+                f'Options:\n'
+                f'0. No, do not evaluate actuators as inputs (just use the UCF inputs).\n'
+                f'1. Yes, exclusively use actuators as inputs (ignore the UCF inputs).\n'
+                f'2. Yes, have the actuators and UCF inputs compete to find the best circuit.\n\n'
+                f'Number of option (0, 1, or 2): '))
+            if cm_in_selection in ['0', '1', '2']:
+                cm_in_option = int(cm_in_selection)
+
+            log.cf.info(cm_out_selection := input(
+                f'\n\nDo you want to use Actuators/Communication Molecules as outputs?\n'
+                f'Options:\n'
+                f'0. No, do not evaluate actuators as outputs (just use the UCF outputs).\n'
+                f'1. Yes, exclusively use actuators as outputs (ignore the UCF outputs).\n'
+                f'2. Yes, have the actuators and UCF outputs compete to find the best circuit.\n\n'
+                f'Number of option (0, 1, or 2): '))
+            if cm_out_selection in ['0', '1', '2']:
+                cm_out_option = int(cm_out_selection)
+
             log.cf.info(options := input(
                 f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
                 f'Available Settings:\n'
@@ -1039,7 +1076,9 @@ if __name__ == '__main__':
                                             'log_overwrite': log_overwrite,
                                             'print_iters': print_iters,
                                             'exhaustive': exhaustive,
-                                            'test_configs': test_configs})
+                                            'test_configs': test_configs,
+                                            'cm_in_option': cm_in_option,
+                                            'cm_out_option': cm_out_option})
             log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
 
     log.cf.info("Exiting Cello...")

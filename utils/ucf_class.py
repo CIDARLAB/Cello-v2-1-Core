@@ -16,7 +16,9 @@ class UCF:
 
     """
 
-    def __init__(self, filepath, name):
+    def __init__(self, filepath, name, cm_in, cm_out):
+        self.cm_in = cm_in
+        self.cm_out = cm_out
         (U, I, O) = self.__parse_helper(filepath, name)
         self.UCFmain = U
         self.UCFin = I
@@ -40,8 +42,7 @@ class UCF:
     def __collection_names(UCF_choice):
         return list(set([c['collection'] for c in UCF_choice]))
 
-    @staticmethod
-    def __parse_helper(filepath, name):
+    def __parse_helper(self, filepath, name):
         filepath = os.path.join(*filepath.split('/'))
         # Communication Molecule filepaths
         CM_in_SR_filepath = os.path.join(*'utils/comm_devices_sr.input.json'.split('/'))      # normal sensor resp func
@@ -65,20 +66,28 @@ class UCF:
                     #     with open(CM_in_SR_filepath, 'r') as comm_devices:
                     #         ucf.extend(json.load(comm_devices))
 
-                    # if f == i:
-                    #     with open(CM_in_HR_filepath, 'r') as comm_devices:
-                    #         ucf.extend(json.load(comm_devices))
+                    if f == i:
+                        if self.cm_in == 1:
+                            with open(CM_in_HR_filepath, 'r') as comm_devices:
+                                ucf = json.load(comm_devices)
+                        elif self.cm_in == 2:
+                            with open(CM_in_HR_filepath, 'r') as comm_devices:
+                                ucf.extend(json.load(comm_devices))
 
                     # if f == u:  # FIXME: If using this, make sure UCF parts/devs correct so diagram has requisite info
                     #     with open(CM_main_filepath, 'r') as comm_devices:
                     #         ucf.extend(json.load(comm_devices))
 
-                    # if f == o:
-                    #     with open(CM_out_HR_filepath, 'r') as comm_devices:
-                    #         ucf.extend(json.load(comm_devices))
+                    if f == o:
+                        if self.cm_out == 1:
+                            with open(CM_out_UC_filepath, 'r') as comm_devices:
+                                ucf = json.load(comm_devices)
+                        elif self.cm_out == 2:
+                            with open(CM_out_UC_filepath, 'r') as comm_devices:
+                                ucf.extend(json.load(comm_devices))
 
                     # if f == o:
-                    #     with open(CM_out_UC_filepath, 'r') as comm_devices:
+                    #     with open(CM_out_HR_filepath, 'r') as comm_devices:
                     #         ucf.extend(json.load(comm_devices))
 
                     out.append(ucf)

@@ -66,6 +66,7 @@ class Input(IO):
         self.params = {}
         self.ymax = None
         self.ymin = None
+        # self.states = {'high': 10, 'low': 0.1}
         self.states = {'high': 1, 'low': 0}
         self.out_scores = {'high': -1, 'low': -1}
         self.score_in_use = None
@@ -91,6 +92,7 @@ class Input(IO):
             self.params = params
             self.ymax = params['ymax']
             self.ymin = params['ymin']
+            # self.vars = vars  # FIXME: add in this functionality
             # comment out below two lines to change STATE from 0/1
             # self.states['high'] = self.ymax
             # self.states['low'] = self.ymin
@@ -102,12 +104,16 @@ class Input(IO):
                 for (lvl, val) in self.states.items():
                     STATE = val
                     # NOTE: Assumes each input constitutes a single value and is either 'STATE' or 'x' in UCF-in
+                    # print(self.function)
                     if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
                         STATE = val
-                    elif 'x' in self.function and 'x1' not in self.function:  # Usually: Hill response for Comm Molecule
-                        x = val
-                    else:
-                        log.cf.error("Cannot identify UCF-in function input parameter")
+                    else:  # Usually: Hill response for Comm Molecule  # FIXME: trace vars properly
+                        if lvl == 'high':
+                            x = self.ymax
+                        elif lvl == 'low':
+                            x = self.ymin
+                    # else:
+                    #     log.cf.error("Cannot identify UCF-in function input parameter")
                     self.out_scores[lvl] = eval(self.function)
                 # print(f'\nIN - {self.name}: {self.params} -> {self.out_scores}')
             except Exception as e:
@@ -145,6 +151,7 @@ class Output(IO):
             if function == 'c * x':
                 # print('NORMAL')
                 self.unit_conversion = params['unit_conversion']
+                # self.unit_conversion = self.ucf_c_value  # FIXME: How handle this?
             elif 'ymax' in function or 'ymin' in function:  # Usually: Hill response for Comm Molecule
                 # print('HILL')
                 self.params = params
