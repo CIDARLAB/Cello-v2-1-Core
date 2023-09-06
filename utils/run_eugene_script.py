@@ -15,9 +15,11 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     """
     NOTE: Commands to be executed before the Python script...
     External command to compile miniEugenePermuter class:
-        javac -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter.java
+        javac -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter.java   // mac / lin?
+        javac -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter.java     // win
     External command to execute program to instantiate Py4J Java Gateway:
-        java -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter
+        java -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter    // mac / lin?
+        java -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter      // win
     NOTE: May need to add java to the path and restart the console...
 
     :param rules:
