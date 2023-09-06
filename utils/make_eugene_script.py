@@ -423,6 +423,9 @@ class EugeneObject:
                         # self.genlocs_fenceposts[o].append(r)
         self.circuit_rules = circuit_rules
 
+        for device in self.structs_cas_dict.keys():
+            self.circuit_rules.append(f'CONTAINS {device}')
+
         # Debugging info...
         # debug_print('EUGENE OBJECTS:')
         # log.cf.info(f'\nself.structs_dict:\n{self.structs_dict}')
