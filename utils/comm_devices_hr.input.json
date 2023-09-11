@@ -172,12 +172,6 @@
 	{
 		"collection": "structures",
 		"name": "DAPG_in_structure",
-		"inputs": [
-			{
-				"name": "in1",
-				"part_type": "promoter"
-			}
-		],
 		"outputs": [
 			"rPhl"
 		]
