@@ -166,8 +166,8 @@ class DNADesign:
         for order in selected_device_orders:
             main_devices = []
             for device in order:
-                if device in list(self.cassettes) or device in list(self.fenceposts):  #  or device in list(self.sequences)
-                    main_devices.append(device)
+                # if device in list(self.cassettes) or device in list(self.fenceposts):  #  or device in list(self.sequences)
+                main_devices.append(device)
             parts = []
             for i, device in enumerate(main_devices):
                 if device in list(self.fenceposts):
@@ -176,8 +176,8 @@ class DNADesign:
                 elif device in list(self.cassettes):
                     parts.extend(self.cassettes[device].inputs)
                     parts.extend(self.cassettes[device].comps)
-                # else:  TODO: re-add scars
-                #     parts.extend(self.sequences[device])
+                else:  # TODO: re-add scars
+                    parts.extend([self.sequences[device].parts_name])
             if parts not in self.valid_circuits:
                 self.valid_circuits.append(parts)
         log.cf.info(f'\nDPL FILES:'
@@ -289,10 +289,17 @@ class DNADesign:
             csv_writer.writerow(['from_partname', 'type', 'to_partname', 'arrowhead_length', 'linestyle',
                                  'linewidth', 'color'])
             for struct in self.structs.values():
-                if struct.gates_group:
-                    new_row = [struct.gates_group, 'Repression', struct.outputs[0], 3, '-', '', hex_to_rgb(
-                        struct.color)]
-                    csv_writer.writerow(new_row)
+                # if struct.gates_group:
+                #     new_row = [struct.gates_group, 'Repression', struct.outputs[0], 3, '-', '',
+                #                hex_to_rgb(struct.color)]
+                #     csv_writer.writerow(new_row)
+                if struct.struct_cassettes:
+                    for part in struct.struct_cassettes[0][3]:  # TODO: Validate
+                        if self.sequences[part].parts_type.lower() == 'cds':
+                            new_row = [part, 'Repression', struct.outputs[0], 3, '-', '',
+                                       hex_to_rgb(struct.color)]
+                            csv_writer.writerow(new_row)
+                            break
             reg_info.close()
 
     def write_dna_sequences(self, filepath) -> None:

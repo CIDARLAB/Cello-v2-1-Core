@@ -71,6 +71,8 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     if max > part_count:
         part_count = max + 2
 
+    rules.reverse()
+
     # DEBUGGING...
     log.cf.info(f'Rules received by call_mini_eugene: {rules}')
     log.cf.info(f'Part count received by call_mini_eugene: {part_count}')
@@ -84,7 +86,7 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     # Call the miniPermute function in the Java program, which will in turn invoke miniEugene
     java_part_orders = miniEugeneInstance.miniPermute(rules, part_count, orders_count)  # FIXME: Add device rule loop
     if java_part_orders:
-        log.cf.info('Valid part orders found by miniEugene...')
+        # log.cf.info('Valid part orders found by miniEugene...')
         valid_orders = []  # Convert back to Python-friendly form
         for component in java_part_orders:
             if component[0] is not None:
@@ -92,7 +94,7 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
                 for part in component:
                     order.append(part)
                 valid_orders.append(order)
-                log.cf.info(f'   + {order}')
+                # log.cf.info(f'   + {order}')
         return valid_orders
     else:
         log.cf.error("miniEugene did not return valid part orders...")
