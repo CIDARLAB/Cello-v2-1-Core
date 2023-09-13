@@ -369,6 +369,9 @@
 	{
 		"collection": "structures",
 		"name": "RpaR-AM2_sensor_structure",
+		"outputs": [
+			"PRpa_A"
+		],
 		"inputs": [
 			{
 				"name": "in1",
