@@ -52,7 +52,8 @@ class CELLO3:
         [end]
     """
 
-    def __init__(self, v_name: str, ucf_name: str, in_path: str, out_path: str, options: dict = None):
+    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, cm_in: str, cm_out: str,
+                 in_path: str, out_path: str, options: dict = None):
         # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
         yosys_cmd_choice = 1  # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
         self.verbose = False  # Print more info to console and log. See logging.config to change log metadata verbosity
@@ -84,6 +85,10 @@ class CELLO3:
         self.out_path = out_path
         self.verilog_name = v_name
         self.ucf_name = ucf_name
+        self.in_name = in_name
+        self.out_name = out_name
+        self.cm_in = cm_in
+        self.cm_out = cm_out
         self.iter_count = 0
         self.best_score = 0
         self.best_graphs = []
@@ -100,7 +105,8 @@ class CELLO3:
         if not cont:
             return  # break if run into problem with yosys, call_YOSYS() will show the error.
 
-        self.ucf = UCF(in_path, ucf_name, self.cm_in_option, self.cm_out_option)  # initialize UCF from file
+        # NOTE: Initializes UCF, Input, and Output from filepaths
+        self.ucf = UCF(in_path, ucf_name, in_name, out_name, cm_in, cm_out, self.cm_in_option, self.cm_out_option)
 
         if not self.ucf.valid:
             return  # breaks early if UCF file has errors
@@ -936,6 +942,11 @@ if __name__ == '__main__':
     # TODO: source UCF files from CELLO-UCF instead
     in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
     out_path_ = 'temp_out/'  # (any path to a local folder)
+    ucf_name_ = ''
+    in_name_ = ''
+    out_name_ = ''
+    cm_in = ''
+    cm_out = ''
 
     figlet = r"""
     
@@ -1014,16 +1025,39 @@ if __name__ == '__main__':
             # 'Eco2C1G3T1': (7 in,  2 out,  6 gate_groups)
             # 'Eco2C1G5T1': (7 in,  3 out, 13 gate_groups)  # FIXME: incomplete inputs? non-existent devices in rules
             # 'Eco2C1G6T1': (11 in, 3 out, 16 gate_groups)  # FIXME: non-existent devices in rules
-            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)  # NOTE: longer execution times
-            log.cf.info(ucf_name_ := input(
-                f'\n\nWhich one of the following UCF (User Constraint File) do you want to use? \n'
+            # 'SC1C1G1T1' : (3 in,  2 out,  9 gate_groups)
+            log.cf.info(name_ := input(
+                f'\n\nIf you want to use a built-in UCF (User Constrain File) and associated Input & Output files, '
+                f'which of the following do you want to use? \n'
                 f'Options: {list(zip(range(len(ucf_list)), ucf_list))} \n\n'
-                f'Index of UCF: '))
-            try:
-                ucf_name_ = ucf_list[int(ucf_name_)]
-            except Exception as e:
-                log.cf.info('Cello was unable to identify the UCF you specified...')
-                log.cf.info(e)
+                f'Alternatively, just hit Enter if you want to specify your own UCF, Input, and Output files...\n\n'
+                f'Index of built-in UCF (or leave blank for custom): '))
+            if name_:
+                try:
+                    ucf_name_ = ucf_list[int(name_)] + '.UCF'
+                    in_name_ = ucf_list[int(name_)] + '.input'
+                    out_name_ = ucf_list[int(name_)] + '.output'
+                except Exception as e:
+                    log.cf.info('Cello was unable to identify the UCF you specified...')
+                    log.cf.info(e)
+            else:
+                os.system('')
+                label = "\u001b[4m" + '.UCF' + "\u001b[0m"
+                log.cf.info(ucf_name_ := input(
+                    f'\n\nPlease specify the name of the UCF file you want to use...\n'
+                    f'(Hint: ___{label}.json, with the .UCF but not the .json, from the'
+                    f' {in_path_[:-1]} folder.)\n\n'
+                    f'UCF File Name: '))
+                label = "\u001b[4m" + '.input' + "\u001b[0m"
+                log.cf.info(in_name_ := input(
+                    f'\n\nPlease specify the name of the Input file you want to use...\n'
+                    f'(Hint: ___{label}.json, with the .input but not the .json, from the {in_path_[:-1]} folder.)\n\n'
+                    f'Input File Name: '))
+                label = "\u001b[4m" + '.output' + "\u001b[0m"
+                log.cf.info(out_name_ := input(
+                    f'\n\nPlease specify the name of the Output file you want to use...\n'
+                    f'(Hint: ___{label}.json, with the .output but not the .json, from the {in_path_[:-1]} folder.)\n\n'
+                    f'Output File Name: '))
 
             log.cf.info(cm_in_selection := input(
                 f'\n\nDo you want to use Actuators/Communication Molecules as inputs?\n'
@@ -1032,8 +1066,11 @@ if __name__ == '__main__':
                 f'1. Yes, exclusively use actuators as inputs (ignore the UCF inputs).\n'
                 f'2. Yes, have the actuators and UCF inputs compete to find the best circuit.\n\n'
                 f'Number of option (0, 1, or 2): '))
-            if cm_in_selection in ['0', '1', '2']:
+            if cm_in_selection in ['1', '2']:
                 cm_in_option = int(cm_in_selection)
+                log.cf.info(cm_in := input(f'\n\nWhat CM Input file do you want to use?\n'
+                                           f'Alternatively, just hit Enter to use the default CMs...\n\n'
+                                           f'CM Input File (or leave blank for default): '))
 
             log.cf.info(cm_out_selection := input(
                 f'\n\nDo you want to use Actuators/Communication Molecules as outputs?\n'
@@ -1042,8 +1079,11 @@ if __name__ == '__main__':
                 f'1. Yes, exclusively use actuators as outputs (ignore the UCF outputs).\n'
                 f'2. Yes, have the actuators and UCF outputs compete to find the best circuit.\n\n'
                 f'Number of option (0, 1, or 2): '))
-            if cm_out_selection in ['0', '1', '2']:
+            if cm_out_selection in ['1', '2']:
                 cm_out_option = int(cm_out_selection)
+                log.cf.info(cm_out := input(f'\n\nWhat CM Output file do you want to use?\n'
+                                            f'Alternatively, just hit Enter to use the default CMs...\n\n'
+                                            f'CM Output File (or leave blank for default): '))
 
             log.cf.info(options := input(
                 f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
@@ -1070,7 +1110,7 @@ if __name__ == '__main__':
                 exhaustive = True
 
             start_time = time.time()
-            Cello3Process = CELLO3(v_name_, ucf_name_, in_path_, out_path_,
+            Cello3Process = CELLO3(v_name_, ucf_name_, in_name_, out_name_, cm_in, cm_out, in_path_, out_path_,
                                    options={'yosys_cmd_choice': yosys_cmd_choice,
                                             'verbose': verbose,
                                             'log_overwrite': log_overwrite,

@@ -16,10 +16,17 @@ class UCF:
 
     """
 
-    def __init__(self, filepath, name, cm_in, cm_out):
+    def __init__(self, filepath, ucf_file, in_file, out_file, cm_in, cm_out, cm_in_opt, cm_out_opt):
+        self.filepath = filepath
+        self.ucf_file = ucf_file
+        self.in_file = in_file
+        self.out_file = out_file
         self.cm_in = cm_in
         self.cm_out = cm_out
-        (U, I, O) = self.__parse_helper(filepath, name)
+        self.cm_in_opt = cm_in_opt
+        self.cm_out_opt = cm_out_opt
+        self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file
+        (U, I, O) = self.__parse_helper()
         self.UCFmain = U
         self.UCFin = I
         self.UCFout = O
@@ -42,17 +49,16 @@ class UCF:
     def __collection_names(UCF_choice):
         return list(set([c['collection'] for c in UCF_choice]))
 
-    def __parse_helper(self, filepath, name):
-        filepath = os.path.join(*filepath.split('/'))
+    def __parse_helper(self):
+        filepath = os.path.join(*self.filepath.split('/'))
         # Communication Molecule filepaths
-        CM_in_SR_filepath = os.path.join(*'utils/comm_devices_sr.input.json'.split('/'))      # normal sensor resp func
-        CM_in_HR_filepath = os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))      # hill response in func
-        CM_main_filepath = os.path.join(*'utils/comm_devices.json'.split('/'))                # hill response func
-        CM_out_HR_filepath = os.path.join(*'utils/comm_devices_hr.output.json'.split('/'))    # hill response out func
-        CM_out_UC_filepath = os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))    # normal unit conv func
-        u = os.path.join(filepath, name + '.UCF.json')
-        i = os.path.join(filepath, name + '.input.json')
-        o = os.path.join(filepath, name + '.output.json')
+        cm_in_filepath = os.path.join(*filepath.split('/'), self.cm_in + '.json') if self.cm_in else \
+                         os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))  # hill response in func
+        cm_out_filepath = os.path.join(*filepath.split('/'), self.cm_out + '.json') if self.cm_out else \
+                          os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))  # normal unit conv func
+        u = os.path.join(filepath, self.ucf_file + '.json')
+        i = os.path.join(filepath, self.in_file + '.json')
+        o = os.path.join(filepath, self.out_file + '.json')
         paths = [u, i, o]
         out = []
         for f in paths:
@@ -60,46 +66,29 @@ class UCF:
                 try:
                     ucf = json.load(ucf)
 
-                    # TOGGLE THESE TO TOGGLE CMs: OC6, OHC12, pC-HSL, DAPG
-
-                    # if f == i:
-                    #     with open(CM_in_SR_filepath, 'r') as comm_devices:
-                    #         ucf.extend(json.load(comm_devices))
-
                     if f == i:
-                        if self.cm_in == 1:
-                            with open(CM_in_HR_filepath, 'r') as comm_devices:
+                        with open(cm_in_filepath, 'r') as comm_devices:
+                            if self.cm_in_opt == 1:
                                 ucf = json.load(comm_devices)
-                        elif self.cm_in == 2:
-                            with open(CM_in_HR_filepath, 'r') as comm_devices:
+                            elif self.cm_in_opt == 2:
                                 ucf.extend(json.load(comm_devices))
-
-                    # if f == u:  # FIXME: If using this, make sure UCF parts/devs correct so diagram has requisite info
-                    #     with open(CM_main_filepath, 'r') as comm_devices:
-                    #         ucf.extend(json.load(comm_devices))
-
                     if f == o:
-                        if self.cm_out == 1:
-                            with open(CM_out_UC_filepath, 'r') as comm_devices:
+                        with open(cm_out_filepath, 'r') as comm_devices:
+                            if self.cm_out_opt == 1:
                                 ucf = json.load(comm_devices)
-                        elif self.cm_out == 2:
-                            with open(CM_out_UC_filepath, 'r') as comm_devices:
+                            elif self.cm_out_opt == 2:
                                 ucf.extend(json.load(comm_devices))
-
-                    # if f == o:
-                    #     with open(CM_out_HR_filepath, 'r') as comm_devices:
-                    #         ucf.extend(json.load(comm_devices))
 
                     out.append(ucf)
                 except Exception as e:
-                    debug_print(f'FAILED TO LOAD UCF {name}\nlocated at path: {f}')
+                    debug_print(f'FAILED TO LOAD UCF {self.name}\nlocated at path: {f}')
                     debug_print(e)
                     # raise(Exception)
         if len(out) == 3:
             return tuple(out)
         else:
             if len(out) > 0:
-                debug_print(f'Working UCF files in the {name} collection: ')
+                debug_print(f'Working UCF files in the {self.name} collection: ')
                 for o in out:
                     try:
                         ucf_name = o[0]['collection']
