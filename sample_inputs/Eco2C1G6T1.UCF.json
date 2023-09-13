@@ -10855,33 +10855,33 @@
 						{
 							"function": "AND",
 							"rules": [
-								"P1_PhlF_a AFTER L2",
-								"P1_PhlF_a BEFORE L3",
-								"P1_PhlF_b AFTER L3"
+								"Pr203-cI-R3_v2_a AFTER L2",
+								"Pr203-cI-R3_v2_a BEFORE L3",
+								"Pr203-cI-R3_v2_b AFTER L3"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"P1_PhlF_a AFTER L2",
-								"P1_PhlF_a BEFORE L3",
-								"P1_PhlF_b BEFORE L2"
+								"Pr203-cI-R3_v2_a AFTER L2",
+								"Pr203-cI-R3_v2_a BEFORE L3",
+								"Pr203-cI-R3_v2_b BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"P1_PhlF_b AFTER L2",
-								"P1_PhlF_b BEFORE L3",
-								"P1_PhlF_a BEFORE L2"
+								"Pr203-cI-R3_v2_b AFTER L2",
+								"Pr203-cI-R3_v2_b BEFORE L3",
+								"Pr203-cI-R3_v2_a BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"P1_PhlF_b AFTER L2",
-								"P1_PhlF_b BEFORE L3",
-								"P1_PhlF_a BEFORE L2"
+								"Pr203-cI-R3_v2_b AFTER L2",
+								"Pr203-cI-R3_v2_b BEFORE L3",
+								"Pr203-cI-R3_v2_a BEFORE L2"
 							]
 						}
 					]
@@ -10892,33 +10892,33 @@
 						{
 							"function": "AND",
 							"rules": [
-								"Q1_QacR_a AFTER L2",
-								"Q1_QacR_a BEFORE L3",
-								"Q1_QacR_b AFTER L3"
+								"Pr203-cI-R4_v2_a AFTER L2",
+								"Pr203-cI-R4_v2_a BEFORE L3",
+								"Pr203-cI-R4_v2_b AFTER L3"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"Q1_QacR_a AFTER L2",
-								"Q1_QacR_a BEFORE L3",
-								"Q1_QacR_b BEFORE L2"
+								"Pr203-cI-R4_v2_a AFTER L2",
+								"Pr203-cI-R4_v2_a BEFORE L3",
+								"Pr203-cI-R4_v2_b BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"Q1_QacR_b AFTER L2",
-								"Q1_QacR_b BEFORE L3",
-								"Q1_QacR_a BEFORE L2"
+								"Pr203-cI-R4_v2_b AFTER L2",
+								"Pr203-cI-R4_v2_b BEFORE L3",
+								"Pr203-cI-R4_v2_a BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"Q1_QacR_b AFTER L2",
-								"Q1_QacR_b BEFORE L3",
-								"Q1_QacR_a BEFORE L2"
+								"Pr203-cI-R4_v2_b AFTER L2",
+								"Pr203-cI-R4_v2_b BEFORE L3",
+								"Pr203-cI-R4_v2_a BEFORE L2"
 							]
 						}
 					]
@@ -10929,33 +10929,33 @@
 						{
 							"function": "AND",
 							"rules": [
-								"A1_AmtR_a AFTER L2",
-								"A1_AmtR_a BEFORE L3",
-								"A1_AmtR_b AFTER L3"
+								"Pr204-P22-R3_a AFTER L2",
+								"Pr204-P22-R3_a BEFORE L3",
+								"Pr204-P22-R3_b AFTER L3"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"A1_AmtR_a AFTER L2",
-								"A1_AmtR_a BEFORE L3",
-								"A1_AmtR_b BEFORE L2"
+								"Pr204-P22-R3_a AFTER L2",
+								"Pr204-P22-R3_a BEFORE L3",
+								"Pr204-P22-R3_b BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"A1_AmtR_b AFTER L2",
-								"A1_AmtR_b BEFORE L3",
-								"A1_AmtR_a BEFORE L2"
+								"Pr204-P22-R3_b AFTER L2",
+								"Pr204-P22-R3_b BEFORE L3",
+								"Pr204-P22-R3_a BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"A1_AmtR_b AFTER L2",
-								"A1_AmtR_b BEFORE L3",
-								"A1_AmtR_a BEFORE L2"
+								"Pr204-P22-R3_b AFTER L2",
+								"Pr204-P22-R3_b BEFORE L3",
+								"Pr204-P22-R3_a BEFORE L2"
 							]
 						}
 					]
@@ -10966,33 +10966,33 @@
 						{
 							"function": "AND",
 							"rules": [
-								"B3_BM3R1_a AFTER L2",
-								"B3_BM3R1_a BEFORE L3",
-								"B3_BM3R1_b AFTER L3"
+								"Pr253-TP901-R2_a AFTER L2",
+								"Pr253-TP901-R2_a BEFORE L3",
+								"Pr253-TP901-R2_b AFTER L3"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"B3_BM3R1_a AFTER L2",
-								"B3_BM3R1_a BEFORE L3",
-								"B3_BM3R1_b BEFORE L2"
+								"Pr253-TP901-R2_a AFTER L2",
+								"Pr253-TP901-R2_a BEFORE L3",
+								"Pr253-TP901-R2_b BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"B3_BM3R1_b AFTER L2",
-								"B3_BM3R1_b BEFORE L3",
-								"B3_BM3R1_a BEFORE L2"
+								"Pr253-TP901-R2_b AFTER L2",
+								"Pr253-TP901-R2_b BEFORE L3",
+								"Pr253-TP901-R2_a BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"B3_BM3R1_b AFTER L2",
-								"B3_BM3R1_b BEFORE L3",
-								"B3_BM3R1_a BEFORE L2"
+								"Pr253-TP901-R2_b AFTER L2",
+								"Pr253-TP901-R2_b BEFORE L3",
+								"Pr253-TP901-R2_a BEFORE L2"
 							]
 						}
 					]
@@ -11003,33 +11003,33 @@
 						{
 							"function": "AND",
 							"rules": [
-								"F2_AmeRs_a AFTER L2",
-								"F2_AmeRs_a BEFORE L3",
-								"F2_AmeRs_b AFTER L3"
+								"Pr206-r1t-R4_a AFTER L2",
+								"Pr206-r1t-R4_a BEFORE L3",
+								"Pr206-r1t-R4_b AFTER L3"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"F2_AmeRs_a AFTER L2",
-								"F2_AmeRs_a BEFORE L3",
-								"F2_AmeRs_b BEFORE L2"
+								"Pr206-r1t-R4_a AFTER L2",
+								"Pr206-r1t-R4_a BEFORE L3",
+								"Pr206-r1t-R4_b BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"F2_AmeRs_b AFTER L2",
-								"F2_AmeRs_b BEFORE L3",
-								"F2_AmeRs_a BEFORE L2"
+								"Pr206-r1t-R4_b AFTER L2",
+								"Pr206-r1t-R4_b BEFORE L3",
+								"Pr206-r1t-R4_a BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"F2_AmeRs_b AFTER L2",
-								"F2_AmeRs_b BEFORE L3",
-								"F2_AmeRs_a BEFORE L2"
+								"Pr206-r1t-R4_b AFTER L2",
+								"Pr206-r1t-R4_b BEFORE L3",
+								"Pr206-r1t-R4_a BEFORE L2"
 							]
 						}
 					]
@@ -11040,33 +11040,403 @@
 						{
 							"function": "AND",
 							"rules": [
-								"E1_BetI_a AFTER L2",
-								"E1_BetI_a BEFORE L3",
-								"E1_BetI_b AFTER L3"
+								"Pr208-Tuc2009-R3_a AFTER L2",
+								"Pr208-Tuc2009-R3_a BEFORE L3",
+								"Pr208-Tuc2009-R3_b AFTER L3"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"E1_BetI_a AFTER L2",
-								"E1_BetI_a BEFORE L3",
-								"E1_BetI_b BEFORE L2"
+								"Pr208-Tuc2009-R3_a AFTER L2",
+								"Pr208-Tuc2009-R3_a BEFORE L3",
+								"Pr208-Tuc2009-R3_b BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"E1_BetI_b AFTER L2",
-								"E1_BetI_b BEFORE L3",
-								"E1_BetI_a BEFORE L2"
+								"Pr208-Tuc2009-R3_b AFTER L2",
+								"Pr208-Tuc2009-R3_b BEFORE L3",
+								"Pr208-Tuc2009-R3_a BEFORE L2"
 							]
 						},
 						{
 							"function": "AND",
 							"rules": [
-								"E1_BetI_b AFTER L2",
-								"E1_BetI_b BEFORE L3",
-								"E1_BetI_a BEFORE L2"
+								"Pr208-Tuc2009-R3_b AFTER L2",
+								"Pr208-Tuc2009-R3_b BEFORE L3",
+								"Pr208-Tuc2009-R3_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr210-phage186-RBS50_a AFTER L2",
+								"Pr210-phage186-RBS50_a BEFORE L3",
+								"Pr210-phage186-RBS50_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr210-phage186-RBS50_a AFTER L2",
+								"Pr210-phage186-RBS50_a BEFORE L3",
+								"Pr210-phage186-RBS50_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr210-phage186-RBS50_b AFTER L2",
+								"Pr210-phage186-RBS50_b BEFORE L3",
+								"Pr210-phage186-RBS50_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr210-phage186-RBS50_b AFTER L2",
+								"Pr210-phage186-RBS50_b BEFORE L3",
+								"Pr210-phage186-RBS50_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R1_a AFTER L2",
+								"Pr211-933W-R1_a BEFORE L3",
+								"Pr211-933W-R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R1_a AFTER L2",
+								"Pr211-933W-R1_a BEFORE L3",
+								"Pr211-933W-R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R1_b AFTER L2",
+								"Pr211-933W-R1_b BEFORE L3",
+								"Pr211-933W-R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R1_b AFTER L2",
+								"Pr211-933W-R1_b BEFORE L3",
+								"Pr211-933W-R1_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R2_a AFTER L2",
+								"Pr211-933W-R2_a BEFORE L3",
+								"Pr211-933W-R2_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R2_a AFTER L2",
+								"Pr211-933W-R2_a BEFORE L3",
+								"Pr211-933W-R2_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R2_b AFTER L2",
+								"Pr211-933W-R2_b BEFORE L3",
+								"Pr211-933W-R2_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr211-933W-R2_b AFTER L2",
+								"Pr211-933W-R2_b BEFORE L3",
+								"Pr211-933W-R2_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr212-L5-R1_a AFTER L2",
+								"Pr212-L5-R1_a BEFORE L3",
+								"Pr212-L5-R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr212-L5-R1_a AFTER L2",
+								"Pr212-L5-R1_a BEFORE L3",
+								"Pr212-L5-R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr212-L5-R1_b AFTER L2",
+								"Pr212-L5-R1_b BEFORE L3",
+								"Pr212-L5-R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr212-L5-R1_b AFTER L2",
+								"Pr212-L5-R1_b BEFORE L3",
+								"Pr212-L5-R1_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr214-P2hd-R1_a AFTER L2",
+								"Pr214-P2hd-R1_a BEFORE L3",
+								"Pr214-P2hd-R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr214-P2hd-R1_a AFTER L2",
+								"Pr214-P2hd-R1_a BEFORE L3",
+								"Pr214-P2hd-R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr214-P2hd-R1_b AFTER L2",
+								"Pr214-P2hd-R1_b BEFORE L3",
+								"Pr214-P2hd-R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr214-P2hd-R1_b AFTER L2",
+								"Pr214-P2hd-R1_b BEFORE L3",
+								"Pr214-P2hd-R1_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R1_a AFTER L2",
+								"Pr215-P2-R1_a BEFORE L3",
+								"Pr215-P2-R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R1_a AFTER L2",
+								"Pr215-P2-R1_a BEFORE L3",
+								"Pr215-P2-R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R1_b AFTER L2",
+								"Pr215-P2-R1_b BEFORE L3",
+								"Pr215-P2-R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R1_b AFTER L2",
+								"Pr215-P2-R1_b BEFORE L3",
+								"Pr215-P2-R1_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R3_a AFTER L2",
+								"Pr215-P2-R3_a BEFORE L3",
+								"Pr215-P2-R3_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R3_a AFTER L2",
+								"Pr215-P2-R3_a BEFORE L3",
+								"Pr215-P2-R3_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R3_b AFTER L2",
+								"Pr215-P2-R3_b BEFORE L3",
+								"Pr215-P2-R3_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R3_b AFTER L2",
+								"Pr215-P2-R3_b BEFORE L3",
+								"Pr215-P2-R3_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R4_a AFTER L2",
+								"Pr215-P2-R4_a BEFORE L3",
+								"Pr215-P2-R4_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R4_a AFTER L2",
+								"Pr215-P2-R4_a BEFORE L3",
+								"Pr215-P2-R4_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R4_b AFTER L2",
+								"Pr215-P2-R4_b BEFORE L3",
+								"Pr215-P2-R4_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr215-P2-R4_b AFTER L2",
+								"Pr215-P2-R4_b BEFORE L3",
+								"Pr215-P2-R4_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr217-VP585-R1_a AFTER L2",
+								"Pr217-VP585-R1_a BEFORE L3",
+								"Pr217-VP585-R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr217-VP585-R1_a AFTER L2",
+								"Pr217-VP585-R1_a BEFORE L3",
+								"Pr217-VP585-R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr217-VP585-R1_b AFTER L2",
+								"Pr217-VP585-R1_b BEFORE L3",
+								"Pr217-VP585-R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr217-VP585-R1_b AFTER L2",
+								"Pr217-VP585-R1_b BEFORE L3",
+								"Pr217-VP585-R1_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Pr218-Wphi-R1_a AFTER L2",
+								"Pr218-Wphi-R1_a BEFORE L3",
+								"Pr218-Wphi-R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr218-Wphi-R1_a AFTER L2",
+								"Pr218-Wphi-R1_a BEFORE L3",
+								"Pr218-Wphi-R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr218-Wphi-R1_b AFTER L2",
+								"Pr218-Wphi-R1_b BEFORE L3",
+								"Pr218-Wphi-R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Pr218-Wphi-R1_b AFTER L2",
+								"Pr218-Wphi-R1_b BEFORE L3",
+								"Pr218-Wphi-R1_a BEFORE L2"
 							]
 						}
 					]

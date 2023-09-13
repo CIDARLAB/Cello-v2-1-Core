@@ -369,33 +369,11 @@
 	{
 		"collection": "structures",
 		"name": "RpaR-AM2_sensor_structure",
-		"outputs": [
-			"PRpa_A"
-		]
-	},
-	{
-		"collection": "parts",
-		"name": "PRpa_A",
-		"type": "promoter",
-		"dnasequence": "gcttaacgatcgttggctgacctgtccgatcggacaatattacgcaagaaaatggtttgttactttcgaataaa"
-	},
-	{
-		"collection": "parts",
-		"type": "cassette",
-		"name": "RiboRpa_RpaR-AM2_TerRpa",
-		"dnasequence": "AAAAAAAAAGGCTCCAAAAGGAGCCttgacggctagctcagtcctaggtacagtgctagctactAGATGCTGTAGTGGGATGTGTGTCTCACCTGAAGAGTACAAAAGTCCGAAACGGTATCCTCTACAAATAATTTTGTTTAAaAGCGATACTTAGGGTAACAGtAATGattgtgggtgaagatcagctgtggggtcgtcgtacactggaatttgttgatagcgttgaacgtctggaagcaccggcactgattagccgttttgaaagcctgattgcaagctgtggttttaccgcctatatcatggcaggtctgccgagccgtaatgccggtctgccggaactgaccctggcaaatggttggcctcgtgattggtttgatctgtatgttagcgaaaactttagcgcagttgatccggttccgcgttatggtgcaaccactgttcatccgtttgtttggagtgatgcaccgtatgatcgtgaccgtgatcaggcagcacatcgtgttatgacccgtgcagcagaatttggtctggttgaaggttattgtattccgctgcattacgatgatggtagcgcagcaattagtatggcaggtgaagatcctgatctgagtccggcagcccgtggtgtaatgcagctggttagcatttatgcacatagccgtctgcgtgtactgagccgtccgaaaccgattcgtcgtaatcgtctgacaccgcgtgaatgtgaaattctgcagtgggcagcacagggtaaaaccgcatgggaaattagcgttattctgtgtattaccgaacgcaccgttaaatttcatctgattgaagcagcacgtaaactggatgcagcaaatcgtaccgcagcagttgcaaaagcactgacactgggtctgattcgtctgtaatagagttaaccaaAAAGGGGGGATTTTATCTCCCCTTTaatttttcct"
-	},
-	{
-		"collection": "structures",
-		"name": "RpaR-AM2_sensor_structure",
 		"inputs": [
 			{
 				"name": "in1",
 				"part_type": "promoter"
 			}
-		],
-		"outputs": [
-			"PRpa_A"
 		],
 		"devices": [
 			{
@@ -412,6 +390,12 @@
 				]
 			}
 		]
+	},
+	{
+		"collection": "parts",
+		"type": "cassette",
+		"name": "RiboRpa_RpaR-AM2_TerRpa",
+		"dnasequence": "AAAAAAAAAGGCTCCAAAAGGAGCCttgacggctagctcagtcctaggtacagtgctagctactAGATGCTGTAGTGGGATGTGTGTCTCACCTGAAGAGTACAAAAGTCCGAAACGGTATCCTCTACAAATAATTTTGTTTAAaAGCGATACTTAGGGTAACAGtAATGattgtgggtgaagatcagctgtggggtcgtcgtacactggaatttgttgatagcgttgaacgtctggaagcaccggcactgattagccgttttgaaagcctgattgcaagctgtggttttaccgcctatatcatggcaggtctgccgagccgtaatgccggtctgccggaactgaccctggcaaatggttggcctcgtgattggtttgatctgtatgttagcgaaaactttagcgcagttgatccggttccgcgttatggtgcaaccactgttcatccgtttgtttggagtgatgcaccgtatgatcgtgaccgtgatcaggcagcacatcgtgttatgacccgtgcagcagaatttggtctggttgaaggttattgtattccgctgcattacgatgatggtagcgcagcaattagtatggcaggtgaagatcctgatctgagtccggcagcccgtggtgtaatgcagctggttagcatttatgcacatagccgtctgcgtgtactgagccgtccgaaaccgattcgtcgtaatcgtctgacaccgcgtgaatgtgaaattctgcagtgggcagcacagggtaaaaccgcatgggaaattagcgttattctgtgtattaccgaacgcaccgttaaatttcatctgattgaagcagcacgtaaactggatgcagcaaatcgtaccgcagcagttgcaaaagcactgacactgggtctgattcgtctgtaatagagttaaccaaAAAGGGGGGATTTTATCTCCCCTTTaatttttcct"
 	},
 	{
 		"collection": "functions",

@@ -210,12 +210,6 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
     :param regs_info:
     """
 
-    # for num, design in dna_designs.items():
-    #     for i, part in enumerate(design):
-    #         if len(part['name']) > 12:
-    #             dna_designs[num][i]['name'] = part['name'][:10] + '...'
-    # print(dna_designs)
-
     # Suppress (useless) console output
     matplotlib_logger = logging.getLogger("matplotlib")
     matplotlib_logger.setLevel(logging.INFO)
