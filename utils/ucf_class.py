@@ -70,7 +70,7 @@ class UCF:
 
                     if f == i:
                         with open(cm_in_filepath, 'r') as comm_devices:
-                            if self.cm_in_opt > 0:
+                            if self.cm_in_opt == 1 or self.cm_in_opt == 2:
                                 in_comm_devices = json.load(comm_devices)
                                 for c in in_comm_devices:
                                     if c['collection'] == 'input_sensors':
@@ -78,7 +78,7 @@ class UCF:
                                 ucf.extend(in_comm_devices)
                     if f == o:
                         with open(cm_out_filepath, 'r') as comm_devices:
-                            if self.cm_out_opt > 0:
+                            if self.cm_out_opt == 1 or self.cm_out_opt == 2:
                                 out_comm_devices = json.load(comm_devices)
                                 for c in out_comm_devices:
                                     if c['collection'] == 'output_devices':

@@ -596,28 +596,39 @@ class CELLO3:
 
             # Skip iterations that don't comply with input CM designations
             if self.cm_in_option == 1:
+                if self.verilog_in_cms:
+                    for index, input in enumerate(new_i):
+                        if input.name in self.ucf.cm_in_names and \
+                                netgraph.inputs[index].name not in self.verilog_in_cms:
+                            return 0
+                        if input.name not in self.ucf.cm_in_names and \
+                                netgraph.inputs[index].name in self.verilog_in_cms:
+                            return 0
+                else:
+                    for input in new_i:
+                        if input.name not in self.ucf.cm_in_names:
+                            return 0
+            elif self.cm_in_option == 2 and self.verilog_in_cms:
                 for index, input in enumerate(new_i):
-                    if input.name in self.ucf.cm_in_names and \
-                            netgraph.inputs[index].name not in self.verilog_in_cms:
-                        return 0
-                    if input.name not in self.ucf.cm_in_names and \
-                            netgraph.inputs[index].name in self.verilog_in_cms:
-                        return 0
-            elif self.cm_in_option == 2:
-                for index, input in enumerate(new_i):
-                    if netgraph.inputs[index].name not in self.verilog_in_cms and input.name in self.ucf.cm_in_names:
+                    if netgraph.inputs[index].name not in self.verilog_in_cms and \
+                            input.name in self.ucf.cm_in_names:
                         return 0
 
             # Skip iterations that don't comply with output CM designations
             if self.cm_out_option == 1:
-                for index, output in enumerate(new_o):
-                    if output.name in self.ucf.cm_out_names and \
-                            netgraph.outputs[index].name not in self.verilog_out_cms:
-                        return 0
-                    if output.name not in self.ucf.cm_out_names and \
-                            netgraph.outputs[index].name in self.verilog_out_cms:
-                        return 0
-            elif self.cm_out_option == 2:
+                if self.verilog_out_cms:
+                    for index, output in enumerate(new_o):
+                        if output.name in self.ucf.cm_out_names and \
+                                netgraph.outputs[index].name not in self.verilog_out_cms:
+                            return 0
+                        if output.name not in self.ucf.cm_out_names and \
+                                netgraph.outputs[index].name in self.verilog_out_cms:
+                            return 0
+                else:
+                    for output in new_o:
+                        if output.name not in self.ucf.cm_out_names:
+                            return 0
+            elif self.cm_out_option == 2 and self.verilog_out_cms:
                 for index, output in enumerate(new_o):
                     if netgraph.outputs[index].name not in self.verilog_out_cms and \
                             output.name in self.ucf.cm_out_names:
@@ -1112,7 +1123,7 @@ if __name__ == '__main__':
                     f'Output File Name: '))
 
             log.cf.info(cm_in_selection := input(
-                f'\n\nDo you want to designate some (or all) inputs to use Actuators/Communication Molecules?\n'
+                f'\n\nDo you want to designate some (or all) inputs to use Actuators/Communication Molecules (CM)?\n'
                 f'(You will have a chance to specify which inputs)\n'
                 f'Options:\n'
                 f'0. No, do not evaluate actuators for any inputs (just use the UCF inputs).\n'
@@ -1122,6 +1133,7 @@ if __name__ == '__main__':
             if cm_in_selection in ['1', '2']:
                 cm_in_option = int(cm_in_selection)
                 log.cf.info(v_in := input(f'\n\nFor which inputs do you want to consider actuators?\n\n'
+                                          f'Alternatively, just hit Enter to consider CMs for all inputs...\n\n'
                                           f'Enter space-separated list of input names from the Verilog file: '))
                 for word in v_in.split():
                     verilog_in_cms.append(word)
@@ -1130,7 +1142,7 @@ if __name__ == '__main__':
                                            f'CM Input File (or leave blank for default): '))
 
             log.cf.info(cm_out_selection := input(
-                f'\n\nDo you want to designate some (or all) outputs to use Actuators/Communication Molecules?\n'
+                f'\n\nDo you want to designate some (or all) outputs to use Actuators/Communication Molecules (CM)?\n'
                 f'(You will have a chance to specify which outputs)\n'
                 f'Options:\n'
                 f'0. No, do not evaluate actuators for any outputs (just use the UCF outputs).\n'
@@ -1140,6 +1152,7 @@ if __name__ == '__main__':
             if cm_out_selection in ['1', '2']:
                 cm_out_option = int(cm_out_selection)
                 log.cf.info(v_out := input(f'\n\nFor which outputs do you want to consider actuators?\n\n'
+                                           f'Alternatively, just hit Enter to consider CMs for all outputs...\n\n'
                                            f'Enter space-separated list of output names from the Verilog file: '))
                 for word in v_out.split():
                     verilog_out_cms.append(word)
