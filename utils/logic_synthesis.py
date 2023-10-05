@@ -43,7 +43,8 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=Fals
 
     if not os.path.isfile(v_loc):
         log.cf.error(f"ERROR finding {verilog}, please check verilog input.")
-        return False
+        raise Exception(f"ERROR finding {verilog}, please check verilog input.")
+        # return False
 
     slash = '/'
     if sys.platform.startswith('win'):
@@ -119,7 +120,8 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=Fals
         subprocess.call(command, shell=True)
     except Exception as e:
         log.cf.error(f"Yosys output for {v_name} already exists, pleas double-check. \n{e}")
-        return False
+        raise Exception(f"Yosys output for {v_name} already exists, pleas double-check. \n{e}")
+        # return False
     
     return True
 

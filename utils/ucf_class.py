@@ -25,6 +25,8 @@ class UCF:
         self.cm_out = cm_out
         self.cm_in_opt = cm_in_opt
         self.cm_out_opt = cm_out_opt
+        self.cm_in_names = []
+        self.cm_out_names = []
         self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file
         (U, I, O) = self.__parse_helper()
         self.UCFmain = U
@@ -68,16 +70,20 @@ class UCF:
 
                     if f == i:
                         with open(cm_in_filepath, 'r') as comm_devices:
-                            if self.cm_in_opt == 1:
-                                ucf = json.load(comm_devices)
-                            elif self.cm_in_opt == 2:
-                                ucf.extend(json.load(comm_devices))
+                            if self.cm_in_opt == 1 or self.cm_in_opt == 2:
+                                in_comm_devices = json.load(comm_devices)
+                                for c in in_comm_devices:
+                                    if c['collection'] == 'input_sensors':
+                                        self.cm_in_names.append(c['name'])
+                                ucf.extend(in_comm_devices)
                     if f == o:
                         with open(cm_out_filepath, 'r') as comm_devices:
-                            if self.cm_out_opt == 1:
-                                ucf = json.load(comm_devices)
-                            elif self.cm_out_opt == 2:
-                                ucf.extend(json.load(comm_devices))
+                            if self.cm_out_opt == 1 or self.cm_out_opt == 2:
+                                out_comm_devices = json.load(comm_devices)
+                                for c in out_comm_devices:
+                                    if c['collection'] == 'output_devices':
+                                        self.cm_out_names.append(c['name'])
+                                ucf.extend(out_comm_devices)
 
                     out.append(ucf)
                 except Exception as e:
