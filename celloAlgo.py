@@ -1136,6 +1136,7 @@ if __name__ == '__main__':
                                           f'Alternatively, just hit Enter to consider CMs for all inputs...\n\n'
                                           f'Enter space-separated list of input names from the Verilog file: '))
                 for word in v_in.split():
+                    word.replace(',', '')
                     verilog_in_cms.append(word)
                 log.cf.info(cm_in := input(f'\n\nWhat CM Input file do you want to use?\n'
                                            f'Alternatively, just hit Enter to use the default CMs...\n\n'
@@ -1155,6 +1156,7 @@ if __name__ == '__main__':
                                            f'Alternatively, just hit Enter to consider CMs for all outputs...\n\n'
                                            f'Enter space-separated list of output names from the Verilog file: '))
                 for word in v_out.split():
+                    word.replace(',', '')
                     verilog_out_cms.append(word)
                 log.cf.info(cm_out := input(f'\n\nWhat CM Output file do you want to use?\n'
                                             f'Alternatively, just hit Enter to use the default CMs...\n\n'
