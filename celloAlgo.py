@@ -22,6 +22,19 @@ from plotters import plotter
 from run_eugene_script import call_mini_eugene
 
 
+def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in, cm_out, in_path_, out_path_, options):
+
+    try:
+        start_time = time.time()
+        CELLO3(v_name_, ucf_name_, in_name_, out_name_, cm_in, cm_out, in_path_, out_path_, options)
+        log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
+        print("Cello completed execution")
+        return
+
+    except Exception as e:
+        return e
+
+
 class CELLO3:
     """
     CELLO arguments:
@@ -54,6 +67,7 @@ class CELLO3:
 
     def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, cm_in: str, cm_out: str,
                  in_path: str, out_path: str, options: dict = None):
+
         # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
         yosys_cmd_choice = 1  # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
         self.verbose = False  # Print more info to console and log. See logging.config to change log metadata verbosity
@@ -63,6 +77,8 @@ class CELLO3:
         self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of log from equivalent config
         self.cm_in_option = 0
         self.cm_out_option = 0
+        self.verilog_in_cms = []
+        self.verilog_out_cms = []
 
         if 'yosys_cmd_choice' in options:
             yosys_cmd_choice = options['yosys_cmd_choice']
@@ -80,6 +96,10 @@ class CELLO3:
             self.cm_in_option = options['cm_in_option']
         if 'cm_out_option' in options:
             self.cm_out_option = options['cm_out_option']
+        if 'verilog_in_cms' in options:
+            self.verilog_in_cms = options['verilog_in_cms']
+        if 'verilog_out_cms' in options:
+            self.verilog_out_cms = options['verilog_out_cms']
 
         self.in_path = in_path
         self.out_path = out_path
@@ -574,6 +594,35 @@ class CELLO3:
             new_o = [Output(o[0], o[1].id) for o in new_o]
             new_g = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in new_g]
 
+            # Skip iterations that don't comply with input CM designations
+            if self.cm_in_option == 1:
+                for index, input in enumerate(new_i):
+                    if input.name in self.ucf.cm_in_names and \
+                            netgraph.inputs[index].name not in self.verilog_in_cms:
+                        return 0
+                    if input.name not in self.ucf.cm_in_names and \
+                            netgraph.inputs[index].name in self.verilog_in_cms:
+                        return 0
+            elif self.cm_in_option == 2:
+                for index, input in enumerate(new_i):
+                    if netgraph.inputs[index].name not in self.verilog_in_cms and input.name in self.ucf.cm_in_names:
+                        return 0
+
+            # Skip iterations that don't comply with output CM designations
+            if self.cm_out_option == 1:
+                for index, output in enumerate(new_o):
+                    if output.name in self.ucf.cm_out_names and \
+                            netgraph.outputs[index].name not in self.verilog_out_cms:
+                        return 0
+                    if output.name not in self.ucf.cm_out_names and \
+                            netgraph.outputs[index].name in self.verilog_out_cms:
+                        return 0
+            elif self.cm_out_option == 2:
+                for index, output in enumerate(new_o):
+                    if netgraph.outputs[index].name not in self.verilog_out_cms and \
+                            output.name in self.ucf.cm_out_names:
+                        return 0
+
             graph = AssignGraph(new_i, new_o, new_g)
             (circuit_score, tb, tb_labels) = self.score_circuit(graph)
             # NOTE: follow the circuit scoring functions
@@ -942,11 +991,14 @@ if __name__ == '__main__':
     # TODO: source UCF files from CELLO-UCF instead
     in_path_ = 'sample_inputs/'  # (contains the verilog files, and UCF files)
     out_path_ = 'temp_out/'  # (any path to a local folder)
+    v_name_ = ''
     ucf_name_ = ''
     in_name_ = ''
     out_name_ = ''
     cm_in = ''
     cm_out = ''
+    verilog_in_cms = []
+    verilog_out_cms = []
 
     figlet = r"""
     
@@ -1060,27 +1112,37 @@ if __name__ == '__main__':
                     f'Output File Name: '))
 
             log.cf.info(cm_in_selection := input(
-                f'\n\nDo you want to use Actuators/Communication Molecules as inputs?\n'
+                f'\n\nDo you want to designate some (or all) inputs to use Actuators/Communication Molecules?\n'
+                f'(You will have a chance to specify which inputs)\n'
                 f'Options:\n'
-                f'0. No, do not evaluate actuators as inputs (just use the UCF inputs).\n'
-                f'1. Yes, exclusively use actuators as inputs (ignore the UCF inputs).\n'
-                f'2. Yes, have the actuators and UCF inputs compete to find the best circuit.\n\n'
+                f'0. No, do not evaluate actuators for any inputs (just use the UCF inputs).\n'
+                f'1. Yes, exclusively use actuators for the specified inputs (ignore the UCF inputs).\n'
+                f'2. Yes, have actuators & UCF inputs compete for the specified inputs to find the best circuit.\n\n'
                 f'Number of option (0, 1, or 2): '))
             if cm_in_selection in ['1', '2']:
                 cm_in_option = int(cm_in_selection)
+                log.cf.info(v_in := input(f'\n\nFor which inputs do you want to consider actuators?\n\n'
+                                          f'Enter space-separated list of input names from the Verilog file: '))
+                for word in v_in.split():
+                    verilog_in_cms.append(word)
                 log.cf.info(cm_in := input(f'\n\nWhat CM Input file do you want to use?\n'
                                            f'Alternatively, just hit Enter to use the default CMs...\n\n'
                                            f'CM Input File (or leave blank for default): '))
 
             log.cf.info(cm_out_selection := input(
-                f'\n\nDo you want to use Actuators/Communication Molecules as outputs?\n'
+                f'\n\nDo you want to designate some (or all) outputs to use Actuators/Communication Molecules?\n'
+                f'(You will have a chance to specify which outputs)\n'
                 f'Options:\n'
-                f'0. No, do not evaluate actuators as outputs (just use the UCF outputs).\n'
-                f'1. Yes, exclusively use actuators as outputs (ignore the UCF outputs).\n'
-                f'2. Yes, have the actuators and UCF outputs compete to find the best circuit.\n\n'
+                f'0. No, do not evaluate actuators for any outputs (just use the UCF outputs).\n'
+                f'1. Yes, exclusively use actuators for the specified outputs (ignore the UCF outputs).\n'
+                f'2. Yes, have actuators & UCF outputs compete for the specified outputs to find the best circuit.\n\n'
                 f'Number of option (0, 1, or 2): '))
             if cm_out_selection in ['1', '2']:
                 cm_out_option = int(cm_out_selection)
+                log.cf.info(v_out := input(f'\n\nFor which outputs do you want to consider actuators?\n\n'
+                                           f'Enter space-separated list of output names from the Verilog file: '))
+                for word in v_out.split():
+                    verilog_out_cms.append(word)
                 log.cf.info(cm_out := input(f'\n\nWhat CM Output file do you want to use?\n'
                                             f'Alternatively, just hit Enter to use the default CMs...\n\n'
                                             f'CM Output File (or leave blank for default): '))
@@ -1109,16 +1171,17 @@ if __name__ == '__main__':
             if 'ex' in options_list:
                 exhaustive = True
 
-            start_time = time.time()
-            Cello3Process = CELLO3(v_name_, ucf_name_, in_name_, out_name_, cm_in, cm_out, in_path_, out_path_,
-                                   options={'yosys_cmd_choice': yosys_cmd_choice,
-                                            'verbose': verbose,
-                                            'log_overwrite': log_overwrite,
-                                            'print_iters': print_iters,
-                                            'exhaustive': exhaustive,
-                                            'test_configs': test_configs,
-                                            'cm_in_option': cm_in_option,
-                                            'cm_out_option': cm_out_option})
-            log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
+    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in, cm_out, in_path_, out_path_,
+                               options={'yosys_cmd_choice': yosys_cmd_choice,
+                                        'verbose': verbose,
+                                        'log_overwrite': log_overwrite,
+                                        'print_iters': print_iters,
+                                        'exhaustive': exhaustive,
+                                        'test_configs': test_configs,
+                                        'cm_in_option': cm_in_option,
+                                        'cm_out_option': cm_out_option,
+                                        'verilog_in_cms': verilog_in_cms,
+                                        'verilog_out_cms': verilog_out_cms})
+    # log.cf.info(result)
 
     log.cf.info("Exiting Cello...")
