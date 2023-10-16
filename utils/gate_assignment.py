@@ -105,13 +105,13 @@ class Input(IO):
                     STATE = val
                     # NOTE: Assumes each input constitutes a single value and is either 'STATE' or 'x' in UCF-in
                     # print(self.function)
-                    if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
-                        STATE = val
-                    else:  # Usually: Hill response for Comm Molecule  # FIXME: trace vars properly
-                        if lvl == 'high':
-                            x = self.ymax
-                        elif lvl == 'low':
-                            x = self.ymin
+                    # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
+                    #     STATE = val
+                    # else:  # Usually: Hill response for Comm Molecule  # FIXME: trace vars properly
+                    #     if lvl == 'high':
+                    #         x = self.ymax
+                    #     elif lvl == 'low':
+                    #         x = self.ymin
                     # else:
                     #     log.cf.error("Cannot identify UCF-in function input parameter")
                     self.out_scores[lvl] = eval(self.function)
