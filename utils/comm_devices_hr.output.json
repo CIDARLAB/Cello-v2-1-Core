@@ -10,8 +10,7 @@
 		"collection": "models",
 		"name": "OC6_out_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "linear_response"
 		},
 		"parameters": [
 			{
@@ -71,8 +70,7 @@
 		"collection": "models",
 		"name": "OHC12_out_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "linear_response"
 		},
 		"parameters": [
 			{
@@ -132,8 +130,7 @@
 		"collection": "models",
 		"name": "pC-HSL_out_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "linear_response"
 		},
 		"parameters": [
 			{
@@ -194,8 +191,7 @@
 		"collection": "models",
 		"name": "DAPG_out_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "linear_response"
 		},
 		"parameters": [
 			{
@@ -274,20 +270,22 @@
         ]
     },
 	{
-        "collection": "functions",
-        "name": "linear_input_composition",
-        "equation": "x2 + x1",
-        "variables": [
-            {
-                "name": "x1",
-                "map": "#//structure/inputs/in1/model/functions/response_function"
-            },
-            {
-                "name": "x2",
-                "map": "#//structure/inputs/in2/model/functions/response_function"
-            }
-        ]
-    },
+		"collection": "functions",
+		"name": "linear_response",
+		"equation": "c * x",
+		"variables": [
+			{
+				"name": "x",
+				"map": "#//model/functions/input_composition"
+			}
+		],
+		"parameters": [
+			{
+				"name": "c",
+				"map": "#//model/parameters/unit_conversion"
+			}
+		]
+	},
 	{
 		"collection": "parts",
 		"type": "cassette",

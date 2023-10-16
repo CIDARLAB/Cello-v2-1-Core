@@ -10,8 +10,7 @@
 		"collection": "models",
 		"name": "OC6_in_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -23,16 +22,6 @@
 				"name": "ymin",
 				"value": 0.06,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "kd",
-				"value": 0.1,
-				"description": "Dissociation equilibrium constant"
-			},
-			{
-				"name": "n",
-				"value": 1.9,
-				"description": "Cooperativety"
 			}
 		]
 	},
@@ -54,8 +43,7 @@
 		"collection": "models",
 		"name": "OHC12_in_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -67,16 +55,6 @@
 				"name": "ymin",
 				"value": 0.01,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "kd",
-				"value": 0.3,
-				"description": "Dissociation equilibrium constant"
-			},
-			{
-				"name": "n",
-				"value": 3.9,
-				"description": "Cooperativety"
 			}
 		]
 	},
@@ -98,8 +76,7 @@
 		"collection": "models",
 		"name": "pC-HSL_in_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -111,17 +88,6 @@
 				"name": "ymin",
 				"value": 0.02,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "kd",
-				"value": 0.2,
-				"description": "Dissociation equilibrium constant"
-
-			},
-			{
-				"name": "n",
-				"value": 2,
-				"description": "Cooperativety"
 			}
 		]
 	},
@@ -143,8 +109,7 @@
 		"collection": "models",
 		"name": "DAPG_in_model",
 		"functions": {
-			"response_function": "Hill_response",
-			"input_composition": "linear_input_composition"
+			"response_function": "sensor_response"
 		},
 		"parameters": [
 			{
@@ -156,70 +121,37 @@
 				"name": "ymin",
 				"value": 0.02,
 				"description": "Minimal transcription"
-			},
-			{
-				"name": "kd",
-				"value": 0.15,
-				"description": "Dissociation equilibrium constant"
-			},
-			{
-				"name": "n",
-				"value": 4,
-				"description": "Cooperativety"
 			}
 		]
 	},
 	{
 		"collection": "structures",
 		"name": "DAPG_in_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			}
+		],
 		"outputs": [
 			"rPhl"
 		]
 	},
 	{
-        "collection": "functions",
-        "name": "Hill_response",
-        "equation": "ymin + (ymax - ymin) / (1.0 + (kd / x)^n)",
-        "variables": [
-            {
-                "name": "x",
-                "map": "#//model/functions/input_composition"
-            }
-        ],
-        "parameters": [
-            {
-                "name": "ymax",
-                "map": "#//model/parameters/ymax"
-            },
-            {
-                "name": "ymin",
-                "map": "#//model/parameters/ymin"
-            },
-            {
-                "name": "kd",
-                "map": "#//model/parameters/kd"
-            },
-            {
-                "name": "n",
-                "map": "#//model/parameters/n"
-            }
-        ]
-    },
-	{
-        "collection": "functions",
-        "name": "linear_input_composition",
-        "equation": "x2 + x1",
-        "variables": [
-            {
-                "name": "x1",
-                "map": "#//structure/inputs/in1/model/functions/response_function"
-            },
-            {
-                "name": "x2",
-                "map": "#//structure/inputs/in2/model/functions/response_function"
-            }
-        ]
-    },
+		"collection": "functions",
+		"name": "sensor_response",
+		"equation": "$STATE * (ymax - ymin) + ymin",
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			}
+		]
+	},
 	{
 		"collection": "parts",
 		"type": "promoter",

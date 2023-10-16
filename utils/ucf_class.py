@@ -16,17 +16,15 @@ class UCF:
 
     """
 
-    def __init__(self, filepath, ucf_file, in_file, out_file, cm_in, cm_out, cm_in_opt, cm_out_opt):
+    def __init__(self, filepath, ucf_file, in_file, out_file, cm_in_path, cm_out_path, cm_in_opt, cm_out_opt):
         self.filepath = filepath
         self.ucf_file = ucf_file
         self.in_file = in_file
         self.out_file = out_file
-        self.cm_in = cm_in
-        self.cm_out = cm_out
+        self.cm_in_path = cm_in_path
+        self.cm_out_path = cm_out_path
         self.cm_in_opt = cm_in_opt
         self.cm_out_opt = cm_out_opt
-        self.cm_in_names = []
-        self.cm_out_names = []
         self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file
         (U, I, O) = self.__parse_helper()
         self.UCFmain = U
@@ -52,15 +50,15 @@ class UCF:
         return list(set([c['collection'] for c in UCF_choice]))
 
     def __parse_helper(self):
-        filepath = os.path.join(*self.filepath.split('/'))
-        # Communication Molecule filepaths
-        cm_in_filepath = os.path.join(*filepath.split('/'), self.cm_in + '.json') if self.cm_in else \
-                         os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))  # hill response in func
-        cm_out_filepath = os.path.join(*filepath.split('/'), self.cm_out + '.json') if self.cm_out else \
-                          os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))  # normal unit conv func
-        u = os.path.join(filepath, self.ucf_file + '.json')
-        i = os.path.join(filepath, self.in_file + '.json')
-        o = os.path.join(filepath, self.out_file + '.json')
+        # filepath = os.path.join(*self.filepath.split('/'))
+        # # Communication Molecule filepaths
+        # cm_in_filepath = os.path.join(*filepath.split('/'), self.cm_in + '.json') if self.cm_in else \
+        #                  os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))  # hill response in func
+        # cm_out_filepath = os.path.join(*filepath.split('/'), self.cm_out + '.json') if self.cm_out else \
+        #                   os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))  # normal unit conv func
+        u = os.path.join(self.filepath, self.ucf_file + '.json')
+        i = os.path.join(self.filepath, self.in_file + '.json')
+        o = os.path.join(self.filepath, self.out_file + '.json')
         paths = [u, i, o]
         out = []
         for f in paths:
@@ -68,27 +66,21 @@ class UCF:
                 try:
                     ucf = json.load(ucf)
 
-                    if f == i:
-                        with open(cm_in_filepath, 'r') as comm_devices:
-                            if self.cm_in_opt == 1 or self.cm_in_opt == 2:
-                                in_comm_devices = json.load(comm_devices)
-                                for c in in_comm_devices:
-                                    if c['collection'] == 'input_sensors':
-                                        self.cm_in_names.append(c['name'])
-                                ucf.extend(in_comm_devices)
-                    if f == o:
-                        with open(cm_out_filepath, 'r') as comm_devices:
-                            if self.cm_out_opt == 1 or self.cm_out_opt == 2:
-                                out_comm_devices = json.load(comm_devices)
-                                for c in out_comm_devices:
-                                    if c['collection'] == 'output_devices':
-                                        self.cm_out_names.append(c['name'])
-                                ucf.extend(out_comm_devices)
+                    if self.cm_in_opt and f == i:
+                        print('CM IN')
+                        with open(self.cm_in_path, 'r') as comm_devices:
+                            in_comm_devices = json.load(comm_devices)
+                            ucf.extend(in_comm_devices)
+                    if self.cm_out_opt and f == o:
+                        print('CM OUT')
+                        with open(self.cm_out_path, 'r') as comm_devices:
+                            out_comm_devices = json.load(comm_devices)
+                            ucf.extend(out_comm_devices)
 
                     out.append(ucf)
                 except Exception as e:
                     debug_print(f'FAILED TO LOAD UCF {self.name}\nlocated at path: {f}')
-                    debug_print(e)
+                    debug_print(str(e))
                     # raise(Exception)
         if len(out) == 3:
             return tuple(out)
