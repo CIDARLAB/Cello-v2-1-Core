@@ -43,49 +43,55 @@ def plot_bars(filepath, table, inputs, outputs, hr_params, plot_name):
 
     fig = plt.subplots()
     plt.subplots_adjust(hspace=0.2*len(bar_graphs), wspace=0.4)
+    if plot_name.endswith('.UCF'):
+        plot_name = plot_name[:-4]
     plt.suptitle(f'{plot_name}: Response Plots', fontsize='medium', y=.98, fontweight='bold')
     hr_graphs = {}
 
     i = 1
     for name, graph in bar_graphs.items():
 
-        # Base Response Plots (for all outputs)
+        # Output Response Plots (all outputs)
         ax1 = plt.subplot(len(bar_graphs), 3, 3*i - 2)
-        ax1.set_title('Fluorescent Reporter', fontsize='small')
+        ax1.set_title(f'{name}', fontsize='small')
         plt.bar(list(graph.keys()), list(graph.values()), color='gray')
         plt.yscale('log')
-        plt.ylabel(f'\n{name}\n(RNAP/s)')
+        plt.ylim(ax1.get_ylim()[0]*0.1, ax1.get_ylim()[1])
+        plt.ylabel('Output (RNAP/s)', fontsize=7, fontweight='bold')
         plt.yticks(fontsize=7)
         plt.xticks(fontsize=7)
 
-        # CM Hill Response Curves
-
-
-        # CM Response Plots (for CM outputs)
+        # CMs Only...
         if name in cms.keys():
+            promoter = ('pLuxB ' if name.startswith('OC6') else 'pCin ' if name.startswith('OHC12') else 'pRpa ' if
+                        name.startswith('pC-HSL') else 'pPhlF ' if name.startswith('DAPG') else '')
             hr_graphs[name] = {}
+            curve = lambda ymax, ymin, kd, n, x : ymin + (ymax - ymin) / (1.0 + (kd / x)**n)
 
-            def f(ymax, ymin, kd, n, x):
-                return ymin + (ymax - ymin) / (1.0 + (kd / x)**n)
+            # Promoter Hill Response Curve (CM only)
             ax2 = plt.subplot(len(bar_graphs), 3, 3*i - 1)
-            x = np.linspace(0.01, 1, 100)
-            ax2.plot(x, f(cms[name]['ymax'], cms[name]['ymin'], cms[name]['kd'], cms[name]['n'], x))
-            ax2.set_title('CM Hill Response Curve', fontsize='small')
+            x = np.linspace(ax1.get_ylim()[0], ax1.get_ylim()[1], 1000)
+            ax2.plot(x, curve(cms[name]['ymax'], cms[name]['ymin'], cms[name]['kd'], cms[name]['n'], x))
+            ax2.set_title(f'{promoter}Hill Response', fontsize='small')
             plt.yscale('log')
             plt.xscale('log')
+            if i >= len(cms):
+                plt.xlabel('Input (RNAP/s)', fontsize=7, fontweight='bold')
             plt.yticks(fontsize=7)
             plt.xticks(fontsize=7)
 
+            # Promoter Activity Bars (CM only)
             for k, v in graph.items():
                 hr_graphs[name][k] = cms[name]['ymin'] + (cms[name]['ymax'] - cms[name]['ymin']) / \
-                                   (1.0 + ((cms[name]['kd']) / v)**cms[name]['n'])  # TODO: Or should it be reverse hr?
+                                   (1.0 + ((cms[name]['kd']) / v)**cms[name]['n'])
             ax3 = plt.subplot(len(bar_graphs), 3, 3*i)
-            ax3.sharey(ax1)
-            ax3.set_title('CM Output', fontsize='small')
+            ax3.sharey(ax2)
+            ax3.set_title(f'{promoter}Activity', fontsize='small')
             plt.bar(list(hr_graphs[name].keys()), list(hr_graphs[name].values()))
             plt.yscale('log')
             plt.yticks(fontsize=7)
             plt.xticks(fontsize=7)
+
         i += 1
 
     plt.savefig(f'{filepath}_response_plots.png')
