@@ -42,11 +42,16 @@ def plot_bars(filepath, table, inputs, outputs, hr_params, plot_name):
                 bar_graph[bar_label] = row[output_indices[output]]
 
     fig = plt.subplots()
-    plt.subplots_adjust(hspace=0.2*len(bar_graphs), wspace=0.4)
+    plt.subplots_adjust(hspace=0.25*len(bar_graphs), wspace=0.4)
     if plot_name.endswith('.UCF'):
         plot_name = plot_name[:-4]
     plt.suptitle(f'{plot_name}: Response Plots', fontsize='medium', y=.98, fontweight='bold')
     hr_graphs = {}
+
+    last = 0
+    for ind, val in enumerate(list(bar_graphs.keys())):
+        if (val in cms.keys()) and (ind + 1 > last):
+            last = ind + 1
 
     i = 1
     for name, graph in bar_graphs.items():
@@ -75,7 +80,7 @@ def plot_bars(filepath, table, inputs, outputs, hr_params, plot_name):
             ax2.set_title(f'{promoter}Hill Response', fontsize='small')
             plt.yscale('log')
             plt.xscale('log')
-            if i >= len(cms):
+            if i == last:
                 plt.xlabel('Input (RNAP/s)', fontsize=7, fontweight='bold')
             plt.yticks(fontsize=7)
             plt.xticks(fontsize=7)
