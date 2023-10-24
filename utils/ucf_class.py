@@ -25,7 +25,7 @@ class UCF:
         self.cm_out_path = cm_out_path
         self.cm_in_opt = cm_in_opt
         self.cm_out_opt = cm_out_opt
-        self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file
+        self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file  # CRIT: Fix
         (U, I, O) = self.__parse_helper()
         self.UCFmain = U
         self.UCFin = I
