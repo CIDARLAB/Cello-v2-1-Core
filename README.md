@@ -10,6 +10,7 @@ cd Cello-v3-Core/
 
 #
 ## Installing Python Packages
+Install using pip
 ```
 pip install -r requirements.txt
 ```
