@@ -1,14 +1,25 @@
+# macOS files
 .DS_Store
-*.history
-.ipynb_checkpoints
-*.rdb
+
+# Development environment directories and files
 venv/
-cello-v3-env/
-*.egg-info/
-test/
+
+# Python cache and compiled files
 __pycache__/
+*.pyc
+*.pyo
+
+# Development tools and metadata
+*.history
 .vscode/
-temp_out/*
-outputs/*
-test_all_configs_out/*
+
+# Logs and temporary directories
+logs/
+temp_out/
+
+# Misc
+assets/Papers
+assets/Slides
+assets/pseudo_code_and_scratch.txt
+
 .bat
