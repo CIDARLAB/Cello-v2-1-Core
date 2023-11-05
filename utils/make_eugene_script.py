@@ -171,7 +171,7 @@ class EugeneObject:
 
         # Add gate group names to dict
         for id_, g in self.gate_map:
-            self.structs_dict[g.gate_in_use].gates_group = g.gate_id
+            self.structs_dict[g.gate_in_use].gates_group = g.name
 
         # Add type, model, structure, outputs to the Inputs in dict
         in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')

@@ -312,11 +312,11 @@ class DNADesign:
         with open(dna_sequences, 'w', newline='') as dna_seq:
             csv_writer = csv.writer(dna_seq)
             for order in self.valid_circuits:
-                segments = ['', 'Landing Pad 1']
+                segments = ['', 'Location 1']
                 count = 2
                 for seq in order:
                     if seq == '_NONCE_PAD':
-                        segments.append(f'Landing Pad {count}')
+                        segments.append(f'Location {count}')
                         count += 1
             csv_writer.writerow(segments)
             for num, order in enumerate(self.valid_circuits):

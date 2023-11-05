@@ -26,6 +26,10 @@ from run_eugene_script import call_mini_eugene
 
 def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_, options):
 
+    # TODO: Check if full filepaths; if not, convert to full paths
+    # TODO: Change CELLO3 and all objects to expect a full path
+    # TODO: Return better error information
+
     try:
         start_time = time.time()
         CELLO3(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_, options)
@@ -128,6 +132,11 @@ class CELLO3:
         if not cont:
             return  # break if run into problem with yosys, call_YOSYS() will show the error.
 
+        self.rnl = self.__load_netlist()  # initialize RG from netlist JSON output from Yosys
+
+        if not self.rnl:
+            return
+
         # NOTE: Initializes UCF, Input, and Output from filepaths
         self.ucf = UCF(self.in_path, ucf_name, in_name, out_name, self.cm_in_path, self.cm_out_path,
                        self.cm_in_option, self.cm_out_option)
@@ -135,20 +144,16 @@ class CELLO3:
         if not self.ucf.valid:
             return  # breaks early if UCF file has errors
 
-        self.rnl = self.__load_netlist()  # initialize RG from netlist JSON output from Yosys
-
-        if not self.rnl:
-            return
-
         valid: bool
         iter_: int
         valid, iter_ = self.check_conditions(verbose=True)
 
         if valid:
             log.cf.info(f'\nCondition check passed? {valid}\n')
-            log.cf.info('\nContinue to evaluation? (y/n) ')
-            log.cf.info(cont := input() if not self.test_configs else 'y')
-            if (cont == 'Y' or cont == 'y') and valid:
+            # log.cf.info('\nContinue to evaluation? (y/n) ')
+            # log.cf.info(cont := input() if not self.test_configs else 'y')
+            # if (cont == 'Y' or cont == 'y') and valid:
+            if valid:
                 best_result = self.techmap(iter_)  # Executing the algorithm if things check out
                 if best_result is None:
                     log.cf.error('\nProblem with best_result...\n')
@@ -256,14 +261,21 @@ class CELLO3:
 
                 # PLOTS
                 try:
-                    output_names = [o.name for o in best_graph.outputs]
-                    output_model_names = [o + '_model' for o in output_names]
-                    output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
-                                                output_model_names)
-                    output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in
-                                     output_jsons}
+                    # output_names = [o.name for o in best_graph.outputs]
+                    # output_model_names = [o + '_model' for o in output_names]
+                    # output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
+                    #                             output_model_names)
+                    # output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
+                    # print(best_graph.outputs[0].vars)
+
+                    # output_info = {o['name'][:-6]: {(x:=o['functions']['response_function']):
+                    #                                 (y:=query_helper(output_function_json, 'name', x)[0])['equation'],
+                    #                                 'first_var': y['variables'][0]['name'],
+                    #                                 'params': {p['name']: p['value'] for p in o['parameters']},
+                    #                                 'prev_node': best_graph.find_prev(best_graph.outputs[0])}
+                    #                for o in output_jsons}
                     plot_name = self.verilog_name + ' + ' + self.ucf_name
-                    plot_bars(filepath, tb, best_graph.inputs, best_graph.outputs, output_params, plot_name)
+                    plot_bars(filepath, plot_name, best_graph, tb)
                     log.cf.info(' - Response plots generated')
                 except Exception as e:
                     log.cf.error(f'Unable to generate response plots:\n{e}', exc_info=True)
@@ -317,8 +329,9 @@ class CELLO3:
         num_ucf_input_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts'))
         num_netlist_inputs = len(self.rnl.inputs) if netlist_valid else 99999
         inputs_match = (num_ucf_input_sensors == num_ucf_input_models) and \
-                       (num_ucf_input_models == num_ucf_input_structures == num_ucf_input_parts) and \
-                       (num_ucf_input_parts >= num_netlist_inputs)
+                       (num_ucf_input_models == num_ucf_input_structures) and \
+                       (num_ucf_input_parts >= num_netlist_inputs)  # CRIT: why must part number match in line above?
+        # == num_ucf_input_parts
         if verbose:
             log.cf.info(f'\nINPUTS (including the communication devices): \n'
                         f'num IN-SENSORS in {self.ucf_name} in-UCF: {num_ucf_input_sensors}\n'
@@ -339,7 +352,7 @@ class CELLO3:
         num_netlist_outputs = len(self.rnl.outputs) if netlist_valid else 99999
         outputs_match = (num_ucf_output_sensors == num_ucf_output_models) and \
                         (num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and \
-                        (num_ucf_output_parts >= num_netlist_outputs)
+                        (num_ucf_output_parts >= num_netlist_outputs)  # CRIT: why must part number match in line above?
         if verbose:
             log.cf.info(f'\nOUTPUTS: \n'
                         f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}\n'
@@ -501,7 +514,7 @@ class CELLO3:
             o_perms.append(o_perm)
         for g_perm in itertools.permutations(g_list, g):
             g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 1000 else 1000
+        max_fun = iter_ if iter_ < 100 else 100
 
         # DUAL ANNEALING SCIPY FUNC
         func = lambda x: self.prep_assign_for_scoring(x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
@@ -692,7 +705,7 @@ class CELLO3:
 
         NOTE: Please ensure the UCF files follow the same format as those provided in the samples folder!
 
-        NOTE: Use one gate from each group only! (graph.gates.gate_id = group name)
+        NOTE: Use one gate from each group only! (graph.gates.name = group name)
 
         :param graph: AssignGraph
         :return: score: tuple[SupportsLessThan, list[list[int] | int], list[str]]
@@ -747,7 +760,7 @@ class CELLO3:
             print(f'input_response = {input_equations}\n')  # TODO: Fix to print mult functions w/ CM
             print(f'Parameters in sensor_response function json: \n{input_params}\n')
 
-        gate_groups = [(g.gate_id, g.gate_type) for g in graph.gates]
+        gate_groups = [(g.name, g.gate_type) for g in graph.gates]
         gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
         gate_query = query_helper(gates, 'group', [g[0] for g in gate_groups])
         gate_ids = [(g['group'], g['name']) for g in gate_query]
@@ -783,9 +796,12 @@ class CELLO3:
         output_model_names = [o + '_model' for o in output_names]
         output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
                                     output_model_names)
+
         output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in output_jsons}
         output_functions = {c['name'][:-6]: c['functions']['response_function'] for c in output_jsons}
         output_equations = {k: (e['equation']) for e in output_function_json for (k, f) in
+                           output_functions.items() if (e['name'] == f)}
+        output_vars = {k: (e['variables']) for e in output_function_json for (k, f) in
                            output_functions.items() if (e['name'] == f)}
 
         if self.print_iters:
@@ -802,13 +818,16 @@ class CELLO3:
         # adding parameters to outputs
         for graph_output in graph.outputs:
             if all([repr(graph_output) in x for x in [output_params, output_equations]]):
-                graph_output.add_eval_params(output_equations[repr(graph_output)], output_params[repr(graph_output)])
+                graph_output.add_eval_params(output_equations[repr(graph_output)],
+                                             output_params[repr(graph_output)],
+                                             output_functions[repr(graph_output)],
+                                             output_vars[repr(graph_output)])
 
         # adding parameters and individual gates to gates
         for (gate_group, gate_name) in gate_ids:
             gate_param = gate_params[gate_name]
             for graph_gate in graph.gates:
-                if graph_gate.gate_id == gate_group:
+                if graph_gate.name == gate_group:
                     graph_gate.add_eval_params(gate_funcs, gate_name, gate_param)
 
         # NOTE: creating a truth table for each graph assignment
@@ -939,7 +958,7 @@ class CELLO3:
                     circuit_scores.append((output_score, output_name))
 
             for graph_gate in graph.gates:
-                graph_gate_idx = truth_table_labels.index(graph_gate.gate_id)
+                graph_gate_idx = truth_table_labels.index(graph_gate.name)
                 truth_table[r][graph_gate_idx] = graph_gate.best_score
 
             if self.print_iters:
@@ -1142,39 +1161,47 @@ if __name__ == '__main__':
                     f'Output File Name: '))
 
             log.cf.info(cm_in_input := input(f'\n\nDo you have a file of Communication Molecule (CM) inputs? (y/n)\n'))
-            if 'y' in cm_in_input or 'Y' in cm_in_input:
+            if not cm_in_input:
+                cm_in_option = True
+                cm_in_file = 'cm_sr.input'
+            elif 'y' in cm_in_input or 'Y' in cm_in_input:
                 cm_in_option = True
                 log.cf.info(cm_in_file := input(f'\n\nWhat CM Input file do you want to use?\n\n'
-                                           f'Name of CM Input File: '))
+                                                f'Name of CM Input File: '))
+
             log.cf.info(cm_out_input := input(f'\n\nDo you have a CM output file? (y/n)\n'))
-            if 'y' in cm_out_input or 'Y' in cm_out_input:
+            if not cm_out_input:
+                cm_out_option = True
+                cm_out_file = 'cm_hr.output'
+            elif 'y' in cm_out_input or 'Y' in cm_out_input:
                 cm_out_option = True
                 log.cf.info(cm_out_file := input(f'\n\nWhat CM Output file do you want to use?\n\n'
-                                            f'Name of CM Output File: '))
+                                                 f'Name of CM Output File: '))
 
-            log.cf.info(options := input(
-                f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
-                f'Available Settings:\n'
-                f' - (v)  Verbose: {verbose} \n'
-                f'        Include \'v\' to print more details to both console and the log file\n'
-                f' - (o)  Log overwrite: {log_overwrite} \n'
-                f'        Include \'o\' to overwrite an old log when a new log is run; removes dates from log name\n'
-                f' - (pi) Print all iterations: {print_iters} \n'
-                f'        Include \'pi\' to print info on all iterations (copious output)\n'
-                f' - (ex) Exhaustive: {exhaustive} \n'
-                f'        Include \'ex\' to test *all* possible permutations to get global optimum \n'
-                f'        May take *long* time; normally uses simulated annealing to efficiently find good solution\n'
-                f'Otherwise, just press Enter to proceed with default settings...\n\n'
-                f'Options (if any): '))
+            options = ''
+            # log.cf.info(options := input(
+            #     f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
+            #     f'Available Settings:\n'
+            #     f' - (v)  Verbose: {verbose} \n'
+            #     f'        Include \'v\' to print more details to both console and the log file\n'
+            #     f' - (o)  Log overwrite: {log_overwrite} \n'
+            #     f'        Include \'o\' to overwrite an old log when a new log is run; removes dates from log name\n'
+            #     f' - (pi) Print all iterations: {print_iters} \n'
+            #     f'        Include \'pi\' to print info on all iterations (copious output)\n'
+            #     f' - (ex) Exhaustive: {exhaustive} \n'
+            #     f'        Include \'ex\' to test *all* possible permutations to get global optimum \n'
+            #     f'        May take *long* time; normally uses simulated annealing to efficiently find good solution\n'
+            #     f'Otherwise, just press Enter to proceed with default settings...\n\n'
+            #     f'Options (if any): '))
             options_list = options.split()
-            if 'v' in options_list:
-                verbose = True
-            if 'o' in options_list:
-                log_overwrite = True
-            if 'pi' in options_list:
-                print_iters = True
-            if 'ex' in options_list:
-                exhaustive = True
+            # if 'v' in options_list:
+            #     verbose = True
+            # if 'o' in options_list:
+            #     log_overwrite = True
+            # if 'pi' in options_list:
+            #     print_iters = True
+            # if 'ex' in options_list:
+            #     exhaustive = True
 
     result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_,
                                options={'yosys_cmd_choice': yosys_cmd_choice,

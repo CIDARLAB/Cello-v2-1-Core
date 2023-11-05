@@ -29,7 +29,7 @@ def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_lis
                     [None] * num_out) * 2
         table.append(row)
     labels = [f'{i.name}_I/O' for i in in_list] + [i.name for i in in_list] + \
-             [f'{g.gate_id}_I/O' for g in gate_list] + [g.gate_id for g in gate_list] + \
+             [f'{g.name}_I/O' for g in gate_list] + [g.name for g in gate_list] + \
              [f'{o.name}_I/O' for o in out_list] + [o.name for o in out_list]
     return table, labels
 
@@ -139,14 +139,18 @@ class Output(IO):
         self.out_score = None
         self.params = {}
         self.IO = None
+        self.func_name = None
+        self.vars = {}
 
-    def add_eval_params(self, function, params):
+    def add_eval_params(self, function, params, func_name, vars):
         """
 
         :param function:
         :param params:
         """
         try:
+            self.func_name = func_name
+            self.vars = vars
             self.function = function.replace('^', '**')
             if function == 'c * x':
                 # print('NORMAL')
@@ -187,7 +191,7 @@ class Gate:
     Used ot represent a gate in a netlist.
     """
     def __init__(self, gate_id, gate_type, inputs, output):
-        self.gate_id = gate_id
+        self.name = gate_id
         self.gate_type = gate_type
         self.inputs = inputs if type(inputs) == list else list(inputs.values())  # each gate can have up to 2 inputs
         self.output = output if type(output) == int else list(output.values())[0]  # each gate can have only 1 output
@@ -264,20 +268,20 @@ class Gate:
     def __str__(self):
         if self.response_func is not None:
             if self.gate_in_use is not None:
-                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and ' \
+                return f'gate {self.gate_type} {self.name} w/ inputs {self.inputs} and ' \
                        f'output {self.output}, and best_gate = {self.gate_in_use}'
             else:
-                return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and ' \
+                return f'gate {self.gate_type} {self.name} w/ inputs {self.inputs} and ' \
                        f'output {self.output}, and individual gates {list(self.gate_params.keys())}'
         else:
-            return f'gate {self.gate_type} {self.gate_id} w/ inputs {self.inputs} and output {self.output}'
+            return f'gate {self.gate_type} {self.name} w/ inputs {self.inputs} and output {self.output}'
 
     def __repr__(self):
-        return f'{self.gate_id}'
+        return f'{self.name}'
 
     def __lt__(self, other):
         if isinstance(other, Gate):
-            return self.gate_id < other.gate_id
+            return self.name < other.name
         return NotImplemented
 
     def __eq__(self, other):

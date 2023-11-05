@@ -52,10 +52,6 @@ class UCF:
     def __parse_helper(self):
         # filepath = os.path.join(*self.filepath.split('/'))
         # # Communication Molecule filepaths
-        # cm_in_filepath = os.path.join(*filepath.split('/'), self.cm_in + '.json') if self.cm_in else \
-        #                  os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))  # hill response in func
-        # cm_out_filepath = os.path.join(*filepath.split('/'), self.cm_out + '.json') if self.cm_out else \
-        #                   os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))  # normal unit conv func
         u = os.path.join(self.filepath, self.ucf_file + '.json')
         i = os.path.join(self.filepath, self.in_file + '.json')
         o = os.path.join(self.filepath, self.out_file + '.json')
