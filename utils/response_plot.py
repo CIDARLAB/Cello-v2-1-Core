@@ -62,7 +62,7 @@ def plot_bars(filepath, plot_name, best_graph, table):
             outputs_dict[k]['scores_pre_HR'] = get_table_values(table, k, input_cnt)
 
     fig = plt.subplots()
-    plt.subplots_adjust(hspace=0.25*len(outputs_dict), wspace=0.4)
+    plt.subplots_adjust(hspace=0.25*output_cnt, wspace=0.4)
     if plot_name.endswith('.UCF'):
         plot_name = plot_name[:-4]
     plt.suptitle(f'{plot_name}: Response Plots', fontsize='medium', y=.98, fontweight='bold')

@@ -16,15 +16,11 @@ class UCF:
 
     """
 
-    def __init__(self, filepath, ucf_file, in_file, out_file, cm_in_path, cm_out_path, cm_in_opt, cm_out_opt):
+    def __init__(self, filepath, ucf_file, in_file, out_file):
         self.filepath = filepath
         self.ucf_file = ucf_file
         self.in_file = in_file
         self.out_file = out_file
-        self.cm_in_path = cm_in_path
-        self.cm_out_path = cm_out_path
-        self.cm_in_opt = cm_in_opt
-        self.cm_out_opt = cm_out_opt
         self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file  # CRIT: Fix
         (U, I, O) = self.__parse_helper()
         self.UCFmain = U
@@ -61,18 +57,6 @@ class UCF:
             with open(f, 'r') as ucf:
                 try:
                     ucf = json.load(ucf)
-
-                    if self.cm_in_opt and f == i:
-                        print('CM IN')
-                        with open(self.cm_in_path, 'r') as comm_devices:
-                            in_comm_devices = json.load(comm_devices)
-                            ucf.extend(in_comm_devices)
-                    if self.cm_out_opt and f == o:
-                        print('CM OUT')
-                        with open(self.cm_out_path, 'r') as comm_devices:
-                            out_comm_devices = json.load(comm_devices)
-                            ucf.extend(out_comm_devices)
-
                     out.append(ucf)
                 except Exception as e:
                     debug_print(f'FAILED TO LOAD UCF {self.name}\nlocated at path: {f}')

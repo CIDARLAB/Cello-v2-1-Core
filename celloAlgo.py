@@ -24,7 +24,7 @@ from response_plot import plot_bars
 from run_eugene_script import call_mini_eugene
 
 
-def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_, options):
+def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
 
     # TODO: Check if full filepaths; if not, convert to full paths
     # TODO: Change CELLO3 and all objects to expect a full path
@@ -32,7 +32,7 @@ def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_ou
 
     try:
         start_time = time.time()
-        CELLO3(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_, options)
+        CELLO3(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options)
         log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
         print("Cello completed execution")
         return
@@ -71,8 +71,8 @@ class CELLO3:
         [end]
     """
 
-    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, cm_in_file: str, cm_out_file: str,
-                 in_path: str, out_path: str, options: dict = None):
+    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, in_path: str, out_path: str,
+                 options: dict = None):
 
         # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
         yosys_cmd_choice = 1  # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
@@ -81,8 +81,6 @@ class CELLO3:
         self.exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
         self.test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
         self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of log from equivalent config
-        self.cm_in_option = False
-        self.cm_out_option = False
 
         if 'yosys_cmd_choice' in options:
             yosys_cmd_choice = options['yosys_cmd_choice']
@@ -96,10 +94,6 @@ class CELLO3:
             self.log_overwrite = options['log_overwrite']
         if 'exhaustive' in options:
             self.exhaustive = options['exhaustive']  # Normally uses Scipy's dual annealing
-        if 'cm_in_option' in options:
-            self.cm_in_option = options['cm_in_option']
-        if 'cm_out_option' in options:
-            self.cm_out_option = options['cm_out_option']
 
         self.in_path = os.path.abspath(in_path)
         self.out_path = os.path.abspath(out_path)
@@ -110,15 +104,6 @@ class CELLO3:
         self.iter_count = 0
         self.best_score = 0
         self.best_graphs = []
-
-        if cm_in_option:
-            self.cm_in_path = os.path.abspath(os.path.join(in_path, cm_in_file + '.json'))
-        else:
-            self.cm_in_path = ''
-        if cm_out_option:
-            self.cm_out_path = os.path.abspath(os.path.join(in_path, cm_out_file + '.json'))
-        else:
-            self.cm_out_path = ''
 
         # Loggers
         log.config_logger(v_name, ucf_name, self.log_overwrite)
@@ -138,8 +123,7 @@ class CELLO3:
             return
 
         # NOTE: Initializes UCF, Input, and Output from filepaths
-        self.ucf = UCF(self.in_path, ucf_name, in_name, out_name, self.cm_in_path, self.cm_out_path,
-                       self.cm_in_option, self.cm_out_option)
+        self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
 
         if not self.ucf.valid:
             return  # breaks early if UCF file has errors
@@ -261,19 +245,6 @@ class CELLO3:
 
                 # PLOTS
                 try:
-                    # output_names = [o.name for o in best_graph.outputs]
-                    # output_model_names = [o + '_model' for o in output_names]
-                    # output_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name',
-                    #                             output_model_names)
-                    # output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
-                    # print(best_graph.outputs[0].vars)
-
-                    # output_info = {o['name'][:-6]: {(x:=o['functions']['response_function']):
-                    #                                 (y:=query_helper(output_function_json, 'name', x)[0])['equation'],
-                    #                                 'first_var': y['variables'][0]['name'],
-                    #                                 'params': {p['name']: p['value'] for p in o['parameters']},
-                    #                                 'prev_node': best_graph.find_prev(best_graph.outputs[0])}
-                    #                for o in output_jsons}
                     plot_name = self.verilog_name + ' + ' + self.ucf_name
                     plot_bars(filepath, plot_name, best_graph, tb)
                     log.cf.info(' - Response plots generated')
@@ -451,16 +422,6 @@ class CELLO3:
         log.cf.info(o_list)
         log.cf.info(g_list)
 
-        # For finding UCF unit conversion factor for use by CMs  TODO: Address
-        # out_names = [o + '_model' for o in o_list]
-        # out_jsons = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'), 'name', out_names)
-        # output_params = {o['name'][:-6]: {p['name']: p['value'] for p in o['parameters']} for o in out_jsons}
-        # ucf_c_val = next((op['unit_conversion'] for op in output_params.values() if op['unit_conversion'] != 1.0), 0)
-        # if not ucf_c_val:
-        #     ucf_c_val = 1.0
-        # global ucf_c_value
-        # ucf_c_value = ucf_c_val
-
         circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
 
         log.cf.info('Netlist de-construction: ')
@@ -627,46 +588,6 @@ class CELLO3:
             new_i = [Input(i[0], i[1].id) for i in new_i]
             new_o = [Output(o[0], o[1].id) for o in new_o]
             new_g = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output) for g in new_g]
-
-            # Skip iterations that don't comply with input CM designations
-            # if self.cm_in_option == 1:
-            #     if self.verilog_in_cms:
-            #         for index, input in enumerate(new_i):
-            #             if input.name in self.ucf.cm_in_names and \
-            #                     netgraph.inputs[index].name not in self.verilog_in_cms:
-            #                 return 0
-            #             if input.name not in self.ucf.cm_in_names and \
-            #                     netgraph.inputs[index].name in self.verilog_in_cms:
-            #                 return 0
-            #     else:
-            #         for input in new_i:
-            #             if input.name not in self.ucf.cm_in_names:
-            #                 return 0
-            # elif self.cm_in_option == 2 and self.verilog_in_cms:
-            #     for index, input in enumerate(new_i):
-            #         if netgraph.inputs[index].name not in self.verilog_in_cms and \
-            #                 input.name in self.ucf.cm_in_names:
-            #             return 0
-
-            # Skip iterations that don't comply with output CM designations
-            # if self.cm_out_option == 1:
-            #     if self.verilog_out_cms:
-            #         for index, output in enumerate(new_o):
-            #             if output.name in self.ucf.cm_out_names and \
-            #                     netgraph.outputs[index].name not in self.verilog_out_cms:
-            #                 return 0
-            #             if output.name not in self.ucf.cm_out_names and \
-            #                     netgraph.outputs[index].name in self.verilog_out_cms:
-            #                 return 0
-            #     else:
-            #         for output in new_o:
-            #             if output.name not in self.ucf.cm_out_names:
-            #                 return 0
-            # elif self.cm_out_option == 2 and self.verilog_out_cms:
-            #     for index, output in enumerate(new_o):
-            #         if netgraph.outputs[index].name not in self.verilog_out_cms and \
-            #                 output.name in self.ucf.cm_out_names:
-            #             return 0
 
             graph = AssignGraph(new_i, new_o, new_g)
             (circuit_score, tb, tb_labels) = self.score_circuit(graph)
@@ -1036,9 +957,6 @@ if __name__ == '__main__':
     exhaustive = False  # Run *all* possible permutations to find true optimum score (may run for *long* time)
     test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
 
-    cm_in_option = False
-    cm_out_option = False
-
     # TODO: source UCF files from CELLO-UCF instead
     in_path_ = os.path.join('sample_inputs', '')  # (contains the verilog files, and UCF files)
     out_path_ = os.path.join('temp_out', '')  # (any path to a local folder)
@@ -1046,8 +964,6 @@ if __name__ == '__main__':
     ucf_name_ = ''
     in_name_ = ''
     out_name_ = ''
-    cm_in_file = ''
-    cm_out_file = ''
 
     figlet = r"""
     
@@ -1160,24 +1076,6 @@ if __name__ == '__main__':
                     f'(Hint: {label}.json, with the .output but not the .json, from the {in_path_[:-1]} folder.)\n\n'
                     f'Output File Name: '))
 
-            log.cf.info(cm_in_input := input(f'\n\nDo you have a file of Communication Molecule (CM) inputs? (y/n)\n'))
-            if not cm_in_input:
-                cm_in_option = True
-                cm_in_file = 'cm_sr.input'
-            elif 'y' in cm_in_input or 'Y' in cm_in_input:
-                cm_in_option = True
-                log.cf.info(cm_in_file := input(f'\n\nWhat CM Input file do you want to use?\n\n'
-                                                f'Name of CM Input File: '))
-
-            log.cf.info(cm_out_input := input(f'\n\nDo you have a CM output file? (y/n)\n'))
-            if not cm_out_input:
-                cm_out_option = True
-                cm_out_file = 'cm_hr.output'
-            elif 'y' in cm_out_input or 'Y' in cm_out_input:
-                cm_out_option = True
-                log.cf.info(cm_out_file := input(f'\n\nWhat CM Output file do you want to use?\n\n'
-                                                 f'Name of CM Output File: '))
-
             options = ''
             # log.cf.info(options := input(
             #     f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
@@ -1203,15 +1101,13 @@ if __name__ == '__main__':
             # if 'ex' in options_list:
             #     exhaustive = True
 
-    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_,
+    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_,
                                options={'yosys_cmd_choice': yosys_cmd_choice,
                                         'verbose': verbose,
                                         'log_overwrite': log_overwrite,
                                         'print_iters': print_iters,
                                         'exhaustive': exhaustive,
-                                        'test_configs': test_configs,
-                                        'cm_in_option': cm_in_option,
-                                        'cm_out_option': cm_out_option})
+                                        'test_configs': test_configs})
     # log.cf.error(result, exc_info=True)
 
     log.cf.info("Exiting Cello...")

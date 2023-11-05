@@ -37,6 +37,11 @@
 		"type": "promoter",
 		"dnasequence": "agaaaccaattgtccatattgcatcagacattgccgtcactgcgtcttttactggctcttctcgctaaccaaaccggtaaccccgcttattaaaagcattctgtaacaaagcgggaccaaagccatgacaaaaacgcgtaacaaaagtgtctataatcacggcagaaaagtccacattgattatttgcacggcgtcacactttgctatgccatagcatttttatccataagattagcggatcctacctgacgctttttatcgcaactctctactgtttctccat"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "IPTG_sensor",
@@ -75,6 +80,11 @@
 		"type": "promoter",
 		"dnasequence": "tgttgacaattaatcatcggctcgtataatgtgtggaattgtgagcgctcacaatt"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "aTc_sensor",
@@ -113,6 +123,11 @@
 		"type": "promoter",
 		"dnasequence": "ttttttccctatcagtgatagagattgacatccctatcagtgatagagataatgagcac"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "Cuma_sensor",
@@ -151,6 +166,11 @@
 		"type": "promoter",
 		"dnasequence": "aacaaacagacaatctggtctgtttgtattatggaaaatttttctgtataatagattcaacaaacagacaatctggtctgtttgtattat"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "Van_sensor",
@@ -189,6 +209,11 @@
 		"type": "promoter",
 		"dnasequence": "attggatccaattgacagctagctcagtcctaggtaccattggatccaat"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "OHC14_sensor",
@@ -227,6 +252,11 @@
 		"type": "promoter",
 		"dnasequence": "gaatcgcaccaagacaggtttgtccaccctttgtgcgtccaaacggacgcacggcgctctaaagcgggtcgcgatctttcagattcgctcctcgcgctttcagtctttgttttggcgcatgtcgttatcgcaaaaccgctgcacacttttgcgcgacatgctctgatccccctcatctgggggggcctatctgagggaatttccgatccggctcgcctgaaccattctgctttccacgaacttgaaaacgct"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "OC6_sensor",
@@ -265,6 +295,11 @@
 		"type": "promoter",
 		"dnasequence": "ACCTGTAGGATCGTACAGGTTTACGCAAGAAAATGGTTTGTTACAGTCGAATAAA"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "DAPG_sensor",
@@ -303,6 +338,11 @@
 		"type": "promoter",
 		"dnasequence": "aacgatcgttggctgcgacgtacggtggaatctgattcgttaccaattgacatgatacgaaacgtaccgtatcgttaaggt"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "Sal_sensor",
@@ -341,6 +381,11 @@
 		"type": "promoter",
 		"dnasequence": "ggggcctcgcttgggttattgctggtgcccggccgggcgcaatattcatgttgatgatttattatatatcgagtggtgtatttatttatattgtttgctccgttaccgttattaac"
 	},
+
+
+
+
+
 	{
 		"collection": "input_sensors",
 		"name": "RpaR-AM2_sensor",
@@ -400,6 +445,233 @@
 		"name": "RiboRpa_RpaR-AM2_TerRpa",
 		"dnasequence": "AAAAAAAAAGGCTCCAAAAGGAGCCttgacggctagctcagtcctaggtacagtgctagctactAGATGCTGTAGTGGGATGTGTGTCTCACCTGAAGAGTACAAAAGTCCGAAACGGTATCCTCTACAAATAATTTTGTTTAAaAGCGATACTTAGGGTAACAGtAATGattgtgggtgaagatcagctgtggggtcgtcgtacactggaatttgttgatagcgttgaacgtctggaagcaccggcactgattagccgttttgaaagcctgattgcaagctgtggttttaccgcctatatcatggcaggtctgccgagccgtaatgccggtctgccggaactgaccctggcaaatggttggcctcgtgattggtttgatctgtatgttagcgaaaactttagcgcagttgatccggttccgcgttatggtgcaaccactgttcatccgtttgtttggagtgatgcaccgtatgatcgtgaccgtgatcaggcagcacatcgtgttatgacccgtgcagcagaatttggtctggttgaaggttattgtattccgctgcattacgatgatggtagcgcagcaattagtatggcaggtgaagatcctgatctgagtccggcagcccgtggtgtaatgcagctggttagcatttatgcacatagccgtctgcgtgtactgagccgtccgaaaccgattcgtcgtaatcgtctgacaccgcgtgaatgtgaaattctgcagtgggcagcacagggtaaaaccgcatgggaaattagcgttattctgtgtattaccgaacgcaccgttaaatttcatctgattgaagcagcacgtaaactggatgcagcaaatcgtaccgcagcagttgcaaaagcactgacactgggtctgattcgtctgtaatagagttaaccaaAAAGGGGGGATTTTATCTCCCCTTTaatttttcct"
 	},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "OC6_in",
+		"model": "OC6_in_model",
+		"structure": "OC6_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "OC6_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 7.5,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.06,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OC6_in_structure",
+		"outputs": [
+			"pLuxB"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pLuxB",
+		"dnasequence": "ACCTGTAGGATCGTACAGGTTTACGCAAGAAAATGGTTTGTTACAGTCGAATAAAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "OHC12_in",
+		"model": "OHC12_in_model",
+		"structure": "OHC12_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "OHC12_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.4,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.01,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OHC12_in_structure",
+		"outputs": [
+			"pCin"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pCin",
+		"dnasequence": "gaatcgcaccaagacaggtttgtccaccctttgtgcgtccaaacggacgcacggcgctctaaagcgggtcgcgatctttcagattcgctcctcgcgctttcagtctttgttttggcgcatgtcgttatcgcaaaaccgctgcacacttttgcgcgacatgctctgatccccctcatctgggggggcctatctgagggaatttccgatccggctcgcctgaaccattctgctttccacgaacttgaaaacgctCGTAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "pC-HSL_in",
+		"model": "pC-HSL_in_model",
+		"structure": "pC-HSL_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "pC-HSL_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 6,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.02,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "pC-HSL_in_structure",
+		"outputs": [
+			"pRpa"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pRpa",
+		"dnasequence": "aggaaaaattAAAGGGGAGATAAAATCCCCCCTTTttggttaactctattacagacgaatcagacccagtgtcagtgcttttgcaactgctgcggtacgatttgctgcatccagtttacgtgctgcttcaatcagatgaaatttaacggtgcgttcggtaatacacagaataacgctaatttcccatgcggttttaccctgtgctgcccactgcagaatttcacattcacgcggtgtcagacgattacgacgaatcggtttcggacggctcagtacacgcagacggctatgtgcataaatgctaaccagctgcattacaccacgggctgccggactcagatcaggatcttcacctgccatactaattgctgcgctaccatcatcgtaatgcagcggaatacaataaccttcaaccagaccaaattctgctgcacgggtcataacacgatgtgctgcctgatcacggtcacgatcatacggtgcatcactccaaacaaacggatgaacagtggttgcaccataacgcggaaccggatcaactgcgctaaagttttcgctaacatacagatcaaaccaatcacgaggccaaccatttgccagggtcagttccggcagaccggcattacggctcggcagacctgccatgatataggcggtaaaaccacagcttgcaatcaggctttcaaaacggctaatcagtgccggtgcttccagacgttcaacgctatcaacaaattccagtgtacgacgaccccacagctgatcttcacccacaatCATTaCTGTTACCCTAAGTATCGCTtTTAAACAAAATTATTTGTAGAGGATACCGTTTCGGACTTTTGTACTCTTCAGGTGAGACACACATCCCACTACAGCATCTagtagctagcactgtacctaggactgagctagccgtcaaGGCTCCTTTTGGAGCCTTTTTTTTTgcttaacgatcgttggctgacctgtccgatcggacaatattacgcaagaaaatggtttgttactttcgaataaaCGTAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "DAPG_in",
+		"model": "DAPG_in_model",
+		"structure": "DAPG_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "DAPG_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.4,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.02,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "DAPG_in_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pPhlF"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pPhlF",
+		"dnasequence": "aacgatcgttggctgcgacgtacggtggaatctgattcgttaccaattgacatgatacgaaacgtaccgtatcgttaaggtAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGatggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccacaggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacaccccaatcggcgacggccccgtgctgctgcccgacaaccactaccttagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaaTGCTCGTACCAGGCCCCTGCAATTTCAACAGGGGCCTTTTTTTATCCAATTCCATCGGGTCCGAATTTTCGGACCTTTTCTCCGC"
+	},
+
+
+
+
+
+	{
+		"collection": "functions",
+		"name": "sensor_response",
+		"equation": "$STATE * (ymax - ymin) + ymin",
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			}
+		]
+	},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	{
 		"collection": "functions",
 		"name": "sensor_response",
