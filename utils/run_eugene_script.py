@@ -2,7 +2,10 @@
 Uses Py4J to invoke a Java program in an already running JVM to interface with the eugene.jar to run the eugene script.
 The script runs Eugene's permute function, which generates all valid part orders based on the UCF rules.
 These part orders are then used for SBOL and other file generation.
-TODO: Ensure JVM properly started on Docker.
+
+This utilizes the miniEugene-core program.  Please see github or the included md file for copyright information.
+https://github.com/CIDARLAB/miniEugene-core
+
 """
 
 # import subprocess

@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 import os.path
 
+# Original script by...
 __author__ = 'Thomas E. Gorochowski <tom@chofski.co.uk>, Voigt Lab, MIT\n\
                Bryan Der <bder@mit.edu>, Voigt Lab, MIT'
 __license__ = 'MIT'
@@ -282,7 +283,7 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
         ax.set_ylim([-plot_params['axis_y'], plot_params['axis_y']])
         ax.set_aspect('equal')
         ax.set_axis_off()
-        ax.set_title(f'Part Order {i + 1}', fontsize=5, loc='left')
+        ax.set_title(f'Design Option {i + 1}', fontsize=5, loc='left')
 
     # Update the size of the figure to fit the constructs drawn
     fig_x_dim = max_dna_len / 70.0
@@ -318,7 +319,7 @@ def plotter(params, parts, regulation, designs, png_output, pdf_output, reverse_
     """
 
     """
-    cur_reverse_char = '@r'  # FIXME: What exactly is the reverse character?
+    cur_reverse_char = '@r'
     if reverse_char:
         cur_reverse_char = reverse_char
     plot_params = load_plot_parameters(params)

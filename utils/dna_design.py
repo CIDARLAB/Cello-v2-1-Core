@@ -108,7 +108,7 @@ class DNADesign:
         # log.cf.info(f'\nself.fenceposts:\n{self.fenceposts}')
 
     # NOTE: CREATE OUTPUT FILES BASED ON DNA PART ORDER AND RELATED INFO ###############################################
-    def get_part_orders(self) -> None:
+    def get_part_orders(self):
 
         def cycle_thru_alt_rulesets():  # TODO: Finish setting up ruleset traversal
 
@@ -162,7 +162,8 @@ class DNADesign:
             if f'CONTAINS {loc}' not in self.circuit_rules:
                 self.circuit_rules.append(f'CONTAINS {loc}')
         consolidated_devices = consolidate_devices()  # len(consolidated_devices)
-        selected_device_orders = call_mini_eugene(self.circuit_rules)  # NOTE: miniEugene
+        selected_device_orders = call_mini_eugene(self.circuit_rules)  # NOTE: miniEugene*
+        # print(selected_device_orders)
         for order in selected_device_orders:
             main_devices = []
             for device in order:
@@ -171,8 +172,9 @@ class DNADesign:
             parts = []
             for i, device in enumerate(main_devices):
                 if device in list(self.fenceposts):
-                    if len(parts) != 0 and i != len(main_devices) - 1:
-                        parts.append('_NONCE_PAD')
+                    # if len(parts) != 0 and i != len(main_devices) - 1:
+                    #     parts.append('_NONCE_PAD')
+                    parts.append(f'{device}_NONCE_PAD')
                 elif device in list(self.cassettes):
                     parts.extend(self.cassettes[device].inputs)
                     parts.extend(self.cassettes[device].comps)
@@ -185,7 +187,7 @@ class DNADesign:
         for circuit_order in self.valid_circuits:
             log.cf.info(f'   + {circuit_order}')
 
-        # return self.valid_circuits  # FIXME: Add outer loop for Eco5/6, Fix tandem functions...
+        return self.valid_circuits  # FIXME: Add outer loop for Eco5/6, Fix tandem functions...
 
     def write_dna_parts_info(self, filepath) -> None:  # equivalent of 2.0 dpl_part_information.csv
         """
@@ -217,9 +219,14 @@ class DNADesign:
             csv_writer.writerow(['part_name', 'type', 'x_extent', 'y_extent', 'start_pad', 'end_pad',
                                  'color', 'hatch', 'arrowhead_height', 'arrowhead_length', 'linestyle', 'linewidth',
                                  'label', 'label_size', 'label_color', 'label_y_offset', 'label_rotation'])
-            csv_writer.writerow(['_NONCE_PAD', 'UserDefined', '30', '', '', '',
-                                 '1.00;1.00;1.00', '', '', '', '', '',
-                                 '', 4, '1.00;1.00;1.00', -10, 90])
+            for part in self.valid_circuits[0]:
+                if part.endswith('_NONCE_PAD'):
+                    csv_writer.writerow([part, 'UserDefined', 30, '', '', 25,
+                                         '1.00;1.00;1.00', '', '', '', '', '',
+                                         part[:-10], 4, '0.0;0.0;0.0', -10, 90])
+            # csv_writer.writerow(['_NONCE_PAD', 'UserDefined', '30', '', '', '',
+            #                      '1.00;1.00;1.00', '', '', '', '', '',
+            #                      '', 4, '1.00;1.00;1.00', -10, 90])
             for seq in self.sequences.values():
                 # lab = shorten(seq.parts_name, 10, placeholder='...')
                 lab = seq.parts_name[:10] + '...' if len(seq.parts_name) > 12 else seq.parts_name
@@ -315,7 +322,8 @@ class DNADesign:
                 segments = ['', 'Location 1']
                 count = 2
                 for seq in order:
-                    if seq == '_NONCE_PAD':
+                    # if seq == '_NONCE_PAD':
+                    if seq.endswith('_NONCE_PAD'):
                         segments.append(f'Location {count}')
                         count += 1
             csv_writer.writerow(segments)
@@ -323,7 +331,8 @@ class DNADesign:
                 sequence = [f'Design Option {num + 1}:', '']
                 index = 1
                 for seq in order:
-                    if seq != '_NONCE_PAD':
+                    # if seq != '_NONCE_PAD':
+                    if not seq.endswith('_NONCE_PAD'):
                         sequence[index] += self.sequences[seq].parts_sequence
                     else:
                         index += 1

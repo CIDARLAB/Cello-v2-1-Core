@@ -22,6 +22,7 @@ from dna_design import *
 from plotters import plotter
 from response_plot import plot_bars
 from run_eugene_script import call_mini_eugene
+from sbol import *
 
 
 def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
@@ -228,20 +229,24 @@ class CELLO3:
 
                 # DNA DESIGN
                 dna_designs = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
-                dna_designs.get_part_orders()  # Calls miniEugene
+                mini_eugene_part_orders = dna_designs.get_part_orders()  # Calls miniEugene
                 # dna_designs.gen_seq(filepath)  # Alternative to miniEugene
                 dna_designs.write_dna_parts_info(filepath)
                 dna_designs.write_dna_parts_order(filepath)
                 dna_designs.write_plot_params(filepath)
                 dna_designs.write_regulatory_info(filepath)
                 dna_designs.write_dna_sequences(filepath)
+                print(mini_eugene_part_orders[0])
+                # SBOL XML
+                sbol_instance = SBOL(filepath, mini_eugene_part_orders[0], sequences)  # TODO: loop part orders
+                sbol_instance.generate_xml()
 
                 # SBOL DIAGRAM
                 print(' - ', end='')
                 plotter(f"{filepath}_plot_parameters.csv", f"{filepath}_dpl_part_information.csv",
                         f"{filepath}_dpl_regulatory_information.csv", f"{filepath}_dpl_dna_designs.csv",
                         f"{filepath}_dpl.png", f"{filepath}_dpl.pdf")
-                log.cf.info('SBOL and other DPL files generated')
+                log.cf.info('DPL files generated')
 
                 # PLOTS
                 try:
