@@ -205,5 +205,61 @@
 		"type": "promoter",
 		"name": "pLuxStar",
 		"dnasequence": "ATAGCTTCTTACCGGACCTGTAGGATCGTACAGGTTTACGCAAGAAAATGGTTTGTTACTTTCGAATAAA"
-	}
+	},
+
+
+
+
+
+
+	{
+        "collection": "device_rules",
+        "rules": {
+            "function": "AND",
+            "rules": [
+                "STARTSWITH pTac",
+                "STARTSWITH pBAD",
+                "pSrpR BEFORE pTet",
+                "pBAD BEFORE pSrpR",
+                "pBAD BEFORE pAmeR",
+                "pBAD BEFORE pBetI",
+                "pBAD BEFORE pLitR",
+                "pBAD BEFORE pTet",
+                "pBAD BEFORE pHlyIIR",
+                "pBAD BEFORE pLmrA",
+                "pBAD BEFORE pPhlF",
+                "pBAD BEFORE pPsrA",
+                "pBAD BEFORE pBM3R1",
+                "pBAD BEFORE pAmtR",
+                "pBAD BEFORE pIcaRA",
+                "pBAD BEFORE pQacR",
+                "pTet BEFORE pAmeR",
+                "pTet BEFORE pBetI",
+                "pTet BEFORE pLitR",
+                "pTet BEFORE pHlyIIR",
+                "pTet BEFORE pLmrA",
+                "pTet BEFORE pPsrA",
+                "pTet BEFORE pAmtR",
+                "pTet BEFORE pIcaRA",
+                "pTac BEFORE pSrpR",
+                "pTac BEFORE pAmeR",
+                "pTac BEFORE pBetI",
+                "pTac BEFORE pLitR",
+                "pTac BEFORE pBAD",
+                "pTac BEFORE pTet",
+                "pTac BEFORE pHlyIIR",
+                "pTac BEFORE pLmrA",
+                "pTac BEFORE pPhlF",
+                "pTac BEFORE pPsrA",
+                "pTac BEFORE pBM3R1",
+                "pTac BEFORE pAmtR",
+                "pTac BEFORE pIcaRA",
+                "pTac BEFORE pQacR",
+                "pPhlF BEFORE pTet",
+                "pBM3R1 BEFORE pTet",
+                "pQacR BEFORE pTet",
+                "ALL_FORWARD"
+            ]
+        }
+    }
 ]

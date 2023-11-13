@@ -335,7 +335,17 @@ class EugeneObject:
         :return:
         """
 
-        def extract_rules(rule_sets, func_type = 'AND') -> list[str]:  # FIXME: UCF5/6 have rules w/ non-extant devices?
+        def init_extraction(rule_set):
+            """
+
+            :param rule_set:
+            :return:
+            """
+            if rule_set:
+                rule_set = extract_rules(rule_set[0])
+            return rule_set
+
+        def extract_rules(rule_sets, func_type = 'AND') -> list[str]:
             """
             Recursively extract all rules from circuit or device ruleset and returns as a flat list of rules.
             :param rule_sets: List/dict of rules from 'device_rules' or 'circuit_rules' in UCFs
@@ -343,7 +353,7 @@ class EugeneObject:
             """
             flat_rules = []
             if func_type == 'OR':
-                rule_sets = rule_sets[0]  # FIXME: Traverse all OR branches
+                rule_sets = rule_sets[0]  # TODO: Traverse all OR branches
             if type(rule_sets) == list:
                 for rule_set in rule_sets:
                     flat_rules.extend(extract_rules(rule_set))
@@ -358,6 +368,20 @@ class EugeneObject:
             else:
                 log.cf.error('rule_set type is unrecognized; cannot parse or flatten rule_sets.')
             return flat_rules
+
+        def merge_rules(in_rules, gate_rules, out_rules):
+            """
+
+            :param in_rules:
+            :param gate_rules:
+            :param out_rules:
+            :return:
+            """
+            merged_rules = in_rules + out_rules
+            for rule in merged_rules:
+                if rule not in gate_rules:
+                    gate_rules.append(rule)
+            return merged_rules
 
         # NOTE: Only comprehensive for our default set of UCFs
         rules_keywords = ['NOT', 'EQUALS',
@@ -378,8 +402,11 @@ class EugeneObject:
                      list(self.genlocs_fenceposts.keys())
 
         # Get Device Rules
-        device_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'device_rules')[0]
-        self.device_rules = extract_rules(device_rules)
+        in_d_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFin, 'device_rules'))
+        gate_d_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'device_rules'))
+        out_d_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFout, 'device_rules'))
+        self.device_rules = merge_rules(in_d_rules, gate_d_rules, out_d_rules)
+        # print('FLATTENED DEVICE RULES: ', self.device_rules)
         device_rules = []
         for r in self.device_rules:
             # if r != 'ALL_FORWARD':
@@ -397,9 +424,11 @@ class EugeneObject:
         self.device_rules = device_rules
 
         # Get Circuit Rules  # FIXME: Needs to be extended for more complex rule layout (e.g. Eco5/6)
-        circuit_rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules')[0]
-        self.circuit_rules = extract_rules(circuit_rules)
-        # print('FLATTENED RULES!: ', self.circuit_rules)
+        in_c_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFin, 'circuit_rules'))
+        gate_c_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules'))
+        out_c_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFout, 'circuit_rules'))
+        self.circuit_rules = merge_rules(in_c_rules, gate_c_rules, out_c_rules)
+        # print('FLATTENED CIRCUIT RULES: ', self.circuit_rules)
         circuit_rules = []
         for r in self.circuit_rules:
             # if r != 'ALL_FORWARD':

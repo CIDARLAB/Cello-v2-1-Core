@@ -562,19 +562,21 @@
                 "map": "#//structure/inputs/in1/model/functions/response_function"
             }
         ]
+    },
+
+
+
+
+
+
+    {
+        "collection": "circuit_rules",
+        "rules": {
+            "function": "AND",
+            "rules": [
+					"YFP_reporter_a AFTER L3",
+					"YFP_reporter_b BEFORE L3"
+            ]
+        }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ]
