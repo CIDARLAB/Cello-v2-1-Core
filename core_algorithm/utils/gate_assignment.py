@@ -8,8 +8,8 @@ Classes: IO, Input(IO), Output(IO), Gate, AssignGraph, GraphParser
 
 # import networkx as nx
 # import matplotlib.pyplot as plt
-from ucf_class import *
-import log
+from core_algorithm.utils.ucf_class import *
+from core_algorithm.utils.log import *
 
 
 def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):

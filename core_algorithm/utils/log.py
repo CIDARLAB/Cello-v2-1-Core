@@ -6,10 +6,12 @@ To use the loggers, 'log.cf.[level]' prints to console and log file, and 'log.f.
 Levels include: debug, info, warning, critical and others as specified in Python logging library documentation.
 """
 
+import os
 import sys
 import traceback
 import logging.config
 from datetime import datetime
+from config import BASE_DIR
 
 
 iter_num = 0
@@ -23,10 +25,21 @@ def config_logger(vname: str, ucfname: str, ow: bool):
     Generates log file and initializes the Logger class (for print() statements) every time a Cello process is created.
     :return: None
     """
-
-    log_file_name = 'logs/' + vname + '+' + ucfname + ((not ow) * datetime.now().strftime("_%Y-%m-%d_%H%M%S")) + '.log'
-    logging.config.fileConfig('utils/logging.config', disable_existing_loggers=False,
-                              defaults={'logfilename': log_file_name})
+    
+    # Determine filename suffix based on the ow variable
+    time_suffix = "" if ow else datetime.now().strftime("_%Y-%m-%d_%H%M%S")
+    
+    # Construct the log file name
+    log_file_name = os.path.join('logs', f"{vname}+{ucfname}{time_suffix}.log")
+    
+    # Configure logger
+    logging.config.fileConfig(
+        os.path.join(BASE_DIR, 'core_algorithm', 'utils', 'logging.config'),
+        disable_existing_loggers=False,
+        defaults={'logfilename': log_file_name}
+    )
+    
+    # Disable logging for matplotlib's font manager to avoid potential clutter
     logging.getLogger('matplotlib.font_manager').disabled = True
     # sys.stdout = Logger(log_file_name)
 

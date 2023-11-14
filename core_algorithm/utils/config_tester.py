@@ -6,9 +6,9 @@ TEAM: Note this is still being fixed up since merge & not fully working!\n\n'  #
 
 from os import listdir
 from os.path import isfile, join
-from celloAlgo import CELLO3
+from core_algorithm.celloAlgo import CELLO3
 from datetime import datetime
-import log
+from core_algorithm.utils import log
 import csv
 
 

@@ -8,10 +8,9 @@ produces and the SBOL diagram...
 import os
 import csv
 from dataclasses import dataclass
-from cello_helpers import debug_print
-from run_eugene_script import call_mini_eugene
+from core_algorithm.utils.py4j_gateway.run_eugene_script import call_mini_eugene
 from copy import deepcopy
-import log
+from core_algorithm.utils import log
 import re
 import random
 from textwrap import shorten

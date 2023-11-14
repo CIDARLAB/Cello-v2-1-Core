@@ -9,59 +9,65 @@ call_YOSYS() [see parameters below for customizing YOSYS output; note, changing 
 import subprocess
 import os
 import shutil
-import sys
-import log
+from core_algorithm.utils import log
 import re
 
 
 def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=False):
     try:
+        # Setting up the output directory
         new_out = os.path.join(out_path, v_name)
-        new_out = os.path.join(*new_out.split('/'))
+
+        # Remove the directory if it exists, then create it
         if os.path.exists(new_out):
-            shutil.rmtree(new_out)  # this could be switched out for making a new dir path instead
+            shutil.rmtree(new_out)
         os.makedirs(new_out)
     except Exception as e:
-        log.cf.error(f"YOSYS output folder for {v_name} could not be re-initialized, please double-check. \n{e}")
+        log.cf.error(
+            f"YOSYS output folder for {v_name} could not be re-initialized, please double-check. \n{e}")
         return False
-    log.cf.info(new_out)  # new out_path
+
+    log.cf.info(new_out)  # Log the new out_path
+
+    # Check if v_name has a directory component
     if '/' in v_name:
-        new_in = os.path.join(in_path, '/'.join(v_name.split('/')[:-1]))
-        v_name = v_name.split('/')[-1]
+        new_in = os.path.join(in_path, os.path.dirname(v_name))
+        v_name = os.path.basename(v_name)
         log.cf.info(new_in)
     else:
         new_in = in_path
-        new_in = os.path.join(*new_in.split('/'))
-    verilog = v_name + '.v'
+
+    # Construct the path to the Verilog file
+    verilog = f"{v_name}.v"
     v_loc = os.path.join(new_in, verilog)
 
+    # Logging the information
     log.cf.info(verilog)
     log.cf.info(v_loc)
     log.cf.info(new_in)
     log.cf.info(new_out)
     log.cf.info('\n')
 
+    # Check for file existence
     if not os.path.isfile(v_loc):
-        log.cf.error(f"ERROR finding {verilog}, please check verilog input.")
-        raise Exception(f"ERROR finding {verilog}, please check verilog input.")
-        # return False
+        error_message = f"ERROR finding {verilog}, please check verilog input."
+        log.cf.error(error_message)
+        raise Exception(error_message)
 
-    slash = '/'
-    if sys.platform.startswith('win'):
-        slash = '\\'
+    command_start = [f"read_verilog {os.path.join(new_in, verilog)}"]
 
-    command_start = ["read_verilog {}{}{};".format(new_in, slash, verilog)]
+    # Commands depending on whether to create files or not
     if no_files:
         command_end = [
-            "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, v_name)
-        ]
+            f"show -format pdf -prefix {os.path.join(new_out, f'{v_name}_yosys')}"]
     else:
         command_end = [
-            "show -format pdf -prefix {}{}{}_yosys".format(new_out, slash, v_name),
-            "write_verilog -noexpr {}{}{}".format(new_out, slash, 'struct_'+v_name),
-            "write_edif {}{}{}.edif;".format(new_out, slash, v_name),
-            "write_json {}{}{}.json;".format(new_out, slash, v_name),
+            f"show -format pdf -prefix {os.path.join(new_out, f'{v_name}_yosys')}",
+            f"write_verilog -noexpr {os.path.join(new_out, f'struct_{v_name}')}",
+            f"write_edif {os.path.join(new_out, f'{v_name}.edif')}",
+            f"write_json {os.path.join(new_out, f'{v_name}.json')}"
         ]
+
     core_commands = [
         [
             # Old Cello Yosys commands
@@ -119,10 +125,10 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=Fals
         command = f"yosys -p \"{'; '.join(commands)}\""
         subprocess.call(command, shell=True)
     except Exception as e:
-        log.cf.error(f"Yosys output for {v_name} already exists, pleas double-check. \n{e}")
-        raise Exception(f"Yosys output for {v_name} already exists, pleas double-check. \n{e}")
-        # return False
-    
+        error_message = f"Yosys output for {v_name} already exists, please double-check. \n{e}"
+        log.cf.error(error_message)
+        raise Exception(error_message)
+
     return True
 
 

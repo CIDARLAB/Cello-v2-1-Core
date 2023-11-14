@@ -6,8 +6,8 @@ UCF Class: __count_collections(), __collection_names(), __parse_helpers(),
 """
 
 import os
-from cello_helpers import *
-import log
+from core_algorithm.utils.cello_helpers import *
+from core_algorithm.utils.log import *
 
 
 # Work in progress

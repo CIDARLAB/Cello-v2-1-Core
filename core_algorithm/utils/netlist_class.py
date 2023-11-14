@@ -2,8 +2,8 @@
 Netlist Class (input: netlist JSON from YOSYS output): __sort_nodes(), __sort_gates(), is_valid_netlist()
 """
 
-from cello_helpers import *
-import log
+from core_algorithm.utils.cello_helpers import *
+from core_algorithm.utils.log import *
 
 
 class Netlist:

@@ -7,7 +7,7 @@ print_centered(), debug_print(), print_json(), print_table(), print_row(), print
 
 import json
 import math
-import log
+from core_algorithm.utils import log
 
 '''
 pseudocode:

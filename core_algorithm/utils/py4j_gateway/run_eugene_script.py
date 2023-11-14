@@ -9,7 +9,7 @@ https://github.com/CIDARLAB/miniEugene-core
 """
 
 # import subprocess
-import log
+from core_algorithm.utils import log
 import logging
 import re
 
@@ -31,7 +31,8 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     """
 
     from py4j.java_gateway import JavaGateway, GatewayParameters
-    logging.getLogger("py4j").setLevel(logging.INFO)  # Suppress (useless) console output
+    # Suppress (useless) console output
+    logging.getLogger("py4j").setLevel(logging.INFO)
     # from py4j.java_collections import ListConverter
 
     # TODO: Call JVM/Java program from this script...
@@ -47,7 +48,8 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     #                       jarpath="./py4j.jar", classpath="./miniEugene-core-1.0.0-jar-with-dependencies.jar")
 
     # Connect to JVM and setup to convert to Java-friendly containers
-    gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_convert=True))
+    gateway = JavaGateway(
+        gateway_parameters=GatewayParameters(auto_convert=True))
     miniEugeneInstance = gateway.entry_point
     # java_rules = ListConverter().convert(rules, addition_app._gateway_client)  # convert to Java container explicitly
     # gateway.jvm.java.util.Collections.sort(java_rules)
@@ -87,7 +89,8 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     # 'CONTAINS P3_PhlF', 'CONTAINS Loc1', 'CONTAINS Loc2', 'CONTAINS Jscar', '[3] EQUALS Jscar']
 
     # Call the miniPermute function in the Java program, which will in turn invoke miniEugene
-    java_part_orders = miniEugeneInstance.miniPermute(rules, part_count, orders_count)  # FIXME: Add device rule loop
+    java_part_orders = miniEugeneInstance.miniPermute(
+        rules, part_count, orders_count)  # FIXME: Add device rule loop
     if java_part_orders:
         # log.cf.info('Valid part orders found by miniEugene...')
         valid_orders = []  # Convert back to Python-friendly form

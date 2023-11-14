@@ -7,9 +7,10 @@ Class: EugeneObject: generate_eugene_structs(), generate_eugene_cassettes(), wri
 
 import os
 from dataclasses import dataclass, field
-from cello_helpers import debug_print
-import log
-import dna_design
+from core_algorithm.utils.cello_helpers import debug_print
+from core_algorithm.utils.log import *
+from core_algorithm.utils.dna_design import *
+from typing import List, Dict, Tuple, Any
 
 # from typing import Annotated, Type, TypeDict
 
@@ -124,7 +125,7 @@ class EugeneObject:
         '''device var name: EugeneCassette [See 'example_eugene_objects' for example data...]'''
 
         self.parts_types: [str] = ['spacer', 'scar']  # always present; *all* associated parts used  # and terminator?
-        self.genlocs_fenceposts: dict[[str]] = {}  # usually 'L1', 'L2', etc.
+        self.genlocs_fenceposts: dict[str, List[str]] = {} # usually 'L1', 'L2', etc.
         self.device_rules: list[str] = []
         self.circuit_rules: list[str] = []
 
@@ -326,7 +327,7 @@ class EugeneObject:
         return True
 
     # NOTE: 3. GENERATE ADDITIONAL EUGENE OBJECTS ######################################################################
-    def generate_eugene_helpers(self) -> (dict, dict, dict, dict[str], dict[str], dict[[str]]):
+    def generate_eugene_helpers(self) -> Tuple[Dict, Dict, Dict, Dict[str, Any], Dict[str, Any], Dict[str, List[str]]]:
         """
         Generate dicts of landing_pads/fenceposts/genetic_locations, as well as device_rules and circuit_rules.
 
