@@ -376,9 +376,9 @@ class EugeneObject:
             :return:
             """
             merged_rules = in_rules + out_rules
-            for rule in merged_rules:
-                if rule not in gate_rules:
-                    gate_rules.append(rule)
+            for rule in gate_rules:
+                if rule not in merged_rules:
+                    merged_rules.append(rule)
             return merged_rules
 
         # NOTE: Only comprehensive for our default set of UCFs
