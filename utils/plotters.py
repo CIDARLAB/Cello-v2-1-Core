@@ -15,7 +15,7 @@
                                  -output     OUT_FILENAME
 """
 
-# Set the backend to use (important for headless servers)  # FIXME: req matplotlib, dnaplotlib installs & update readme
+# Set the backend to use (important for headless servers)
 import matplotlib
 import logging
 

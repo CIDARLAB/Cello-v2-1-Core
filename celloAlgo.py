@@ -162,7 +162,7 @@ class CELLO3:
                             f' - Best Design: {best_result[1]}\n'
                             f' - Best Circuit Score: {self.best_score}')
 
-                log.cf.info(f'\nInputs ( input_response = {best_graph.inputs[0].function} ):')
+                log.cf.info(f'\nInputs ( input_response = {best_graph.inputs[0].functions} ):')
                 in_labels = {}
                 for rnl_in, g_in in graph_inputs_for_printing:
                     log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of'
@@ -236,7 +236,7 @@ class CELLO3:
                 dna_designs.write_plot_params(filepath)
                 dna_designs.write_regulatory_info(filepath)
                 dna_designs.write_dna_sequences(filepath)
-                print(mini_eugene_part_orders[0])
+
                 # SBOL XML
                 sbol_instance = SBOL(filepath, mini_eugene_part_orders[0], sequences)  # TODO: loop part orders
                 sbol_instance.generate_xml()
@@ -671,11 +671,13 @@ class CELLO3:
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
         input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
         input_model_names = [i.name + '_model' for i in graph.inputs]
-        input_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'), 'name',
-                                    input_model_names)
-        input_functions = {c['name'][:-6]: c['functions']['response_function'] for c in input_info}
-        input_equations = {k: (e['equation']) for e in input_function_json for (k, f) in
-                           input_functions.items() if (e['name'] == f)}  # FIXME: redo to properly trace params & vars
+        input_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'),
+                                  'name', input_model_names)
+        input_functions = {c['name'][:-6]: c['functions'] for c in input_info}
+        input_equations = input_functions.copy()
+        for key, input in input_functions.items():
+            input_equations[key] = {k: (e['equation']) for e in input_function_json for (k, f) in input.items()
+                                    if (e['name'] == f)}
         input_params = {c['name'][:-6]: {p['name']: p['value'] for p in c['parameters']} for c in input_info}
 
         if self.print_iters:
@@ -683,28 +685,36 @@ class CELLO3:
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
-            print(f'input_response = {input_equations}\n')  # TODO: Fix to print mult functions w/ CM
-            print(f'Parameters in sensor_response function json: \n{input_params}\n')
+            print(f"input_response = {(funcs:=next(iter(input_equations.values())))['response_function']}")
+            if 'tandem_interference_factor' in funcs.keys():
+                print(f"\ntandem_interference_factor = {funcs['tandem_interference_factor']}")
+            print(f'\nParameters in sensor_response function json: \n{input_params}\n')
 
+        main_function_json = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions')
         gate_groups = [(g.name, g.gate_type) for g in graph.gates]
         gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
         gate_query = query_helper(gates, 'group', [g[0] for g in gate_groups])
         gate_ids = [(g['group'], g['name']) for g in gate_query]
-        gate_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models')
-        gate_func_names = gate_functions[0]['functions']
         gate_id_names = [i[1] + '_model' for i in gate_ids]
-        gate_functions = query_helper(gate_functions, 'name', gate_id_names)
-        gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_functions}
+        gate_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models'),
+                                      'name', gate_id_names)
+        gate_functions = {c['name'][:-6]: c['functions'] for c in gate_info}
+        gate_equations = gate_functions.copy()
+        for key, input in gate_functions.items():
+            gate_equations[key] = {k: (e['equation']) for e in main_function_json for (k, f) in input.items()
+                                    if (e['name'] == f and 'equation' in e.keys())}
+        gate_func_names = gate_info[0]['functions']
+        gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_info}
         if self.print_iters:
             print(f'GATE parameters: ')
             for f in gate_params:
                 print(f'{f} {gate_params[f]}')
 
-        ucf_main_functions = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'functions')
-        gate_funcs = {}
-        for func_type, func_name in gate_func_names.items():
-            if func_type not in ['toxicity', 'cytometry']:  # TODO: add cytometry and toxicity evaluation
-                gate_funcs[func_type] = query_helper(ucf_main_functions, 'name', [func_name])[0]['equation']
+        # gate_funcs = {}
+        # for func_type, func_name in gate_func_names.items():
+        #     if func_type not in ['toxicity', 'cytometry']:  # TODO: add cytometry and toxicity evaluation
+        #         gate_funcs[func_type] = query_helper(main_function_json, 'name', [func_name])[0]['equation']
+
         # try:
         #     input_composition = query_helper(ucf_main_functions, 'name', ['linear_input_composition'])[0]
         # except Exception as e:
@@ -754,7 +764,7 @@ class CELLO3:
             gate_param = gate_params[gate_name]
             for graph_gate in graph.gates:
                 if graph_gate.name == gate_group:
-                    graph_gate.add_eval_params(gate_funcs, gate_name, gate_param)
+                    graph_gate.add_eval_params(gate_equations[gate_name], gate_name, gate_param)
 
         # NOTE: creating a truth table for each graph assignment
         num_inputs = len(graph.inputs)

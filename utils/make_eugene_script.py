@@ -37,7 +37,7 @@ class EugeneStruct:
     """[ [ 1st name, cassette name, num of ins, [components] ] , etc.]"""
     inputs: list[str] = field(default_factory=list[str])
     """gates_name of input nodes"""
-    outputs: str = ""  # TODO: Change to support mult outputs
+    outputs: str = ""  # NOTE: Can only handle single output per structure
     """gates_name of output nodes"""
     color: str = ""
     """color from 'gates' block in UCF; used in SBOL diagram"""
@@ -60,7 +60,7 @@ class EugeneSequence:
     """name in UCF parts block, corresponds to 'outputs'/'components' from structures block"""
     parts_sequence: str = ""
     """dna sequence from UCF parts block"""
-    dev_rules: list[str] = field(default_factory=list[str])  # TODO: can probably remove this; captured better below...
+    dev_rules: list[str] = field(default_factory=list[str])
     """all device rules for this part (that are relevant to this circuit)"""
     cir_rules: list[str] = field(default_factory=list[str])
     """circuit rules associated with each part (mostly for scars)"""
@@ -92,7 +92,7 @@ class EugeneCassette:
     """'outputs' (from input node's UCF structures block) name for each input node"""
     comps: list[str] = field(default_factory=list[str])
     """'components' (from main UCF 'structures' block)"""
-    outputs: str = ""  # TODO: Change to support mult outputs
+    outputs: str = ""   # NOTE: Can only handle single output per structure
     """same 'outputs' as the EugeneStruct object"""
     color: str = ""
     """color from structs dict (i.e. from 'gates' block in UCF); used in SBOL diagram"""
@@ -150,7 +150,7 @@ class EugeneObject:
                 for rnl_gate2, g_gate2 in self.gate_map:
                     if g_gate2.output == g_in:
                         edges[g_gate.gate_in_use].append(g_gate2.gate_in_use)
-        for rnl_output, g_output in self.out_map:  # TODO: Can assume an input is not directly connected to output?
+        for rnl_output, g_output in self.out_map:  # NOTE: Assumes input not connected directly to output
             for rnl_gate, g_gate in self.gate_map:
                 if g_gate.output == rnl_output[1]:
                     edges[g_output.name].append(g_gate.gate_in_use)
@@ -258,8 +258,6 @@ class EugeneObject:
         """
 
         # Get PartTypes and Sequences
-        # TODO: Why include all terminators and all scars even if corresponding parts not in the circuit?
-        # TODO: Why does SC1 have no terminators?
         ins, mains, outs = [], [], []
         # From UCFin:   'structures' name > 'outputs' name > 'parts' type (probably 'promoter')
         # From UCFmain: 'structures' name > 'outputs' name and cassette 'components' names > 'parts' type (e.g. cds)
@@ -321,7 +319,7 @@ class EugeneObject:
                                                                      cir_rules=[])
                         for i in range(int(c[2])):
                             if input_ < len(eu.inputs):
-                                output = self.structs_dict[eu.inputs[input_]].outputs[0]  # TODO: Only ever 1 'outputs'?
+                                output = self.structs_dict[eu.inputs[input_]].outputs[0]
                                 input_ += 1
                                 self.structs_cas_dict[c[0]].inputs.append(output)
 
@@ -423,7 +421,7 @@ class EugeneObject:
                     cassette.dev_rules.append(r)
         self.device_rules = device_rules
 
-        # Get Circuit Rules  # FIXME: Needs to be extended for more complex rule layout (e.g. Eco5/6)
+        # Get Circuit Rules
         in_c_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFin, 'circuit_rules'))
         gate_c_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules'))
         out_c_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFout, 'circuit_rules'))
@@ -539,7 +537,6 @@ class EugeneObject:
             # for device in self.structs_cas_dict.keys():
             #     for rule in self.structs_cas_dict[device].cir_rules:
             for rule in self.circuit_rules:  # TODO: Add 'Device' after each device name/operand in each rule...
-                # FIXME: extra outputs don't have rules! (and those extra outputs may be selected by the annealing)
                 # NOTE: I really think this should be fixed at the UCF level, not the program level
                 eug.write(f'{sep}    {rule}')
                 if not sep:
@@ -572,7 +569,7 @@ class EugeneObject:
             eug.write('\n);\n\n')
 
             # Closing...
-            eug.write("\nresult = permute(circuit);\n\nallResults = allResults + result;\n\n")  # TODO: Static?
+            eug.write("\nresult = permute(circuit);\n\nallResults = allResults + result;\n\n")
             eug.write('}\n' * len(self.structs_cas_dict))
 
             eug.close()

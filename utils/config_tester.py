@@ -12,7 +12,6 @@ import log
 import csv
 
 
-# TODO: implement more robust exception handling
 def test_all_configs(input_folder: str):
     """
     This utility will run through every combination of configuration files currently

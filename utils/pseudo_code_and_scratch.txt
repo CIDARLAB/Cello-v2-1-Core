@@ -152,7 +152,7 @@ find_prev
     #         return None
 
 
-# TODO: This approach of redirecting all print statements, though parsimonious, was proving unreliable; will investigate
+# TODO: This approach of redirecting all print statements, though parsimonious, was proving unreliable
 # class Logger(object):
 #     """
 #     Converts all print statements so they print to both console and the log file.

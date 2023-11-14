@@ -62,7 +62,9 @@ class Input(IO):
     """
     def __init__(self, name, id_):
         super().__init__(name, id_)
-        self.function = None
+        self.functions = None
+        self.resp_func_eq = None
+        self.tandem_func_eq = None
         self.params = {}
         self.ymax = None
         self.ymin = None
@@ -70,6 +72,7 @@ class Input(IO):
         self.states = {'high': 1, 'low': 0}
         self.out_scores = {'high': -1, 'low': -1}
         self.score_in_use = None
+        self.tandem_scores = {'high': -1, 'low': -1}
 
     def switch_onoff(self, state):
         """
@@ -81,48 +84,44 @@ class Input(IO):
         else:
             self.score_in_use = 'high'
 
-    def add_eval_params(self, function, params):
+    def add_eval_params(self, functions, params):
         """
 
         :param function:
         :param params:
         """
         try:
-            self.function = function
+            self.functions = functions
+            self.resp_func_eq = None
+            self.tandem_func_eq = None
             self.params = params
             self.ymax = params['ymax']
             self.ymin = params['ymin']
-            # self.vars = vars  # FIXME: add in this functionality
+            # self.vars = vars  # TODO: Add proper var/func tracing
             # comment out below two lines to change STATE from 0/1
             # self.states['high'] = self.ymax
             # self.states['low'] = self.ymin
             try:
-                self.function = self.function.replace('^', '**')
-                self.function = self.function.replace('$', '')
+                self.resp_func_eq = self.functions.get('response_function', '')
+                self.tandem_func_eq = self.functions.get('tandem_interference_factor', '')
+                self.resp_func_eq = self.resp_func_eq.replace('$', '')
+                self.tandem_func_eq = self.tandem_func_eq.replace('^', '**')
+                self.tandem_func_eq = self.tandem_func_eq.replace('$', '')
                 for p in params.keys():
                     locals()[p] = params[p]
                 for (lvl, val) in self.states.items():
                     STATE = val
-                    # NOTE: Assumes each input constitutes a single value and is either 'STATE' or 'x' in UCF-in
-                    # print(self.function)
-                    # if 'STATE' in self.function:  # Usually: $STATE * (ymax - ymin) + ymin
-                    #     STATE = val
-                    # else:  # Usually: Hill response for Comm Molecule  # FIXME: trace vars properly
-                    #     if lvl == 'high':
-                    #         x = self.ymax
-                    #     elif lvl == 'low':
-                    #         x = self.ymin
-                    # else:
-                    #     log.cf.error("Cannot identify UCF-in function input parameter")
-                    self.out_scores[lvl] = eval(self.function)
+                    self.out_scores[lvl] = eval(self.resp_func_eq)
+                    if self.tandem_func_eq:
+                        self.tandem_scores[lvl] = eval(self.tandem_func_eq)
                 # print(f'\nIN - {self.name}: {self.params} -> {self.out_scores}')
             except Exception as e:
-                debug_print(f'ERROR calculating input score for {str(self)}, with function {self.function}\n{e}')
+                debug_print(f'ERROR calculating input score for {str(self)}, with function {self.resp_func_eq}\n{e}')
         except Exception as e:
-            debug_print(f'Error adding evaluation parameters to {str(self)}\n{function} | {params}\n{e}')
+            debug_print(f'Error adding evaluation parameters to {str(self)}\n{self.resp_func_eq} | {params}\n{e}')
 
     def __str__(self):
-        if self.function is None:
+        if self.resp_func_eq is None:
             return f'input {self.name} {self.id}'
         else:
             return f'input {self.name} {self.id} with ymax: {self.ymax} and ymin: {self.ymin}'
@@ -153,11 +152,8 @@ class Output(IO):
             self.vars = vars
             self.function = function.replace('^', '**')
             if function == 'c * x':
-                # print('NORMAL')
                 self.unit_conversion = params['unit_conversion']
-                # self.unit_conversion = self.ucf_c_value  # FIXME: How handle this?
             elif 'ymax' in function or 'ymin' in function:  # Usually: Hill response for Comm Molecule
-                # print('HILL')
                 self.params = params
             else:
                 log.cf.error("Cannot identify UCF-in function input parameter")
@@ -200,10 +196,11 @@ class Gate:
         self.hill_response = None
         self.response_func = None
         self.input_comp = None
-        self.tandem_factor = None
+        self.tandem_factor_func = None
         self.gate_in_use = None
         self.best_score = None
         self.IO = None
+        self.tandem_score = None
 
     def add_eval_params(self, gate_funcs, g_name, params):
         """
@@ -213,17 +210,26 @@ class Gate:
         :param g_name:
         :param params:
         """
-        if 'response_function' in gate_funcs.keys():
-            self.response_func = gate_funcs['response_function'].replace('^', '**')
-        else:
-            log.cf.error("Cannot find gate response_function in UCF; is it named 'response_function'?")
-        if 'input_composition' in gate_funcs.keys():
-            self.input_comp = gate_funcs['input_composition'].replace('^', '**')
-        else:
-            log.cf.error("Cannot find gate input_composition function in UCF; is it named 'input_composition'?")
-        if 'tandem_interference_factor' in gate_funcs.keys():
-            self.tandem_factor = gate_funcs['tandem_interference_factor'].replace('^', '**')
-            self.input_comp = self.input_comp.replace('t1', f'({self.tandem_factor})')
+        self.response_func = gate_funcs.get('response_function', '')
+        self.input_comp = gate_funcs.get('input_composition', '')
+        self.tandem_factor_func = gate_funcs.get('tandem_interference_factor', '')
+        self.response_func = self.response_func.replace('^', '**')
+        self.tandem_factor_func = self.tandem_factor_func.replace('^', '**')
+        # if 'response_function' in gate_funcs.keys():
+        #     self.response_func = gate_funcs['response_function'].replace('^', '**')
+        # else:
+        #     log.cf.error("Cannot find gate response_function in UCF; is it named 'response_function'?")
+        # if 'input_composition' in gate_funcs.keys():
+        #     self.input_comp = gate_funcs['input_composition'].replace('^', '**')
+        # else:
+        #     log.cf.error("Cannot find gate input_composition function in UCF; is it named 'input_composition'?")
+        # if 'tandem_interference_factor' in gate_funcs.keys():
+            # Usually: alpha * (K**n + beta * x**n) / (K**n + x**n)
+            # self.tandem_factor_func = gate_funcs['tandem_interference_factor'].replace('^', '**')
+            # Usually: x1 + (alpha * (K ** n + beta * x ** n) / (K ** n + x ** n)) * x2
+            # self.input_comp = self.input_comp.replace('t1', f'({self.tandem_factor_func})')
+            # self.tandem_score = eval(self.tandem_factor_func)
+            # print(self.tandem_score)
             # TODO: Generalize tandem_inter_factor param
         # self.hill_response = hill_response
         # self.input_comp = input_composition
@@ -259,10 +265,6 @@ class Gate:
         for k in eval_params.keys():
             locals()[k] = eval_params[k]
         x = in_comp  # NOTE: UCF has to use 'x' as input_composition in the gate response_function
-        # print('\n', gate_name)
-        # print(eval_params)
-        # print(x)
-        # print(eval(self.hill_response))
         return eval(self.response_func), gate_name
 
     def __str__(self):
@@ -338,8 +340,8 @@ class AssignGraph:
                 for g in self.gates:
                     if g.output == i_no:
                         prevs.append(g)
-                # for o in self.outputs:  # TODO: needed for consecutive outputs?  needed for CMs?
-                #     if o.id == i_no:    # QUEST: OK that conversion factor of output not part of next node score?
+                # for o in self.outputs:  # NOTE: commented out to permit intermediate output nodes
+                #     if o.id == i_no:    # TODO: OK that conversion factor of output not part of next node score?
                 #         prevs.append(o)
                 for i in self.inputs:
                     if i.id == i_no:
