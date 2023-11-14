@@ -215,6 +215,7 @@ class Gate:
         self.tandem_factor_func = gate_funcs.get('tandem_interference_factor', '')
         self.response_func = self.response_func.replace('^', '**')
         self.tandem_factor_func = self.tandem_factor_func.replace('^', '**')
+
         # if 'response_function' in gate_funcs.keys():
         #     self.response_func = gate_funcs['response_function'].replace('^', '**')
         # else:
@@ -355,7 +356,7 @@ class AssignGraph:
             return ValueError()
 
     # NOTE: needs modification
-    def get_score(self, node, verbose=False):
+    def get_score(self, node, verbose=False):  # TODO: Base case is tandem calc on the input?
         """
 
         :param node:
@@ -380,15 +381,18 @@ class AssignGraph:
             if node.gate_type == 'NOT':
                 input_score = self.get_score(self.find_prev(node))
                 x = input_score
+                # TODO: Retrieve tandem score
             elif node.gate_type == 'NOR':
+
                 input_scores = [self.get_score(x) for x in self.find_prev(node)]
                 x1 = input_scores[0]
                 x2 = input_scores[1]
+                # TODO: Retrieve tanadem score(s)
                 eval_params = node.gate_params
-                for k in eval_params.values():  # TODO: finish tandem function implementation
+                for k in eval_params.values():
                     for r in k:
                         locals()[r] = k[r]
-                x = eval(node.input_comp)  # basically x = x1 + x2
+                x = eval(node.input_comp)  # usually x = x1 + x2
             else:
                 # there shouldn't be gates other than NOR/NOT
                 raise Exception
