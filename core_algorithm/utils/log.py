@@ -30,7 +30,7 @@ def config_logger(vname: str, ucfname: str, ow: bool):
     time_suffix = "" if ow else datetime.now().strftime("_%Y-%m-%d_%H%M%S")
     
     # Construct the log file name
-    log_file_name = os.path.join('logs', f"{vname}+{ucfname}{time_suffix}.log")
+    log_file_name = os.path.join('logs/', f"{vname}+{ucfname}{time_suffix}.log")
     
     # Configure logger
     logging.config.fileConfig(

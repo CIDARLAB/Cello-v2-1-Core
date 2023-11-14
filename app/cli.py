@@ -18,9 +18,6 @@ def start_cli():
     # Runs brief tests of all configs, producing logs and a csv summary of all tests
     test_configs = False
 
-    cm_in_option = False
-    cm_out_option = False
-
     # TODO: source UCF files from CELLO-UCF instead
     # (contains the verilog files, and UCF files)
     in_path_ = LIBRARY_DIR
@@ -29,8 +26,6 @@ def start_cli():
     ucf_name_ = ''
     in_name_ = ''
     out_name_ = ''
-    cm_in_file = ''
-    cm_out_file = ''
 
     figlet = r"""
     
@@ -145,52 +140,38 @@ def start_cli():
                     f'(Hint: {label}.json, with the .output but not the .json, from the {in_path_[:-1]} folder.)\n\n'
                     f'Output File Name: '))
 
-            log.cf.info(cm_in_input := input(
-                f'\n\nDo you have a file of Communication Molecule (CM) inputs? (y/n)\n'))
-            if 'y' in cm_in_input or 'Y' in cm_in_input:
-                cm_in_option = True
-                log.cf.info(cm_in_file := input(f'\n\nWhat CM Input file do you want to use?\n\n'
-                                                f'Name of CM Input File: '))
-            log.cf.info(cm_out_input := input(
-                f'\n\nDo you have a CM output file? (y/n)\n'))
-            if 'y' in cm_out_input or 'Y' in cm_out_input:
-                cm_out_option = True
-                log.cf.info(cm_out_file := input(f'\n\nWhat CM Output file do you want to use?\n\n'
-                                                 f'Name of CM Output File: '))
-
-            log.cf.info(options := input(
-                f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
-                f'Available Settings:\n'
-                f' - (v)  Verbose: {verbose} \n'
-                f'        Include \'v\' to print more details to both console and the log file\n'
-                f' - (o)  Log overwrite: {log_overwrite} \n'
-                f'        Include \'o\' to overwrite an old log when a new log is run; removes dates from log name\n'
-                f' - (pi) Print all iterations: {print_iters} \n'
-                f'        Include \'pi\' to print info on all iterations (copious output)\n'
-                f' - (ex) Exhaustive: {exhaustive} \n'
-                f'        Include \'ex\' to test *all* possible permutations to get global optimum \n'
-                f'        May take *long* time; normally uses simulated annealing to efficiently find good solution\n'
-                f'Otherwise, just press Enter to proceed with default settings...\n\n'
-                f'Options (if any): '))
+            options = ''
+            # log.cf.info(options := input(
+            #     f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
+            #     f'Available Settings:\n'
+            #     f' - (v)  Verbose: {verbose} \n'
+            #     f'        Include \'v\' to print more details to both console and the log file\n'
+            #     f' - (o)  Log overwrite: {log_overwrite} \n'
+            #     f'        Include \'o\' to overwrite an old log when a new log is run; removes dates from log name\n'
+            #     f' - (pi) Print all iterations: {print_iters} \n'
+            #     f'        Include \'pi\' to print info on all iterations (copious output)\n'
+            #     f' - (ex) Exhaustive: {exhaustive} \n'
+            #     f'        Include \'ex\' to test *all* possible permutations to get global optimum \n'
+            #     f'        May take *long* time; normally uses simulated annealing to efficiently find good solution\n'
+            #     f'Otherwise, just press Enter to proceed with default settings...\n\n'
+            #     f'Options (if any): '))
             options_list = options.split()
-            if 'v' in options_list:
-                verbose = True
-            if 'o' in options_list:
-                log_overwrite = True
-            if 'pi' in options_list:
-                print_iters = True
-            if 'ex' in options_list:
-                exhaustive = True
+            # if 'v' in options_list:
+            #     verbose = True
+            # if 'o' in options_list:
+            #     log_overwrite = True
+            # if 'pi' in options_list:
+            #     print_iters = True
+            # if 'ex' in options_list:
+            #     exhaustive = True
 
-    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, cm_in_file, cm_out_file, in_path_, out_path_,
+    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_,
                                options={'yosys_cmd_choice': yosys_cmd_choice,
                                         'verbose': verbose,
                                         'log_overwrite': log_overwrite,
                                         'print_iters': print_iters,
                                         'exhaustive': exhaustive,
-                                        'test_configs': test_configs,
-                                        'cm_in_option': cm_in_option,
-                                        'cm_out_option': cm_out_option})
+                                        'test_configs': test_configs})
     # log.cf.error(result, exc_info=True)
 
     log.cf.info("Exiting Cello...")

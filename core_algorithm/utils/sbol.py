@@ -30,7 +30,8 @@ circuit.constraints = [sbol3.Constraint(sbol3.SBOL_PRECEDES, ptet_sc, op1_sc),
 """
 
 import sbol3
-import log
+
+from core_algorithm.utils import log
 
 
 class SBOL:

@@ -8,21 +8,21 @@ https://github.com/CIDARLAB/miniEugene-core
 
 """
 
-# import subprocess
-from core_algorithm.utils import log
 import logging
 import re
+
+from core_algorithm.utils import log
 
 
 def call_mini_eugene(rules: list[str], orders_count: int = 5):
     """
     NOTE: Commands to be executed before the Python script...
     External command to compile miniEugenePermuter class:
-        javac -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter.java   // mac / lin?
+        javac -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter.java   // mac / lin
         javac -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter.java     // win
     External command to execute program to instantiate Py4J Java Gateway:
-        java -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter    // mac / lin?
-        java -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter      // win
+        java -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar./src' miniEugenePermuter    // mac / lin
+        java -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar./src miniEugenePermuter      // win
     NOTE: May need to add java to the path and restart the console...
 
     :param rules:
@@ -34,18 +34,6 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     # Suppress (useless) console output
     logging.getLogger("py4j").setLevel(logging.INFO)
     # from py4j.java_collections import ListConverter
-
-    # TODO: Call JVM/Java program from this script...
-    # application = "C:\\Program Files\\Java\\jdk-20\\bin\\javac.exe"
-    # # application = "C:\\Users\\Chris\\OneDrive\\VS-Code\\CELLO\\Cell-v3-Fork\\Cello-v3-Core\\utils"
-    # subprocess.run([application, "-cp .\\py4j.jar;.\\miniEugene-core-1.0.0-jar-with-dependencies.jar "
-    #                              "AdditionApplication.java"])
-    # application = "C:\\Program Files\\Java\\jdk-20\\bin\\java.exe"
-    # subprocess.run([application, "-cp .\\py4j.jar;.\\miniEugene-core-1.0.0-jar-with-dependencies.jar "
-    #                              "AdditionApplication"])
-    # subprocess.run("java -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar AdditionApplication")
-    # gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_convert=True)).launch_gateway(
-    #                       jarpath="./py4j.jar", classpath="./miniEugene-core-1.0.0-jar-with-dependencies.jar")
 
     # Connect to JVM and setup to convert to Java-friendly containers
     gateway = JavaGateway(
