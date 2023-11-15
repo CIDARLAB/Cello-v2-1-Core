@@ -1,0 +1,28 @@
+# Version control
+.git
+.gitignore
+
+# Python cache and compiled files
+__pycache__
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+
+# Temporary output directory
+temp_out/
+
+# Logs
+logs/
+
+# Assets like PDFs, which aren't necessary for runtime
+assets/Papers
+assets/Slides
+
+# Development tools, notes, etc.
+assets/pseudo_code_and_scratch.txt
+
+# Other files/directories not needed for the application to run
+License.txt
+README.md

@@ -1,0 +1,270 @@
+Examples from and+Bth...
+
+# NOTE: UCF Hierarchies...  DNA Seq > Part > Component > Cassette > Device > Structure
+# DNA seqs are 'parts', which constitute 'components' (e.g. 'M1')
+# 'components' make up 'cassettes' (e.g. 'Gate1_a_cassette'), which are specific types of 'devices' (e.g. 'Gate1_a')
+# 'devices' (and 'outputs', e.g. 'PM1') make up a 'structure', which constitutes a gate/input/output (e.g. 'Gate1')
+# The structure's corresponding 'model' contains the Hill_response or related function parameters
+
+# NOTE: General Flow...
+# celloAlgo circuit design > EugeneObject Struct/device info > EugeneCassette cassette info/DNA seqs > Part order
+
+# NOTE: See and+Bth-dna_design-to-sbol_diagram.png for visual depiction of relationship between dna_design and the SBOL
+
+
+
+# BASIC CIRCUIT DESIGN INFO
+
+    Inputs:
+        [aTc_sensor, IPTG_sensor],
+    Gates:
+        [M1, M3, M4],
+    Outputs:
+        [nanoluc_reporter]
+
+    Mappings:
+        [(('a', 2), aTc_sensor), (('b', 3), IPTG_sensor)],
+        [('81', M1), ('82', M3), ('83', M4)],
+        [(('out', 4), nanoluc_reporter)]
+
+    Connections: {       # NOTE: Generated from info provided by celloAlgo above; used in creation of EugeneObject below
+        'Gate1': ['aTc_sensor'],
+        'Gate3': ['IPTG_sensor'],
+        'Gate4': ['Gate1', 'Gate3'],
+        'nanoluc_reporter': ['Gate4']
+    }
+
+
+
+# FROM UCF STRUCTURES BLOCKS                                           # NOTE: All the relevant info extracted from UCFs
+EugeneObject.structs_dict{
+
+    'Gate1': EugeneStruct(
+        type='gate', gates_name='Gate1', gates_group='M1', gates_model='Gate1_model', gates_struct='Gate1_structure',
+        struct_cassettes=[
+            ['Gate1_a', 'Gate1_a_cassette', 1, ['M1', 'L3S3P41']],       # NOTE: Used as needed for EugeneCassette below
+            ['Gate1_b', 'Gate1_b_cassette', 1, ['M1', 'L3S3P41']]
+        ],
+        inputs=['aTc_sensor'], outputs=['PM1'],  # NOTE: Based on circuit structure above; used in DNA Parts order below
+        color="3BA9E0"
+    ),
+
+    'aTc_sensor': EugeneStruct(
+        type='input', gates_name='aTc_sensor', gates_group='', gates_model='aTc_sensor_model',
+            gates_struct='aTc_sensor_structure',
+        struct_cassettes=[],
+        inputs=[], outputs=['P_aTc'],
+        color=""
+    ),
+
+    'Gate3': EugeneStruct(
+        type='gate', gates_name='Gate3', gates_group='M3', gates_model='Gate3_model', gates_struct='Gate3_structure',
+        struct_cassettes=[
+            ['Gate3_a', 'Gate3_a_cassette', 1, ['M3', 'ECK120034435']],
+            ['Gate3_b', 'Gate3_b_cassette', 1, ['M3', 'ECK120034435']]
+        ],
+        inputs=['IPTG_sensor'], outputs=['PM3'],
+        color="8FC73E"
+    ),
+
+    'IPTG_sensor': EugeneStruct(
+        type='input', gates_name='IPTG_sensor', gates_group='', gates_model='IPTG_sensor_model',
+        gates_struct='IPTG_sensor_structure',
+        struct_cassettes=[],
+        inputs=[], outputs=['P_IPTG'],
+        color=""
+    ),
+
+    'Gate4': EugeneStruct(
+        type='gate', gates_name='Gate4', gates_group='M4', gates_model='Gate4_model', gates_struct='Gate4_structure',
+        struct_cassettes=[
+            ['Gate4_a', 'Gate4_a_cassette', 1, ['M4', 'ECK120033736']],
+            ['Gate4_b', 'Gate4_b_cassette', 1, ['M4', 'ECK120033736']]
+        ],
+        inputs=['Gate1', 'Gate3'], outputs=['PM4'],
+        color="E83C96"
+    ),
+
+    'nanoluc_reporter': EugeneStruct(
+        type='output', gates_name='nanoluc_reporter', gates_group='', gates_model='nanoluc_reporter_model',
+            gates_struct='nanoluc_reporter_structure',
+        struct_cassettes=[
+            ['nanoluc_reporter_a', 'nanoluc_cassette', 1, ['nanoluc_cassette']],
+            ['nanoluc_reporter_b', 'nanoluc_cassette', 1, ['nanoluc_cassette']]
+        ],
+        inputs=['Gate4'], outputs=[''],
+        color=""
+    )
+
+}
+
+
+
+# FROM UCF PARTS BLOCKS                                    # NOTE: All the parts/DNA sequences from the structures above
+EugeneObject.parts_seq_dict{
+
+    'P_IPTG': EugeneSequence(
+        parts_type='promoter', parts_name='P_IPTG',
+        parts_sequence='TTACAAAGAAAATTCGACAAACTGTTATTTTTCTATCTATTTATTTGAATTGTGAGCGGATAACAATTACCTTTGTCGGCAATTGTGA...',
+        dev_rules=["ALL_FORWARD"]
+    ),
+
+    'P_aTc': EugeneSequence(
+        parts_type='promoter', parts_name='P_aTc',
+        parts_sequence='ttttgcacccgctttccaagagaagaaagccttgttaaattgacttagtgtaaaagcgcagtactgcttgaccataagaacaaaatag...',
+        dev_rules=["ALL_FORWARD"]
+    ),
+
+    'M1': EugeneSequence(
+        parts_type='cds', parts_name='M1',
+        parts_sequence='CAAAGATAATAGAACTTAAGGTTTTAGAGCTAGAAATAGCAAGTTAAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGTGGCACCGA...',
+        dev_rules=["ALL_FORWARD"]
+    ),
+
+    [... many additional parts, e.g. scars, terminators, etc.]
+
+    }
+}
+
+
+
+# FROM UCF STRUCTURES>CASSETTES BLOCKS                                      # NOTE: Used heavily for dna_design creation
+EugeneObject.structs_cas_dict{
+
+    'Gate1_a': EugeneCassette(
+        struct_var_name='Gate1_a', struct_cas_name='Gate1_a_cassette', type='gate',
+        inputs=['P_aTc'],
+        comps=['M1', 'L3S3P41'],
+        outputs=['PM1'],
+        color="3BA9E0",
+        dev_rules=[],
+        cir_rules=[]  # TODO: Finish
+    ),
+
+    'Gate3_a': EugeneCassette(
+        struct_var_name='Gate3_a', struct_cas_name='Gate3_a_cassette', type='gate',
+        inputs=['P_IPTG'],
+        comps=['M3', 'ECK120034435'],
+        outputs=['PM3'],
+        color="8FC73E",
+        dev_rules=[],
+        cir_rules=[]
+    ),
+
+    'Gate4_a': EugeneCassette(
+        struct_var_name='Gate4_a', struct_cas_name='Gate4_a_cassette', type='gate',
+        inputs=['PM1'],
+        comps=['M4', 'ECK120033736'],
+        outputs=['PM4'],
+        color="E83C96",
+        dev_rules=[],
+        cir_rules=[]
+    ),
+
+    'Gate4_b': EugeneCassette(
+        struct_var_name='Gate4_b', struct_cas_name='Gate4_b_cassette', type='gate',
+        inputs=['PM3'],
+        comps=['M4', 'ECK120033736'],
+        outputs=['PM4'],
+        color="E83C96",
+        dev_rules=[],
+        cir_rules=[]
+    ),
+
+    'nanoluc_reporter_a': EugeneCassette(
+        struct_var_name='nanoluc_reporter_a', struct_cas_name='nanoluc_cassette', type='output',
+        inputs=['PM4'],
+        comps=['nanoluc_cassette'],
+        outputs=[''],
+        color="",
+        dev_rules=[],
+        cir_rules=[]
+    )
+
+}
+
+
+
+# TARGET DNA PARTS ORDER
+# NOTE: Based on EugeneCassette and EugeneSequence above
+# NOTE: Generally ordered according to circuit_rules; between lines, device components are ordered by device_rules
+
+    --------------------------------------------------------------------------------------------------------------------
+    promoter   P_aTc           (.SEQUENCE("ttttgc..."))  # 'outputs' of aTc_sensor precursor in UCF input file
+    cds        M1              (.SEQUENCE("CAAAGA..."))  # from Gate1_a 'components' of the Gate1 'structures' block
+    terminator L3S3P41         (.SEQUENCE("GGATCC..."))  # from Gate1_a 'components' of the Gate1 'structures' block
+    --------------------------------------------------------------------------------------------------------------------
+    promoter   PM1             (.SEQUENCE("TGCTGT..."))  # 'outputs' of Gate1 precursor (from 'structures' block)
+    cds        M4              (.SEQUENCE("CAAAGA..."))  # from Gate4_a 'components' of the Gate4 'structures' block
+    terminator ECK120033736    (.SEQUENCE("GGATCC..."))  # from Gate4_a 'components' of the Gate4 'structures' block
+    --------------------------------------------------------------------------------------------------------------------
+    promoter   PM4             (.SEQUENCE("TGCTGT..."))  # 'outputs' of Gate4 precursor (from 'structures' block)
+    cassette   nanoluc_cassette(.SEQUENCE("ATGGTT..."))  # from nanoluc_reporter_a 'components' in UCF output file
+    --------------------------------------------------------------------------------------------------------------------
+    promoter   P_IPTG          (.SEQUENCE("TTACAA..."))  # 'outputs' of IPTG_sensor precursor in UCF input file
+    cds        M3              (.SEQUENCE("CAAAGA..."))  # from Gate3_a 'components' of the Gate3 'structures' block
+    terminator ECK120034435    (.SEQUENCE("GGATCC..."))  # from Gate3_a 'components' of the Gate3 'structures' block
+    --------------------------------------------------------------------------------------------------------------------
+    promoter   PM3             (.SEQUENCE("TGCTGT..."))  # 'outputs' of Gate3 precursor (from 'structures' block)
+    cds        M4              (.SEQUENCE("CAAAGA..."))  # from Gate4_b 'components' of the Gate4 'structures' block
+    terminator ECK120033736    (.SEQUENCE("GGATCC..."))  # from Gate4_b 'components' of the Gate4 'structures' block
+    --------------------------------------------------------------------------------------------------------------------
+    ["_NONCE_PAD"s will also be inserted as needed (according to the fencepost rules?)]
+
+
+
+# OTHER INFO
+
+    dnaplotlib types
+        STD_PART_TYPES =
+        [ 'Promoter',
+          'CDS',
+          'Terminator',
+          'RBS',
+          'Scar',
+          'Spacer',
+          'EmptySpace',
+          'Ribozyme',
+          'Ribonuclease',
+          'Protease',
+          'DNACleavageSite',
+          'RNACleavageSite',
+          'ProteinCleavageSite',
+          'DNALocation',
+          'RNALocation',
+          'ProteinLocation',
+          'DNAStability',
+          'RNAStability',
+          'ProteinStability',
+          'StemTop',
+          'Operator',
+          'Origin',
+          'Insulator',
+          '5Overhang',
+          '3Overhang',
+          'RestrictionSite',
+          'BluntRestrictionSite',
+          'PrimerBindingSite',
+          '5StickyRestrictionSite',
+          '3StickyRestrictionSite',
+          '5ChromosomalLocus',
+          '3ChromosomalLocus',
+          'UserDefined',
+          'Signature'
+        ]
+
+    2.0 types
+    if (type.equals(Part.S_PROMOTER)) {
+      rtn = DnaPlotLibUtils.S_PROMOTER;
+    } else if (type.equals(Part.S_RIBOZYME)) {
+      rtn = DnaPlotLibUtils.S_RIBOZYME;
+    } else if (type.equals(Part.S_RBS)) {
+      rtn = DnaPlotLibUtils.S_RBS;
+    } else if (type.equals(Part.S_CDS)) {
+      rtn = DnaPlotLibUtils.S_CDS;
+    } else if (type.equals(Part.S_TERMINATOR)) {
+      rtn = DnaPlotLibUtils.S_TERMINATOR;
+    } else if (type.equals(Part.S_SCAR)) {
+      rtn = DnaPlotLibUtils.S_SCAR;
+    } else if (type.equals(Part.S_SPACER)) {
+      rtn = DnaPlotLibUtils.S_SPACER;

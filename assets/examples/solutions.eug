@@ -1,0 +1,10 @@
+Device d1(L1, nanoluc_reporter_a, Gate1_a, Gate3_a, Gate5_a, Gate5_b, L2);
+Device d2(L1, nanoluc_reporter_a, Gate1_a, Gate3_a, Gate5_b, Gate5_a, L2);
+Device d3(L1, nanoluc_reporter_a, Gate1_a, Gate5_b, Gate3_a, Gate5_a, L2);
+Device d4(L1, nanoluc_reporter_a, Gate5_b, Gate1_a, Gate3_a, Gate5_a, L2);
+Device d5(L1, Gate1_a, nanoluc_reporter_a, Gate5_b, Gate3_a, Gate5_a, L2);
+Device d6(L1, Gate1_a, nanoluc_reporter_a, Gate3_a, Gate5_b, Gate5_a, L2);
+Device d7(L1, Gate1_a, nanoluc_reporter_a, Gate3_a, Gate5_a, Gate5_b, L2);
+Device d8(L1, Gate1_a, Gate3_a, nanoluc_reporter_a, Gate5_b, Gate5_a, L2);
+Device d9(L1, Gate1_a, Gate3_a, nanoluc_reporter_a, Gate5_a, Gate5_b, L2);
+Device d10(L1, Gate1_a, Gate3_a, Gate5_a, Gate5_b, nanoluc_reporter_a, L2);

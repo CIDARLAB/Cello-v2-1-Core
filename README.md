@@ -10,9 +10,9 @@ cd Cello-v3-Core/
 
 #
 ## Installing Python Packages
-You will need to install the Python packages for Graphviz, SciPy, Matplotlib, DNAplotlib, and Py4J by running:
+Install using pip
 ```
-pip install graphviz scipy matplotlib dnaplotlib py4j
+pip install -r requirements.txt
 ```
 
 #
