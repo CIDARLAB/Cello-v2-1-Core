@@ -4,6 +4,7 @@ from config import LIBRARY_DIR, TEMP_OUTPUTS_DIR
 from core_algorithm.utils import log
 from core_algorithm.utils.config_tester import test_all_configs
 
+
 def start_cli():
     # NOTE: SETTINGS
     # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation

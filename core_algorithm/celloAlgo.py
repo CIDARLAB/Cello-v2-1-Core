@@ -23,6 +23,7 @@ from core_algorithm.utils.response_plot import plot_bars
 from core_algorithm.utils import log
 from core_algorithm.utils.sbol import *
 
+
 def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
     start_time = time.time()
     CELLO3(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options)
