@@ -18,14 +18,14 @@
 	},
 	{
 		"collection": "measurement_std",
-		"signal_carrier_units": "RPUG",
-		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPU.  RPU = (YFP - YFP0)/(YFPRPUG - YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median fluorescence of the cells containing full sensor array with two other landing pads empty, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad",
+		"signal_carrier_units": "RNAP/s",
+		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPU.  RPU = (YFP - YFP0)/(YFPRPUG - YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median fluorescence of the cells containing full sensor array with two other landing pads empty, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad. After converesion to RPU, the values are then converted to RNAP/s with the following conversion factor: 1 RPU = 0.019 RNAP/s.",
 		"plasmid_description": "Genome integrated RPU standard where YFP fluorescent protein is driven by J23101 promoter and B0034 RBS. RiboJ was used as a ribozyme insulator. A bidirectional terminator DT3 was used to insulate YFP from the genome. The insertion is in the landing pad #2, at the position of 4633382"
 	},
 	{
 		"collection": "input_composition",
-		"signal_carrier_units": "RPUG",
-		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPU.  RPU = (YFP - YFP0)/(YFPRPUG - YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median fluorescence of the cells containing full sensor array with two other landing pads empty, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad",
+		"signal_carrier_units": "RNAP/s",
+		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPU.  RPU = (YFP - YFP0)/(YFPRPUG - YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median fluorescence of the cells containing full sensor array with two other landing pads empty, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad. After converesion to RPU, the values are then converted to RNAP/s with the following conversion factor: 1 RPU = 0.019 RNAP/s.",
 		"plasmid_description": "We used the pRpa*A (pC-HSL inducer) sensor cassette, which was cloned alongside the circuit. The DNA sequence of this particular input sensor includes a promoter, ribozyme, RBS, sensor protein, and terminator (all required components)"
 	},
 	{
@@ -65,6 +65,18 @@
 				"sequence": {
 					"type": "ncbi",
 					"ref": "CP007799"
+				}
+			},
+			{
+				"symbol": "attB2",
+				"description": "Output devices location for Communication Molecules",
+				"locus": {
+					"start": -999,
+					"end": -999
+				},
+				"sequence": {
+					"type": "",
+					"ref": ""
 				}
 			}
 		]

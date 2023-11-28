@@ -575,7 +575,47 @@
             "function": "AND",
             "rules": [
 					"YFP_reporter_a AFTER L3",
-					"YFP_reporter_b BEFORE L3"
+					"YFP_reporter_b BEFORE L3",
+
+					"attB2 AFTER L3",
+					"OC6_out_a AFTER attB2",
+					"OHC12_out_a AFTER attB2",
+					"DAPG_out_a AFTER attB2",
+					"pC-HSL_out_a AFTER attB2",
+
+					"attB2 AFTER Pr203-cI-R3_v2_a",
+					"attB2 AFTER Pr203-cI-R4_v2_a",
+					"attB2 AFTER Pr204-P22-R3_a",
+					"attB2 AFTER Pr253-TP901-R2_a",
+					"attB2 AFTER Pr206-r1t-R4_a",
+					"attB2 AFTER Pr208-Tuc2009-R3_a",
+					"attB2 AFTER Pr210-phage186-RBS50_a",
+					"attB2 AFTER Pr211-933W-R1_a",
+					"attB2 AFTER Pr211-933W-R2_a",
+					"attB2 AFTER Pr212-L5-R1_a",
+					"attB2 AFTER Pr214-P2hd-R1_a",
+					"attB2 AFTER Pr215-P2-R1_a",
+					"attB2 AFTER Pr215-P2-R3_a",
+					"attB2 AFTER Pr215-P2-R4_a",
+					"attB2 AFTER Pr218-Wphi-R1_a",
+					"attB2 AFTER Pr217-VP585-R1_a",
+
+					"attB2 AFTER Pr203-cI-R3_v2_b",
+					"attB2 AFTER Pr203-cI-R4_v2_b",
+					"attB2 AFTER Pr204-P22-R3_b",
+					"attB2 AFTER Pr253-TP901-R2_b",
+					"attB2 AFTER Pr206-r1t-R4_b",
+					"attB2 AFTER Pr208-Tuc2009-R3_b",
+					"attB2 AFTER Pr210-phage186-RBS50_b",
+					"attB2 AFTER Pr211-933W-R1_b",
+					"attB2 AFTER Pr211-933W-R2_b",
+					"attB2 AFTER Pr212-L5-R1_b",
+					"attB2 AFTER Pr214-P2hd-R1_b",
+					"attB2 AFTER Pr215-P2-R1_b",
+					"attB2 AFTER Pr215-P2-R3_b",
+					"attB2 AFTER Pr215-P2-R4_b",
+					"attB2 AFTER Pr218-Wphi-R1_b",
+					"attB2 AFTER Pr217-VP585-R1_b"
             ]
         }
     }

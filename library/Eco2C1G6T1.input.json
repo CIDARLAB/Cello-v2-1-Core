@@ -657,34 +657,5 @@
 				"map": "#//model/parameters/ymin"
 			}
 		]
-	},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	{
-		"collection": "functions",
-		"name": "sensor_response",
-		"equation": "$STATE * (ymax - ymin) + ymin",
-		"parameters": [
-			{
-				"name": "ymax",
-				"map": "#//model/parameters/ymax"
-			},
-			{
-				"name": "ymin",
-				"map": "#//model/parameters/ymin"
-			}
-		]
 	}
 ]

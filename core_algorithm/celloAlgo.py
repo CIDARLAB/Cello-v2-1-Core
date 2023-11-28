@@ -142,8 +142,6 @@ class CELLO3:
         except Exception as e:
             raise CelloError('Error with logic synthesis', e)
 
-
-
         # NOTE: Initializes UCF, Input, and Output from filepaths
         try:
             self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
@@ -153,8 +151,7 @@ class CELLO3:
         except Exception as e:
             raise CelloError('Error reading UCF', e)
 
-
-        # NOTE: Verilog/UCF Comatibility Check
+        # NOTE: Verilog/UCF Compatibility Check
         try:
             valid: bool
             iter_: int
@@ -166,7 +163,6 @@ class CELLO3:
             log.cf.info(f'\nCondition check passed? {valid}\n')
         except Exception as e:
             raise CelloError('Error with Verilog/UCF compatibility check', e)
-
 
         # NOTE: Circuit Scoring
         try:
@@ -193,7 +189,6 @@ class CELLO3:
                 debug_print(best_result[1])
         except Exception as e:
             raise CelloError('Error with circuit scoring', e)
-
 
         # NOTE: RESULTS/CIRCUIT DESIGN
         try:
@@ -230,7 +225,6 @@ class CELLO3:
                 tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
             raise CelloError('Error with results/circuit design', e)
-
 
         # NOTE: TRUTH TABLE/GATE SCORING
         try:
@@ -375,8 +369,7 @@ class CELLO3:
 
     def check_conditions(self, verbose=True):
         """
-
-        NOTE: Ignore logic_constraints value, which is unreliable, and instead use the actual gate count
+        Ignores logic_constraints value, which is unreliable, and instead use the actual gate count
 
         :param verbose: bool: default True
         :return:
@@ -407,7 +400,7 @@ class CELLO3:
         num_netlist_inputs = len(self.rnl.inputs) if netlist_valid else 99999
         inputs_match = (num_ucf_input_sensors == num_ucf_input_models) and \
                        (num_ucf_input_models == num_ucf_input_structures) and \
-                       (num_ucf_input_parts >= num_netlist_inputs)  # CRIT: why must part number match in line above?
+                       (num_ucf_input_parts >= num_netlist_inputs)  # TODO: why must part number match in line above?
         # == num_ucf_input_parts
         if verbose:
             log.cf.info(f'\nINPUTS (including the communication devices): \n'
@@ -434,7 +427,7 @@ class CELLO3:
         num_netlist_outputs = len(self.rnl.outputs) if netlist_valid else 99999
         outputs_match = (num_ucf_output_sensors == num_ucf_output_models) and \
                         (num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and \
-                        (num_ucf_output_parts >= num_netlist_outputs)  # CRIT: why must part number match in line above?
+                        (num_ucf_output_parts >= num_netlist_outputs)  # TODO: why must part number match in line above?
         if verbose:
             log.cf.info(f'\nOUTPUTS: \n'
                         f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}\n'
@@ -487,7 +480,7 @@ class CELLO3:
             log.cf.info(sorted(gate_names))
 
         gates_match = (num_structs == num_models == num_gates) and (
-            num_gates_available[0] >= num_netlist_gates)
+                num_gates_available[0] >= num_netlist_gates)
         if verbose:
             log.cf.info(
                 f"{'Valid' if gates_match else 'NOT valid'} intermediate match!")
@@ -602,8 +595,10 @@ class CELLO3:
         max_fun = iter_ if iter_ < 100 else 100
 
         # DUAL ANNEALING SCIPY FUNC
-        def func(x): return self.prep_assign_for_scoring(
-            x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+        def func(x):
+            return self.prep_assign_for_scoring(
+                x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+
         lo = [0, 0, 0]
         hi = [len(i_perms), len(o_perms), len(g_perms)]
         bounds = list(zip(lo, hi))
@@ -708,8 +703,11 @@ class CELLO3:
             if self.print_iters:
                 print_centered(
                     f'beginning iteration {self.iter_count}:', also_logfile=False)
+
             # Output the combination
-            def map_helper(l, c): return list(map(lambda x_, y: (x_, y), l, c))
+            def map_helper(l, c):
+                return list(map(lambda x_, y: (x_, y), l, c))
+
             new_i = map_helper(i_perm, netgraph.inputs)
             new_g = map_helper(g_perm, netgraph.gates)
             new_o = map_helper(o_perm, netgraph.outputs)
@@ -811,7 +809,7 @@ class CELLO3:
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
-            print(f"input_response = {(funcs:=next(iter(input_equations.values())))['response_function']}")
+            print(f"input_response = {(funcs := next(iter(input_equations.values())))['response_function']}")
             if 'tandem_interference_factor' in funcs.keys():
                 print(f"\ntandem_interference_factor = {funcs['tandem_interference_factor']}")
             print(f'\nParameters in sensor_response function json: \n{input_params}\n')
@@ -823,12 +821,12 @@ class CELLO3:
         gate_ids = [(g['group'], g['name']) for g in gate_query]
         gate_id_names = [i[1] + '_model' for i in gate_ids]
         gate_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models'),
-                                      'name', gate_id_names)
+                                 'name', gate_id_names)
         gate_functions = {c['name'][:-6]: c['functions'] for c in gate_info}
         gate_equations = gate_functions.copy()
         for key, input in gate_functions.items():
             gate_equations[key] = {k: (e['equation']) for e in main_function_json for (k, f) in input.items()
-                                    if (e['name'] == f and 'equation' in e.keys())}
+                                   if (e['name'] == f and 'equation' in e.keys())}
         gate_func_names = gate_info[0]['functions']
         gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_info}
         if self.print_iters:
@@ -864,7 +862,7 @@ class CELLO3:
         output_equations = {k: (e['equation']) for e in output_function_json for (k, f) in
                             output_functions.items() if (e['name'] == f)}
         output_vars = {k: (e['variables']) for e in output_function_json for (k, f) in
-                           output_functions.items() if (e['name'] == f)}
+                       output_functions.items() if (e['name'] == f)}
 
         if self.print_iters:
             print('OUTPUT parameters: ')
