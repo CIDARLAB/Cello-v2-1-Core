@@ -16,7 +16,8 @@ from config import BASE_DIR
 
 iter_num = 0
 iter_validity = "Valid"
-log_counts = {'WARNING': 0, 'ERROR': 0, 'CRITICAL': 0}  # Global issue counts (resets at new cello process)
+# Global issue counts (resets at new cello process)
+log_counts = {'WARNING': 0, 'ERROR': 0, 'CRITICAL': 0}
 last_log = "[None]"
 
 
@@ -25,20 +26,21 @@ def config_logger(vname: str, ucfname: str, ow: bool):
     Generates log file and initializes the Logger class (for print() statements) every time a Cello process is created.
     :return: None
     """
-    
+
     # Determine filename suffix based on the ow variable
     time_suffix = "" if ow else datetime.now().strftime("_%Y-%m-%d_%H%M%S")
-    
+
     # Construct the log file name
-    log_file_name = os.path.join('logs', f"{vname}+{ucfname}{time_suffix}.log")
-    
+    log_file_name = os.path.join(
+        'logs/', f"{vname}+{ucfname}{time_suffix}.log")
+
     # Configure logger
     logging.config.fileConfig(
         os.path.join(BASE_DIR, 'core_algorithm', 'utils', 'logging.config'),
         disable_existing_loggers=False,
         defaults={'logfilename': log_file_name}
     )
-    
+
     # Disable logging for matplotlib's font manager to avoid potential clutter
     logging.getLogger('matplotlib.font_manager').disabled = True
     # sys.stdout = Logger(log_file_name)
@@ -74,8 +76,10 @@ class ContextFilter(logging.Filter):
         if record.levelname in ('WARNING', 'ERROR', 'CRITICAL'):
             log_counts[record.levelname] += 1
             last_log = f"Caught exception: {record.msg}"
-            cf.info(f"*****  !{record.levelname}!  *****\n{traceback.format_exc()}")
-        elif record.levelname == 'DEBUG':  # 'debug' level reserved for invalid configs (e.g. gate mismatch)
+            cf.info(
+                f"*****  !{record.levelname}!  *****\n{traceback.format_exc()}")
+        # 'debug' level reserved for invalid configs (e.g. gate mismatch)
+        elif record.levelname == 'DEBUG':
             iter_validity = "Invalid"
         return True
 

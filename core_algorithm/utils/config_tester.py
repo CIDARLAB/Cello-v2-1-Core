@@ -12,7 +12,6 @@ from core_algorithm.utils import log
 import csv
 
 
-# TODO: implement more robust exception handling
 def test_all_configs(input_folder: str):
     """
     This utility will run through every combination of configuration files currently
@@ -36,7 +35,8 @@ def test_all_configs(input_folder: str):
         f'By default, each valid config will only run for the first 1000 iterations to check for errors.\n'
         f'(Note: log overwrite is turned on by default.)\n'
         f'Each config produces a log file of the terminal output, and a csv summarizing all results is generated.\n\n'
-        f'Total number of configurations to be tested: ' + str(len(v_names) * len(ucf_names)) + '\n'
+        f'Total number of configurations to be tested: ' +
+        str(len(v_names) * len(ucf_names)) + '\n'
         f'(Depending on the number of valid configs, this may take awhile to complete...)\n'
         f'\nDo you want to proceed? (y/n) ')
 
@@ -65,7 +65,8 @@ def test_all_configs(input_folder: str):
                                                             'test_configs': True})
                         exception = "Done"
                     except Exception as e:
-                        log.cf.info("FAILED with error (will go to next iteration)!")
+                        log.cf.info(
+                            "FAILED with error (will go to next iteration)!")
                         log.cf.critical(e)
                         exception = "Failed"
                     w, e, c = log.log_counts['WARNING'], log.log_counts['ERROR'], log.log_counts['CRITICAL']

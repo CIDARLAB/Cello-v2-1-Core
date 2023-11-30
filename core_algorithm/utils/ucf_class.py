@@ -16,22 +16,19 @@ class UCF:
 
     """
 
-    def __init__(self, filepath, ucf_file, in_file, out_file, cm_in_path, cm_out_path, cm_in_opt, cm_out_opt):
+    def __init__(self, filepath, ucf_file, in_file, out_file):
         self.filepath = filepath
         self.ucf_file = ucf_file
         self.in_file = in_file
         self.out_file = out_file
-        self.cm_in_path = cm_in_path
-        self.cm_out_path = cm_out_path
-        self.cm_in_opt = cm_in_opt
-        self.cm_out_opt = cm_out_opt
+        # CRIT: Fix
         self.name = ucf_file[:-4] if ucf_file.endswith('.UCF') else ucf_file
         (U, I, O) = self.__parse_helper()
         self.UCFmain = U
         self.UCFin = I
         self.UCFout = O
         self.valid = True if (
-                self.UCFmain is not None and self.UCFin is not None and self.UCFout is not None) else False
+            self.UCFmain is not None and self.UCFin is not None and self.UCFout is not None) else False
         if self.valid:
             self.collection_count = {cName: self.__count_collection(cName) for cName in
                                      self.__collection_names(self.UCFmain)}  # Main UCF collection counts
@@ -52,47 +49,34 @@ class UCF:
     def __parse_helper(self):
         # filepath = os.path.join(*self.filepath.split('/'))
         # # Communication Molecule filepaths
-        # cm_in_filepath = os.path.join(*filepath.split('/'), self.cm_in + '.json') if self.cm_in else \
-        #                  os.path.join(*'utils/comm_devices_hr.input.json'.split('/'))  # hill response in func
-        # cm_out_filepath = os.path.join(*filepath.split('/'), self.cm_out + '.json') if self.cm_out else \
-        #                   os.path.join(*'utils/comm_devices_uc.output.json'.split('/'))  # normal unit conv func
-        u = os.path.join(self.filepath, self.ucf_file + '.json')
-        i = os.path.join(self.filepath, self.in_file + '.json')
-        o = os.path.join(self.filepath, self.out_file + '.json')
+        u = os.path.join(self.filepath, self.ucf_file)
+        i = os.path.join(self.filepath, self.in_file)
+        o = os.path.join(self.filepath, self.out_file)
         paths = [u, i, o]
         out = []
         for f in paths:
             with open(f, 'r') as ucf:
                 try:
                     ucf = json.load(ucf)
-
-                    if self.cm_in_opt and f == i:
-                        print('CM IN')
-                        with open(self.cm_in_path, 'r') as comm_devices:
-                            in_comm_devices = json.load(comm_devices)
-                            ucf.extend(in_comm_devices)
-                    if self.cm_out_opt and f == o:
-                        print('CM OUT')
-                        with open(self.cm_out_path, 'r') as comm_devices:
-                            out_comm_devices = json.load(comm_devices)
-                            ucf.extend(out_comm_devices)
-
                     out.append(ucf)
                 except Exception as e:
-                    debug_print(f'FAILED TO LOAD UCF {self.name}\nlocated at path: {f}')
+                    debug_print(
+                        f'FAILED TO LOAD UCF {self.name}\nlocated at path: {f}')
                     debug_print(str(e))
                     # raise(Exception)
         if len(out) == 3:
             return tuple(out)
         else:
             if len(out) > 0:
-                debug_print(f'Working UCF files in the {self.name} collection: ')
+                debug_print(
+                    f'Working UCF files in the {self.name} collection: ')
                 for o in out:
                     try:
                         ucf_name = o[0]['collection']
                         print(f' - name at collection[0]: {ucf_name}')
                     except Exception as e:
-                        debug_print(f'FAILED TO PRINT UCF file\ndump: {o}\n{e}')
+                        debug_print(
+                            f'FAILED TO PRINT UCF file\ndump: {o}\n{e}')
                 print()
             return None, None, None
 

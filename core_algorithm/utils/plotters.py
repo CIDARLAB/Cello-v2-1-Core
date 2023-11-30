@@ -15,21 +15,22 @@
                                  -output     OUT_FILENAME
 """
 
-# Set the backend to use (important for headless servers)  # FIXME: req matplotlib, dnaplotlib installs & update readme
+# Set the backend to use (important for headless servers)
+import os.path
+from argparse import ArgumentParser
+import matplotlib.pyplot as plt
+import dnaplotlib as dpl
+import csv
+import getopt
+import sys
+from contextlib import redirect_stdout, redirect_stderr
 import matplotlib
 import logging
 
 matplotlib.use('Agg')
 
-from contextlib import redirect_stdout, redirect_stderr
-import sys
-import getopt
-import csv
-import dnaplotlib as dpl
-import matplotlib.pyplot as plt
-from argparse import ArgumentParser
-import os.path
 
+# Original script by...
 __author__ = 'Thomas E. Gorochowski <tom@chofski.co.uk>, Voigt Lab, MIT\n\
                Bryan Der <bder@mit.edu>, Voigt Lab, MIT'
 __license__ = 'MIT'
@@ -79,16 +80,19 @@ def load_part_information(filename):
     header_map = {}
     for i in range(len(header)):
         header_map[header[i]] = i
-    attrib_keys = [k for k in list(header_map.keys()) if k not in ['part_name', 'type']]
+    attrib_keys = [k for k in list(header_map.keys()) if k not in [
+        'part_name', 'type']]
     for row in parts_reader:
         # Make the attributes map
         part_attribs_map = {}
         for k in attrib_keys:
             if row[header_map[k]] != '':
                 if k == 'color' or k == 'label_color':
-                    part_attribs_map[k] = [float(x) for x in row[header_map[k]].split(';')]
+                    part_attribs_map[k] = [
+                        float(x) for x in row[header_map[k]].split(';')]
                 else:
-                    part_attribs_map[k] = make_float_if_needed(row[header_map[k]])
+                    part_attribs_map[k] = make_float_if_needed(
+                        row[header_map[k]])
         part_name = row[header_map['part_name']]
         part_type = row[header_map['type']]
         part_info[part_name] = [part_name, part_type, part_attribs_map]
@@ -123,8 +127,10 @@ def load_dna_designs(filename, part_info, reverse_char='r'):
                     part_design = {}
                     cur_part_info = part_info[part_name]
                     part_design['type'] = cur_part_info[1]
-                    part_design['name'] = part_name  # needed to add part name for regulation
-                    part_design['fwd'] = fwd  # needed to add fwd for regulation
+                    # needed to add part name for regulation
+                    part_design['name'] = part_name
+                    # needed to add fwd for regulation
+                    part_design['fwd'] = fwd
                     if fwd:
                         part_design['start'] = i
                         part_design['end'] = i + 1
@@ -153,7 +159,8 @@ def load_regulatory_information(filename, part_info, dna_designs):
     header_map = {}
     for i in range(len(header)):
         header_map[header[i]] = i
-    attrib_keys = [k for k in list(header_map.keys()) if k not in ['from_partname', 'type', 'to_partname']]
+    attrib_keys = [k for k in list(header_map.keys()) if k not in [
+        'from_partname', 'type', 'to_partname']]
 
     # reg_reader can only be read once?
     rows = []
@@ -176,9 +183,11 @@ def load_regulatory_information(filename, part_info, dna_designs):
             for k in attrib_keys:
                 if row[header_map[k]] != '':
                     if k == 'color':
-                        reg_attribs_map[k] = [float(x) for x in row[header_map[k]].split(';')]
+                        reg_attribs_map[k] = [
+                            float(x) for x in row[header_map[k]].split(';')]
                     else:
-                        reg_attribs_map[k] = make_float_if_needed(row[header_map[k]])
+                        reg_attribs_map[k] = make_float_if_needed(
+                            row[header_map[k]])
 
             # from, type, to
             type = row[header_map['type']]
@@ -266,7 +275,8 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
         ax = fig.add_subplot(num_of_designs, 1, i + 1)
         if 'show_title' in list(plot_params.keys()) and plot_params['show_title'] == 'Y':
             ax.set_title(design_list[i], fontsize=8)
-        start, end = dr.renderDNA(ax, design, part_renderers, regs, reg_renderers)
+        start, end = dr.renderDNA(
+            ax, design, part_renderers, regs, reg_renderers)
 
         dna_len = end - start
         if max_dna_len < dna_len:
@@ -282,7 +292,7 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
         ax.set_ylim([-plot_params['axis_y'], plot_params['axis_y']])
         ax.set_aspect('equal')
         ax.set_axis_off()
-        ax.set_title(f'Part Order {i + 1}', fontsize=5, loc='left')
+        ax.set_title(f'Design Option {i + 1}', fontsize=5, loc='left')
 
     # Update the size of the figure to fit the constructs drawn
     fig_x_dim = max_dna_len / 70.0
@@ -318,15 +328,17 @@ def plotter(params, parts, regulation, designs, png_output, pdf_output, reverse_
     """
 
     """
-    cur_reverse_char = '@r'  # FIXME: What exactly is the reverse character?
+    cur_reverse_char = '@r'
     if reverse_char:
         cur_reverse_char = reverse_char
     plot_params = load_plot_parameters(params)
     part_info = load_part_information(parts)
-    dna_designs = load_dna_designs(designs, part_info, reverse_char=cur_reverse_char)
+    dna_designs = load_dna_designs(
+        designs, part_info, reverse_char=cur_reverse_char)
 
     regs_info = None
     if regulation:
-        regs_info = load_regulatory_information(regulation, part_info, dna_designs)
+        regs_info = load_regulatory_information(
+            regulation, part_info, dna_designs)
 
     plot_dna(dna_designs, png_output, pdf_output, plot_params, regs_info)
