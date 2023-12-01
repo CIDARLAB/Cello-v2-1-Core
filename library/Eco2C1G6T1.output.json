@@ -22,7 +22,7 @@
 	},
 	{
 		"collection": "structures",
-		"name": "RFP_reporter_structure",
+		"name": "BFP_reporter_structure",
 		"inputs": [
 			{
 				"name": "in1",
