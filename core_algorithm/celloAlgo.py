@@ -7,10 +7,7 @@ TODO: Also update examples and assets folder...
 
 import itertools
 import scipy
-import sys
-import os
 import time
-import shutil
 
 from core_algorithm.utils.gate_assignment import *
 from core_algorithm.utils.logic_synthesis import *
@@ -20,17 +17,14 @@ from core_algorithm.utils.make_eugene_script import *
 from core_algorithm.utils.dna_design import *
 from core_algorithm.utils.plotters import plotter
 from core_algorithm.utils.response_plot import plot_bars
-from core_algorithm.utils import log
 from core_algorithm.utils.sbol import *
 
 
-def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
+def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options):
     try:
         start_time = time.time()
-        CELLO3(v_name_, ucf_name_, in_name_,
-               out_name_, in_path_, out_path_, options)
-        log.cf.info(
-            f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
+        CELLO3(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options)
+        log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
         print("Cello completed execution")
         return {'status': 'SUCCESS', 'msg': 'Cello process executed successfully'}
     except CelloError as e:
@@ -50,13 +44,6 @@ class CelloError(Exception):
 
 class CELLO3:
     """
-    CELLO arguments:
-    1. verilog name
-    2. ucf name
-    3. path-to-verilog-and-ucf
-    4. path-for-output
-    5. options (optional)
-
     General flow of control...
         call_YOSYS()
         UCF Class (read in UCF data)
@@ -74,35 +61,28 @@ class CELLO3:
                     ...
         techmap() returns best graph
         info printed
-        eugene file created
+        eugene file, dna designs, SBOL diagram, plots, zipfile, etc. created
         [end]
     """
 
-    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, in_path: str, out_path: str,
+    def __init__(self, v_name, ucf_name, in_name, out_name, verilogs_path, constraints_path, out_path,
                  options: dict = None):
 
         # NOTE: Initialization
         try:
             # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
-            # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
-            yosys_cmd_choice = 1
-            # Print more info to console and log. See logging.config to change log metadata verbosity
-            self.verbose = False
-            # Print to console info on *all* tested iterations (produces copious amounts of text)
-            self.print_iters = False
-            # Run *all* possible permutations to find true optimum score (may run for *long* time)
-            self.exhaustive = False
-            # Runs brief tests of all configs, producing logs and a csv summary of all tests
-            self.test_configs = False
-            # Removes date/time from file name, allowing overwrite of log from equivalent config
-            self.log_overwrite = False
+            yosys_cmd_choice = 1  # Set of cmds passed to YOSYS to convert Verilog to netlist & image generation
+            self.verbose = False  # Print more info to console & log. See logging.config to change verbosity
+            self.print_iters = False  # Print to console info on *all* tested iters (produces copious amounts of text)
+            self.exhaustive = False  # Run *all* possible permutes to find true optimum score (*long* run time)
+            self.test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
+            self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of logs
 
             if 'yosys_cmd_choice' in options:
                 yosys_cmd_choice = options['yosys_cmd_choice']
             if 'verbose' in options:
                 self.verbose = options['verbose']
-            if 'print_iters' in options:
-                # NOTE: Never prints to log (some configs have billions of iters)
+            if 'print_iters' in options:  # NOTE: Never prints to log (some configs have billions of iters)
                 self.print_iters = options['print_iters']
             if 'test_configs' in options:
                 self.test_configs = options['test_configs']
@@ -112,7 +92,8 @@ class CELLO3:
                 # Normally uses Scipy's dual annealing
                 self.exhaustive = options['exhaustive']
 
-            self.in_path = os.path.abspath(in_path)
+            self.verilogs_path = os.path.abspath(verilogs_path)
+            self.constraints_path = os.path.abspath(constraints_path)
             self.out_path = os.path.abspath(out_path)
             self.verilog_name = v_name
             self.ucf_name = ucf_name
@@ -124,11 +105,10 @@ class CELLO3:
             self.units = 'Unknown_Units'
 
             # Loggers
-            log.config_logger(v_name, ucf_name, self.log_overwrite)
+            log.config_logger(self.verilog_name, self.ucf_name, self.log_overwrite)
             log.reset_logs()
             # TODO: print settings already chosen
-            print_centered(
-                ['CELLO V3', self.verilog_name + ' + ' + self.ucf_name])
+            print_centered(['CELLO V2.1', self.verilog_name + ' + ' + self.ucf_name])
 
         except Exception as e:
             raise CelloError("Error with initialization", e)
@@ -136,7 +116,7 @@ class CELLO3:
         # NOTE: Logic Synthesis (YOSYS)
         try:
             # yosys cmd set 1 seems best after trial & error
-            cont = call_YOSYS(in_path, out_path, v_name, yosys_cmd_choice)
+            cont = call_YOSYS(self.verilogs_path, self.out_path, self.verilog_name, yosys_cmd_choice)
 
             print_centered('End of Logic Synthesis')
             if not cont:
@@ -154,7 +134,7 @@ class CELLO3:
 
         # NOTE: Initializes UCF, Input, and Output from filepaths
         try:
-            self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
+            self.ucf = UCF(self.constraints_path, self.ucf_name, self.in_name, self.out_name)
             units = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'measurement_std')[0]['signal_carrier_units']
             if units:
                 self.units = units
@@ -168,32 +148,25 @@ class CELLO3:
             valid: bool
             iter_: int
             valid, iter_ = self.check_conditions(verbose=True)
-
             if not valid:
                 raise Exception("Condition check failed")
-
             log.cf.info(f'\nCondition check passed? {valid}\n')
         except Exception as e:
             raise CelloError('Error with Verilog/UCF compatibility check', e)
 
         # NOTE: Circuit Scoring
         try:
-            best_result = self.techmap(
-                iter_)  # Executing the algorithm if things check out
+            best_result = self.techmap(iter_)  # Executing the algorithm if things check out
             if best_result is None:
                 log.cf.error('\nProblem with best_result...\n')
                 return
-            # best_score = best_result[0]
             best_graph = best_result[1]
             truth_table = best_result[2]
             truth_table_labels = best_result[3]
 
-            graph_inputs_for_printing = list(
-                zip(self.rnl.inputs, best_graph.inputs))
-            graph_gates_for_printing = list(
-                zip(self.rnl.gates, best_graph.gates))
-            graph_outputs_for_printing = list(
-                zip(self.rnl.outputs, best_graph.outputs))
+            graph_inputs_for_printing = list(zip(self.rnl.inputs, best_graph.inputs))
+            graph_gates_for_printing = list(zip(self.rnl.gates, best_graph.gates))
+            graph_outputs_for_printing = list(zip(self.rnl.outputs, best_graph.outputs))
 
             if self.verbose:
                 debug_print(
@@ -225,16 +198,14 @@ class CELLO3:
                 log.cf.info(f' - {rnl_g} {g_g}')
                 gate_labels[rnl_g] = g_g.gate_in_use
 
-            log.cf.info(
-                f'\nOutputs ( unit_conversion = {best_graph.outputs[0].function} ):')
+            log.cf.info(f'\nOutputs ( unit_conversion = {best_graph.outputs[0].function} ):')
             out_labels = {}
             for rnl_out, g_out in graph_outputs_for_printing:
                 log.cf.info(f' - {rnl_out} {str(g_out)}')
                 out_labels[rnl_out[0]] = g_out.name
 
             tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
-            replace_techmap_diagram_labels(
-                tech_diagram_filepath, gate_labels, in_labels, out_labels)
+            replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
             raise CelloError('Error with results/circuit design', e)
 
