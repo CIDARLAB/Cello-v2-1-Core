@@ -38,7 +38,7 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=Fals
         new_in = in_path
 
     # Construct the path to the Verilog file
-    verilog = v_name
+    verilog = v_name  # CRIT: ADD + '.v'?
     v_loc = os.path.join(new_in, verilog)
 
     # Logging the information
