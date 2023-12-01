@@ -7298,7 +7298,6 @@
 				"CONTAINS L2",
 				"CONTAINS L3",
 				"YFP_reporter NEXTTO L3",
-				"ENDSWITH YFP_reporter",
 				"V1_VanR BEFORE P1_PhlF",
 				"V1_VanR BEFORE P2_PhlF",
 				"V1_VanR BEFORE P3_PhlF",

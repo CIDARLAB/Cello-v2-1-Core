@@ -112,6 +112,7 @@ class CELLO3:
             self.iter_count = 0
             self.best_score = 0
             self.best_graphs = []
+            self.units = 'Unknown_Units'
 
             # Loggers
             log.config_logger(v_name, ucf_name, self.log_overwrite)
@@ -145,7 +146,9 @@ class CELLO3:
         # NOTE: Initializes UCF, Input, and Output from filepaths
         try:
             self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
-
+            units = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'measurement_std')[0]['signal_carrier_units']
+            if units:
+                self.units = units
             if not self.ucf.valid:
                 return  # breaks early if UCF file has errors
         except Exception as e:
@@ -229,20 +232,19 @@ class CELLO3:
         # NOTE: TRUTH TABLE/GATE SCORING
         try:
             # Create the full path for the file
-            filepath = os.path.join(
-                out_path, self.verilog_name, f"{self.verilog_name}_activity-table.csv")
+            filepath = os.path.join(out_path, self.verilog_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
 
             # Ensure the directory exists
             directory_path = os.path.dirname(filepath)
             os.makedirs(directory_path, exist_ok=True)
 
-            log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
+            log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING (Units: {self.units}):')
             tb = [truth_table_labels] + truth_table
             print_table(tb)
             print('(See log for more precision)')
 
             # Now write the CSV file
-            with open(filepath, 'w', newline='') as csvfile:
+            with open(f'{filepath}_activity-table.csv', 'w', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(['Scores...'])
                 csv_writer.writerows(zip(*[["{:.2e}".format(float(c)) if i > 0 else c for i, c in enumerate(row)]
@@ -262,8 +264,7 @@ class CELLO3:
 
         # NOTE: CIRCUIT SCORE FILE
         try:
-            filename = f"{self.verilog_name}_circuit-score.csv"
-            fullpath = os.path.join(out_path, self.verilog_name, filename)
+            fullpath = os.path.join(os.path.dirname(filepath), f"{os.path.basename(filepath)}_circuit-score.csv")
 
             with open(fullpath, 'w', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
@@ -295,8 +296,6 @@ class CELLO3:
             dna_designs = DNADesign(
                 structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
             mini_eugene_part_orders = dna_designs.get_part_orders()  # Calls miniEugene
-            dna_designs.get_part_orders()  # Calls miniEugene
-            # dna_designs.gen_seq(filepath)  # Alternative to miniEugene
             dna_designs.write_dna_parts_info(filepath)
             dna_designs.write_dna_parts_order(filepath)
             dna_designs.write_plot_params(filepath)
@@ -313,21 +312,15 @@ class CELLO3:
 
             base_dir = os.path.dirname(filepath)
 
-            plot_parameters_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_plot_parameters.csv")
-            dpl_part_info_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl_part_information.csv")
-            dpl_regulatory_info_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl_regulatory_information.csv")
-            dpl_dna_designs_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl_dna_designs.csv")
-            dpl_png_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl.png")
-            dpl_pdf_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl.pdf")
+            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_plot_parameters.csv")
+            dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl_part_information.csv")
+            dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl_regulatory_information.csv")
+            dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl_dna_designs.csv")
+            dpl_png_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl.png")
+            dpl_pdf_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl.pdf")
 
             print(' - ', end='')
-            plotter(plot_parameters_file, dpl_part_info_file, dpl_regulatory_info_file,
+            plotter(plot_parameters_file, dpl_part_info_file, dpl_reg_info_file,
                     dpl_dna_designs_file, dpl_png_file, dpl_pdf_file)
 
             log.cf.info('SBOL and other DPL files generated')
@@ -337,7 +330,7 @@ class CELLO3:
         # NOTE: PLOTS
         try:
             plot_name = self.verilog_name + ' + ' + self.ucf_name
-            plot_bars(filepath, plot_name, best_graph, tb)
+            plot_bars(filepath, plot_name, best_graph, tb, self.units)
             log.cf.info(' - Response plots generated')
         except Exception as e:
             log.cf.error(
@@ -538,7 +531,7 @@ class CELLO3:
 
         circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
 
-        log.cf.info('Netlist de-construction: ')
+        log.cf.info('\nNetlist de-construction: ')
         log.cf.info(circuit.inputs)
         log.cf.info(circuit.gates)
         log.cf.info(circuit.outputs)
@@ -1015,8 +1008,7 @@ class CELLO3:
                 output_name = graph_output.name
                 graph_output_idx = truth_table_labels.index(output_name)
                 if truth_table[r][graph_output_idx] is None:
-                    output_score = graph.get_score(
-                        graph_output, verbose=self.verbose)
+                    output_score = graph.get_score(graph_output, verbose=self.verbose)[0]
                     truth_table[r][graph_output_idx] = output_score
                     circuit_scores.append((output_score, output_name))
 

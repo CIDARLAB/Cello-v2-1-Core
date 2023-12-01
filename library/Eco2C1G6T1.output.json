@@ -186,6 +186,60 @@
 
 
 	{
+		"collection": "output_devices",
+		"name": "YFP_reporter_2",
+		"model": "YFP_reporter_2_model",
+		"structure": "YFP_reporter_2_structure"
+	},
+	{
+		"collection": "models",
+		"name": "YFP_reporter_2_model",
+		"functions": {
+			"response_function": "linear_response",
+			"input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "unit_conversion",
+				"value": 0.4
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "YFP_reporter_2_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "YFP_reporter_2",
+				"components": [
+					"#in1",
+					"#in2",
+					"YFP_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "cassette",
+		"name": "YFP_cassette",
+		"dnasequence": "CTGAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGAAAGAGGGGAAATACTAGATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACAGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCTTCGGCTACGGCCTGCAATGCTTCGCCCGCTACCCCGACCACATGAAGCTGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCAATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTTAGCTACCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAACTCGGTACCAAATTCCAGAAAAGAGGCCTCCCGAAAGGGGGGCCTTTTTTCGTTTTGGTCC"
+	},
+
+
+
+
+	{
 		"collection": "functions",
 		"name": "linear_response",
 		"equation": "c * x",
@@ -251,13 +305,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 7.5,
-				"description": "Maximal transcription"
+				"value": 0.1425,
+				"description": "Maximal transcription (7.5 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "ymin",
-				"value": 0.06,
-				"description": "Minimal transcription"
+				"value": 0.00114,
+				"description": "Minimal transcription (0.06 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "kd",
@@ -323,13 +377,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 3.4,
-				"description": "Maximal transcription"
+				"value": 0.0646,
+				"description": "Maximal transcription (3.4 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "ymin",
-				"value": 0.01,
-				"description": "Minimal transcription"
+				"value": 0.00019,
+				"description": "Minimal transcription (0.01 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "kd",
@@ -395,13 +449,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 6,
-				"description": "Maximal transcription"
+				"value": 0.114,
+				"description": "Maximal transcription (6 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "ymin",
-				"value": 0.02,
-				"description": "Minimal transcription"
+				"value": 0.00038,
+				"description": "Minimal transcription (0.02 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "kd",
@@ -468,13 +522,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 3.4,
-				"description": "Maximal transcription"
+				"value": 0.0646,
+				"description": "Maximal transcription (3.4 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "ymin",
-				"value": 0.02,
-				"description": "Minimal transcription"
+				"value": 0.00038,
+				"description": "Minimal transcription (0.02 RPU * 0.019 for conversion to RNAP/s)"
 			},
 			{
 				"name": "kd",
@@ -618,5 +672,14 @@
 					"attB2 AFTER Pr217-VP585-R1_b"
             ]
         }
-    }
+    },
+	{
+		"collection": "device_rules",
+		"rules": {
+			"function": "AND",
+			"rules": [
+				"ALL_FORWARD"
+			]
+		}
+	}
 ]

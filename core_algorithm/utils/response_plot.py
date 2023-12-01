@@ -16,13 +16,13 @@ def get_table_values(table, col_name, input_cnt):
             col_index = index
 
     for row in table[1:]:
-        bar_label = ' '
+        bar_label = ''
         for i, v in enumerate(row):
             if i < input_cnt:
                 if v == 0:
-                    bar_label += '— '
+                    bar_label += '—\n'
                 elif v == 1:
-                    bar_label += '+ '
+                    bar_label += '+\n'
             elif i == col_index:
                 bar_values[bar_label] = v
                 break
@@ -30,7 +30,7 @@ def get_table_values(table, col_name, input_cnt):
     return bar_values
 
 
-def plot_bars(filepath, plot_name, best_graph, table):
+def plot_bars(filepath, plot_name, best_graph, table, units):
 
     input_cnt = len(best_graph.inputs)
     output_cnt = len(best_graph.outputs)
@@ -61,11 +61,15 @@ def plot_bars(filepath, plot_name, best_graph, table):
             outputs_dict[k]['name'] = k
             outputs_dict[k]['scores_pre_HR'] = get_table_values(table, k, input_cnt)
 
-    fig = plt.subplots()
-    plt.subplots_adjust(hspace=0.25*output_cnt, wspace=0.4)
+    # fig = plt.subplots()
+    px = 1 / plt.rcParams['figure.dpi']
+    plt.figure(figsize=((640 + 180*input_cnt)*px, (80 + 360*output_cnt)*px))
+    plt.subplots_adjust(top=0.8 + (0.03*output_cnt), hspace=0.5, wspace=0.5)
     if plot_name.endswith('.UCF'):
         plot_name = plot_name[:-4]
-    plt.suptitle(f'{plot_name}: Response Plots', fontsize='medium', y=.98, fontweight='bold')
+    plt.suptitle(f'{plot_name}: Response Plots', fontsize=15, y=.95, fontweight='bold')
+    plt.rc('ytick', labelsize=12)
+    plt.rc('xtick', labelsize=12)
 
     last = 0
     for ind, val in enumerate(list(outputs_dict.values())):
@@ -76,13 +80,11 @@ def plot_bars(filepath, plot_name, best_graph, table):
 
         # Output Response Plots (all outputs)
         ax1 = plt.subplot(output_cnt, 3, 3*i - 2)
-        ax1.set_title(f'{data["name"]}', fontsize='small')
+        ax1.set_title(f'{data["name"]}', fontsize=12)
         plt.bar(list(data['scores_pre_HR'].keys()), list(data['scores_pre_HR'].values()), color='gray')
         plt.yscale('log')
-        plt.ylim(ax1.get_ylim()[0]*0.1, ax1.get_ylim()[1])
-        plt.ylabel('Output (RNAP/s)', fontsize=7, fontweight='bold')
-        plt.yticks(fontsize=7)
-        plt.xticks(fontsize=7)
+        plt.ylim(ax1.get_ylim()[0]*0.1, ax1.get_ylim()[1]*10)
+        plt.ylabel(f'Output ({units})', fontsize=12, fontweight='bold')
 
         # Outputs with Hill Response functions (i.e. Communication Molecules) only...
         if data['prev_node']:
@@ -93,22 +95,18 @@ def plot_bars(filepath, plot_name, best_graph, table):
             x = np.linspace(ax1.get_ylim()[0], ax1.get_ylim()[1], 1000)
             ax2.plot(x, curve(data['params']['ymax'], data['params']['ymin'], data['params']['kd'],
                               data['params']['n'], x))
-            ax2.set_title(f'{output} Hill', fontsize='small')
-            plt.yscale('log')
+            ax2.set_title(f'{output} Hill', fontsize=12)
+            plt.yscale('log', )
             plt.xscale('log')
             if i == last:
-                plt.xlabel('Input (RNAP/s)', fontsize=7, fontweight='bold')
-            plt.yticks(fontsize=7)
-            plt.xticks(fontsize=7)
+                plt.xlabel(f'Input ({units})', fontsize=12, fontweight='bold')
 
             # Promoter Activity Bars
             ax3 = plt.subplot(output_cnt, 3, 3*i)
             ax3.sharey(ax2)
-            ax3.set_title(f'{output} Promoter', fontsize='small')
+            ax3.set_title(f'{output} Promoter', fontsize=12)
             plt.bar(list(data['scores_post_HR'].keys()), list(data['scores_post_HR'].values()))
             plt.yscale('log')
-            plt.yticks(fontsize=7)
-            plt.xticks(fontsize=7)
 
         i += 1
 

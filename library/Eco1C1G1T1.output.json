@@ -186,9 +186,17 @@
             "function": "AND",
             "rules": [
                 "YFP_reporter NEXTTO Loc3",
-                "YFP_reporter AFTER Loc3",
+                "YFP_reporter AFTER Loc3"
             ]
         }
-    }
-]
+    },
+	{
+		"collection": "device_rules",
+		"rules": {
+			"function": "AND",
+			"rules": [
+				"ALL_FORWARD"
+			]
+		}
+	}
 ]
