@@ -8,7 +8,6 @@ Class: EugeneObject: generate_eugene_structs(), generate_eugene_cassettes(), wri
 import os
 from dataclasses import dataclass, field
 from core_algorithm.utils.cello_helpers import debug_print
-from core_algorithm.utils.log import *
 from core_algorithm.utils.dna_design import *
 from typing import List, Dict, Tuple, Any
 

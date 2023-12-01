@@ -116,7 +116,7 @@ class CELLO3:
         # NOTE: Logic Synthesis (YOSYS)
         try:
             # yosys cmd set 1 seems best after trial & error
-            cont = call_YOSYS(self.verilogs_path, self.out_path, self.verilog_name, yosys_cmd_choice)
+            cont = call_YOSYS(self.verilogs_path, self.out_path, self.verilog_name, self.ucf_name[:-4], yosys_cmd_choice)
 
             print_centered('End of Logic Synthesis')
             if not cont:
@@ -204,8 +204,8 @@ class CELLO3:
                 log.cf.info(f' - {rnl_out} {str(g_out)}')
                 out_labels[rnl_out[0]] = g_out.name
 
-            tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
-            replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
+            # tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
+            # replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
             raise CelloError('Error with results/circuit design', e)
 
@@ -292,12 +292,12 @@ class CELLO3:
 
             base_dir = os.path.dirname(filepath)
 
-            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_plot_parameters.csv")
-            dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl_part_information.csv")
-            dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl_regulatory_information.csv")
-            dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl_dna_designs.csv")
-            dpl_png_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl.png")
-            dpl_pdf_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl.pdf")
+            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_plot-parameters.csv")
+            dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-part-information.csv")
+            dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-regulatory-info.csv")
+            dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-dna-designs.csv")
+            dpl_png_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.png")
+            dpl_pdf_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.pdf")
 
             print(' - ', end='')
             plotter(plot_parameters_file, dpl_part_info_file, dpl_reg_info_file,
@@ -320,7 +320,7 @@ class CELLO3:
         # NOTE: ZIPFILE
         try:
             archive_name = os.path.join(
-                out_path, f"{self.verilog_name}_all-files")
+                out_path, f"{self.verilog_name}_{self.ucf_name[:-4]}_all-files")
             target_directory = os.path.join(out_path, self.verilog_name)
 
             shutil.make_archive(archive_name, 'zip', target_directory)
@@ -329,10 +329,7 @@ class CELLO3:
             raise CelloError('Error with generating zipfile', e)
 
     def __load_netlist(self):
-        # net_path = self.out_path + '/' + self.verilog_name + '/' + self.verilog_name + '.json'
-        # net_path = os.path.join(*net_path.split('/'))
-        net_path = os.path.join(
-            self.out_path, self.verilog_name, self.verilog_name + '.json')
+        net_path = os.path.join(self.out_path, self.verilog_name,f'{self.verilog_name}_{self.ucf_name[:-4]}_yosys.json')
         net_file = open(net_path, 'r')
         net_json = json.load(net_file)
         netlist = Netlist(net_json)
@@ -565,7 +562,7 @@ class CELLO3:
             o_perms.append(o_perm)
         for g_perm in itertools.permutations(g_list, g):
             g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 100 else 100
+        max_fun = iter_ if iter_ < 1000 else 1000
 
         # DUAL ANNEALING SCIPY FUNC
         def func(x):

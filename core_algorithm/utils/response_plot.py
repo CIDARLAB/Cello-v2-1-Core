@@ -110,4 +110,5 @@ def plot_bars(filepath, plot_name, best_graph, table, units):
 
         i += 1
 
-    plt.savefig(f'{filepath}_response_plots.png')
+    plt.savefig(f'{filepath}_response-plots.png')
+    plt.savefig(f'{filepath}_response-plots.png')

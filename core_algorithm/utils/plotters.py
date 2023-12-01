@@ -21,13 +21,9 @@ import logging
 
 matplotlib.use('Agg')
 
-from contextlib import redirect_stdout, redirect_stderr
-import sys
-import getopt
 import csv
 import dnaplotlib as dpl
 import matplotlib.pyplot as plt
-from argparse import ArgumentParser
 import os.path
 
 # Original script by...

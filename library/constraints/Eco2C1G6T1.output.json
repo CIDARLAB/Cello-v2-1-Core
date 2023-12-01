@@ -631,6 +631,7 @@
 					"YFP_reporter_a AFTER L3",
 					"YFP_reporter_b BEFORE L3",
 
+					"YFP_reporter_a BEFORE attB2",
 					"attB2 AFTER L3",
 					"OC6_out_a AFTER attB2",
 					"OHC12_out_a AFTER attB2",
