@@ -26,7 +26,7 @@ def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_lis
     table = []
     for i in range(2 ** num_in):
         row = [(i >> j) & 1 for j in range(num_in - 1, -1, -1)] + ([None] * num_in) + ([None] * num_gates) * 2 + (
-                    [None] * num_out) * 2
+            [None] * num_out) * 2
         table.append(row)
     labels = [f'{i.name}_I/O' for i in in_list] + [i.name for i in in_list] + \
              [f'{g.name}_I/O' for g in gate_list] + [g.name for g in gate_list] + \
@@ -38,6 +38,7 @@ class IO:
     """
 
     """
+
     def __init__(self, name, id_):
         self.name = name
         self.id = id_
@@ -60,6 +61,7 @@ class Input(IO):
     """
 
     """
+
     def __init__(self, name, id_):
         super().__init__(name, id_)
         self.functions = None
@@ -131,6 +133,7 @@ class Output(IO):
     """
 
     """
+
     def __init__(self, name, id_):
         super().__init__(name, id_)
         self.function = None
@@ -185,6 +188,7 @@ class Gate:
     """
     Used ot represent a gate in a netlist.
     """
+
     def __init__(self, gate_id, gate_type, inputs, output):
         self.name = gate_id
         self.gate_type = gate_type
@@ -304,6 +308,7 @@ class AssignGraph:
     """
 
     """
+
     def __init__(self, inputs: list = None, outputs: list = None, gates: list = None):
         if gates is None:
             gates = []
@@ -415,6 +420,7 @@ class GraphParser:
     """
     Used to initialize all permutations of gate assignments from UCF to netlist.
     """
+
     def __init__(self, inputs, outputs, gates):
         self.inputs = self.load_inputs(inputs)
         self.outputs = self.load_outputs(outputs)

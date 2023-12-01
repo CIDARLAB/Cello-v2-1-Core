@@ -66,7 +66,8 @@ def hex_to_rgb(hex_value):
         return '0.0;0.0;0.0'
     value = hex_value.lstrip('#')
     lv = len(value)
-    vals = list(round(int(value[i:i + lv // 3], 16) / 255, 2) for i in range(0, lv, lv // 3))
+    vals = list(round(int(value[i:i + lv // 3], 16) / 255, 2)
+                for i in range(0, lv, lv // 3))
     return ';'.join(str(val) for val in vals)
 
 
@@ -109,7 +110,7 @@ class DNADesign:
     # NOTE: CREATE OUTPUT FILES BASED ON DNA PART ORDER AND RELATED INFO ###############################################
     def get_part_orders(self):
 
-        def cycle_thru_alt_rulesets():
+        def cycle_thru_alt_rulesets():  # TODO: Finish setting up ruleset traversal
 
             rules_keywords = ['NOT', 'EQUALS',
                               'NEXTTO', 'CONTAINS',
@@ -294,7 +295,7 @@ class DNADesign:
                 #                hex_to_rgb(struct.color)]
                 #     csv_writer.writerow(new_row)
                 if struct.struct_cassettes:
-                    for part in struct.struct_cassettes[0][3]:
+                    for part in struct.struct_cassettes[0][3]:  # TODO: Validate
                         if self.sequences[part].parts_type.lower() == 'cds':
                             new_row = [part, 'Repression', struct.outputs[0], 3, '-', '',
                                        hex_to_rgb(struct.color)]

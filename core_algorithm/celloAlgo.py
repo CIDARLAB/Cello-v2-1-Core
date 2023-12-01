@@ -25,18 +25,27 @@ from core_algorithm.utils.sbol import *
 
 
 def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
-    start_time = time.time()
-    CELLO3(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options)
-    log.cf.info(
-        f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
-    print("Cello completed execution")
+    try:
+        start_time = time.time()
+        CELLO3(v_name_, ucf_name_, in_name_,
+               out_name_, in_path_, out_path_, options)
+        log.cf.info(
+            f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
+        print("Cello completed execution")
+        return {'status': 'SUCCESS', 'msg': 'Cello process executed successfully'}
+    except CelloError as e:
+        return e.to_dict()
 
 
 class CelloError(Exception):
-    def __init__(self, error_message, exception):
-        super().__init__(error_message)
-        self.message = error_message
+    def __init__(self, error_msg, exception):
+        super().__init__(error_msg)
+        self.msg = error_msg
         self.exception = exception
+        self.status = "FAILURE"
+
+    def to_dict(self):
+        return {'status': self.status, 'msg': self.msg}
 
 
 class CELLO3:
@@ -161,7 +170,7 @@ class CELLO3:
             valid, iter_ = self.check_conditions(verbose=True)
 
             if not valid:
-                return
+                raise Exception("Condition check failed")
 
             log.cf.info(f'\nCondition check passed? {valid}\n')
         except Exception as e:
