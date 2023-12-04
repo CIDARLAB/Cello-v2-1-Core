@@ -43,6 +43,7 @@ def start_gateway():
     atexit.register(lambda: process.terminate())
     return process
 
+
 def terminate_gateway(process) -> None:
     if process.poll() is None:
         process.terminate()
