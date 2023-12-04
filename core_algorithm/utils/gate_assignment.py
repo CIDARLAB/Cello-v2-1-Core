@@ -178,7 +178,8 @@ class Output(IO):
         if self.function is None:
             return f'output {self.name} {self.id}'
         else:
-            return f'output {self.name} {self.id} with c: {self.unit_conversion}'
+            return f'output {self.name} {self.id} with {self.function}: ' \
+                   f'{("c = " + str(self.unit_conversion)) if self.unit_conversion else self.params}'
 
 
 class Gate:

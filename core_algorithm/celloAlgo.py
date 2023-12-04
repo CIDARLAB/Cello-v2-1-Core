@@ -15,7 +15,7 @@ from core_algorithm.utils.netlist_class import Netlist
 from core_algorithm.utils.ucf_class import UCF
 from core_algorithm.utils.make_eugene_script import *
 from core_algorithm.utils.dna_design import *
-from core_algorithm.utils.plotters import plotter
+from core_algorithm.utils.sbol_plot import plotter
 from core_algorithm.utils.response_plot import plot_bars
 from core_algorithm.utils.sbol import *
 
@@ -135,9 +135,15 @@ class CELLO3:
         # NOTE: Initializes UCF, Input, and Output from filepaths
         try:
             self.ucf = UCF(self.constraints_path, self.ucf_name, self.in_name, self.out_name)
-            units = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'measurement_std')[0]['signal_carrier_units']
+            units = self.ucf.query_top_level_collection(self.ucf.UCFout, 'measurement_std')
             if units:
-                self.units = units
+                self.units = units[0]['signal_carrier_units']
+            else:
+                units = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'measurement_std')
+                if units:
+                    self.units = units[0]['signal_carrier_units']
+                else:
+                    log.cf.warning('Cannot find units...')
             if not self.ucf.valid:
                 return  # breaks early if UCF file has errors
         except Exception as e:
@@ -184,28 +190,28 @@ class CELLO3:
                         f' - Best Circuit Score: {self.best_score}')
 
             log.cf.info(
-                f'\nInputs ( input_response = {best_graph.inputs[0].functions} ):')
+                f'\nInputs ( input response = {best_graph.inputs[0].resp_func_eq} ):')
             in_labels = {}
             for rnl_in, g_in in graph_inputs_for_printing:
                 log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of'
                             f' {str(list(g_in.out_scores.items()))}')
                 in_labels[rnl_in[0]] = g_in.name
 
-            log.cf.info(f'\nGates ( hill_response = {best_graph.gates[0].hill_response}, '
-                        f'input_composition = {best_graph.gates[0].input_comp} ):')
+            log.cf.info(f'\nGates ( response function = {best_graph.gates[0].response_func};   '
+                        f'input composition = {best_graph.gates[0].input_comp} ):')
             gate_labels = {}
             for rnl_g, g_g in graph_gates_for_printing:
                 log.cf.info(f' - {rnl_g} {g_g}')
                 gate_labels[rnl_g] = g_g.gate_in_use
 
-            log.cf.info(f'\nOutputs ( unit_conversion = {best_graph.outputs[0].function} ):')
+            log.cf.info(f'\nOutputs ( unit conversion and/or hill response... ):')
             out_labels = {}
             for rnl_out, g_out in graph_outputs_for_printing:
                 log.cf.info(f' - {rnl_out} {str(g_out)}')
                 out_labels[rnl_out[0]] = g_out.name
 
-            # tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
-            # replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
+            tech_diagram_filepath = os.path.join(self.out_path, v_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
+            replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
             raise CelloError('Error with results/circuit design', e)
 
@@ -218,7 +224,7 @@ class CELLO3:
             directory_path = os.path.dirname(filepath)
             os.makedirs(directory_path, exist_ok=True)
 
-            log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING (Units: {self.units}):')
+            log.cf.info(f'\n\nTRUTH TABLE/GATE SCORING:')
             tb = [truth_table_labels] + truth_table
             print_table(tb)
             print('(See log for more precision)')
@@ -256,7 +262,7 @@ class CELLO3:
         try:
             eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
                                   graph_outputs_for_printing, best_graph)
-            log.cf.info('\n\nEUGENE FILE:')
+            log.cf.info('\n\nEUGENE FILES:')
             if eugene.generate_eugene_structs():
                 log.cf.info(" - Eugene object and structs created...")
             if eugene.generate_eugene_cassettes():
@@ -292,7 +298,7 @@ class CELLO3:
 
             base_dir = os.path.dirname(filepath)
 
-            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_plot-parameters.csv")
+            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-plot-parameters.csv")
             dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-part-information.csv")
             dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-regulatory-info.csv")
             dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-dna-designs.csv")
@@ -303,7 +309,7 @@ class CELLO3:
             plotter(plot_parameters_file, dpl_part_info_file, dpl_reg_info_file,
                     dpl_dna_designs_file, dpl_png_file, dpl_pdf_file)
 
-            log.cf.info('SBOL and other DPL files generated')
+            log.cf.info('SBOL XML and related files generated')
         except Exception as e:
             raise CelloError('Error with generating SBOL diagram', e)
 
@@ -311,7 +317,7 @@ class CELLO3:
         try:
             plot_name = self.verilog_name + ' + ' + self.ucf_name
             plot_bars(filepath, plot_name, best_graph, tb, self.units)
-            log.cf.info(' - Response plots generated')
+            log.cf.info(' - Response plots generated\n\n')
         except Exception as e:
             log.cf.error(
                 f'Unable to generate response plots:\n{e}', exc_info=True)
@@ -361,12 +367,9 @@ class CELLO3:
             self.ucf.UCFin, 'input_sensors')
         print(in_sensors)
         num_ucf_input_sensors = len(in_sensors)
-        num_ucf_input_structures = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
-        num_ucf_input_models = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
-        num_ucf_input_parts = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts'))
+        num_ucf_input_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
+        num_ucf_input_models = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
+        num_ucf_input_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts'))
         num_netlist_inputs = len(self.rnl.inputs) if netlist_valid else 99999
         inputs_match = (num_ucf_input_sensors == num_ucf_input_models) and \
                        (num_ucf_input_models == num_ucf_input_structures) and \
@@ -385,15 +388,11 @@ class CELLO3:
             log.cf.info(
                 f"{'Valid' if inputs_match else 'NOT valid'} input match!")
 
-        out_sensors = self.ucf.query_top_level_collection(
-            self.ucf.UCFout, 'output_devices')
+        out_sensors = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
         num_ucf_output_sensors = len(out_sensors)
-        num_ucf_output_structures = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures'))
-        num_ucf_output_models = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'))
-        num_ucf_output_parts = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFout, 'parts'))
+        num_ucf_output_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures'))
+        num_ucf_output_models = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'))
+        num_ucf_output_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'parts'))
         num_netlist_outputs = len(self.rnl.outputs) if netlist_valid else 99999
         outputs_match = (num_ucf_output_sensors == num_ucf_output_models) and \
                         (num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and \
@@ -414,8 +413,7 @@ class CELLO3:
         num_models = self.ucf.collection_count['models']
         num_gates = self.ucf.collection_count['gates']
         num_parts = self.ucf.collection_count['parts']
-        ucf_gates = self.ucf.query_top_level_collection(
-            self.ucf.UCFmain, 'gates')
+        ucf_gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
         gate_names = []
         g_list = []
         for gate in ucf_gates:
@@ -434,8 +432,7 @@ class CELLO3:
                         f'num GATES in {self.ucf_name} UCF: {num_gates}')
 
         num_gates_available = []
-        logic_constraints = self.ucf.query_top_level_collection(
-            self.ucf.UCFmain, 'logic_constraints')
+        logic_constraints = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'logic_constraints')
         for logic_constraint in logic_constraints:
             for g in logic_constraint['available_gates']:
                 num_gates_available.append(g['max_instances'])
@@ -482,14 +479,12 @@ class CELLO3:
         # NOTE: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
         print_centered('Beginning GATE ASSIGNMENT')
 
-        in_sensors = self.ucf.query_top_level_collection(
-            self.ucf.UCFin, 'input_sensors')
+        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
         i_list = []
         for sensor in in_sensors:
             i_list.append(sensor['name'])
 
-        out_devices = self.ucf.query_top_level_collection(
-            self.ucf.UCFout, 'output_devices')
+        out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
         o_list = []
         for device in out_devices:
             o_list.append(device['name'])
@@ -762,8 +757,7 @@ class CELLO3:
         '''
 
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
-        input_function_json = self.ucf.query_top_level_collection(
-            self.ucf.UCFin, 'functions')
+        input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
         input_model_names = [i.name + '_model' for i in graph.inputs]
         input_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'),
                                   'name', input_model_names)
@@ -820,8 +814,7 @@ class CELLO3:
         #     print(f'linear_input_composition = {linear_input_composition}')
         #     print('\n')
 
-        output_function_json = self.ucf.query_top_level_collection(
-            self.ucf.UCFout, 'functions')
+        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
         output_function_str = output_function_json[0]['equation']
         output_names = [o.name for o in graph.outputs]
         output_model_names = [o + '_model' for o in output_names]

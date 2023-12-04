@@ -1,5 +1,15 @@
 [
 	{
+		"collection": "measurement_std",
+		"signal_carrier_units": "RNAP/s",
+		"normalization_instructions": "The values are converted from RPUG (from the Eco2C1G6T1 UCF) to RNAP/s with the following conversion factor: RPU = 0.019 RNAP/s (see 10.15252/msb.20209584).  The same factor has also been applied to the ymax an ymin values of the communication molecule outputs (OC6, OHC12, pC-HSL, DAPG).  Note: change unit conversion factors accordingly if using a different or modified UCF."
+	},
+
+
+
+
+
+	{
 		"collection": "output_devices",
 		"name": "BFP_reporter",
 		"model": "BFP_reporter_model",
@@ -15,7 +25,7 @@
 		"parameters": [
 			{
 				"name": "unit_conversion",
-				"value": 1.0,
+				"value": 0.019,
 				"description": "Unit conversion"
 			}
 		]
@@ -77,7 +87,7 @@
 		"parameters": [
 			{
 				"name": "unit_conversion",
-				"value": 1.0,
+				"value": 0.019,
 				"description": "Unit conversion"
 			}
 		]
@@ -139,7 +149,7 @@
 		"parameters": [
 			{
 				"name": "unit_conversion",
-				"value": 1.0,
+				"value": 0.019,
 				"description": "Unit conversion"
 			}
 		]
@@ -201,7 +211,7 @@
 		"parameters": [
 			{
 				"name": "unit_conversion",
-				"value": 0.4
+				"value": 0.019
 			}
 		]
 	},

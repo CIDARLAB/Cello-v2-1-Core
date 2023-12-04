@@ -17,8 +17,8 @@
 	},
 	{
 		"collection": "measurement_std",
-		"signal_carrier_units": "RNAP/s",
-		"normalization_instructions": "First, the following equation converts the median YFP fluorescence to RPUG.  RPUG = (YFP \u2013 YFP0)/(YFPRPUG \u2013 YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median autofluorescence, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad.  After converesion to RPU, the values are then converted to RNAP/s with the following conversion factor: 1 RPU = 0.019 RNAP/s.",
+		"signal_carrier_units": "RPUG",
+		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPUG.  RPUG = (YFP \u2013 YFP0)/(YFPRPUG \u2013 YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median autofluorescence, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad",
 		"plasmid_description": "Genome integrated RPU standard where YFP fluorescent protein is driven by J23101 promoter and B0034 RBS. RiboJ was used as a ribozyme insulator. A bidirectional terminator DT3 was used to insulate YFP from the genome. The insertion is in the landing pad #1, at the position of 4196314"
 	},
 	{
@@ -5045,13 +5045,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.097286403,
-				"description": "Maximal transcription (5.120337 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 5.120337,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.000156351,
-				"description": "Minimal transcription (0.008229 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.008229,
+				"description": "Minimal transcription"
 			},
 			{
 				"name": "K",
@@ -5087,13 +5087,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.085848726,
-				"description": "Maximal transcription (4.518354 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 4.518354,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00072162,
-				"description": "Minimal transcription (0.03798 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.03798,
+				"description": "Minimal transcription"
 			},
 			{
 				"name": "K",
@@ -5129,13 +5129,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.039484641,
-				"description": "Maximal transcription (2.078139 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 2.078139,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00048108,
-				"description": "Minimal transcription (0.02532 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.02532,
+				"description": "Minimal transcription"
 			},
 			{
 				"name": "K",
@@ -5171,13 +5171,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.012303621,
-				"description": "Maximal transcription (0.647559 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.647559,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00012027,
-				"description": "Minimal transcription (0.00633 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.00633,
+				"description": "Minimal transcription"
 			},
 			{
 				"name": "K",
@@ -5213,13 +5213,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.070189572,
-				"description": "Maximal transcription (3.694188 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 3.694188,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00060135,
-				"description": "Minimal transcription (0.03165 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.03165,
+				"description": "Minimal transcription"
 			},
 			{
 				"name": "K",
@@ -5255,13 +5255,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.042731931,
-				"description": "Maximal transcription (2.249049 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 2.249049,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0048108,
-				"description": "Minimal transcription (0.2532 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.2532,
+				"description": "Minimal transcription"
 			},
 			{
 				"name": "K",

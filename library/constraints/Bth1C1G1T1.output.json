@@ -50,23 +50,6 @@
 		]
 	},
 	{
-		"collection": "functions",
-		"name": "linear_response",
-		"equation": "c * x",
-		"variables": [
-			{
-				"name": "x",
-				"map": "#//model/functions/input_composition"
-			}
-		],
-		"parameters": [
-			{
-				"name": "c",
-				"map": "#//model/parameters/unit_conversion"
-			}
-		]
-	},
-	{
 		"collection": "parts",
 		"type": "cassette",
 		"name": "nanoluc_cassette",
@@ -127,6 +110,28 @@
 		"type": "cassette",
 		"name": "nanoluc_cassette",
 		"dnasequence": "ATGGTTTTTACTCTGGAAGATTTTGTTGGCGATTGGCGTCAGACCGCGGGTTATAATTTGGATCAAGTCCTGGAACAGGGTGGCGTAAGCTCTCTGTTCCAGAACCTGGGTGTGAGCGTGACGCCGATTCAGCGCATCGTTCTGTCCGGCGAGAACGGTCTGAAAATTGATATTCATGTGATCATCCCGTACGAAGGCCTGAGCGGTGACCAAATGGGTCAAATCGAGAAAATCTTTAAAGTCGTCTACCCAGTTGACGATCACCACTTCAAGGTTATCTTGCATTACGGTACGCTGGTGATTGATGGTGTGACCCCGAATATGATTGACTATTTCGGCCGTCCGTATGAAGGCATTGCCGTTTTTGACGGTAAAAAGATCACCGTCACCGGTACCCTGTGGAATGGCAATAAGATTATTGACGAGCGTCTGATTAACCCGGACGGCAGCCTGCTGTTCCGCGTGACCATCAACGGTGTCACGGGTTGGCGTCTGTGCGAGCGCATCCTGGCATAA"
+	},
+
+
+
+
+
+	{
+		"collection": "functions",
+		"name": "linear_response",
+		"equation": "c * x",
+		"variables": [
+			{
+				"name": "x",
+				"map": "#//model/functions/input_composition"
+			}
+		],
+		"parameters": [
+			{
+				"name": "c",
+				"map": "#//model/parameters/unit_conversion"
+			}
+		]
 	},
 
 

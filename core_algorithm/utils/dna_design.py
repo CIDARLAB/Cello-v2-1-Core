@@ -173,7 +173,7 @@ class DNADesign:
                     parts.extend([self.sequences[device].parts_name])
             if parts not in self.valid_circuits:
                 self.valid_circuits.append(parts)
-        log.cf.info(f'\nDPL FILES:'
+        log.cf.info(f'\nSBOL FILES:'
                     f'\n - Circuit orders selected...')
         for circuit_order in self.valid_circuits:
             log.cf.info(f'   + {circuit_order}')
@@ -257,7 +257,7 @@ class DNADesign:
 
         :param filepath:
         """
-        plot_parameters = filepath + '_plot-parameters.csv'
+        plot_parameters = filepath + '_dpl-plot-parameters.csv'
         os.makedirs(os.path.dirname(plot_parameters), exist_ok=True)
         with open(plot_parameters, 'w', newline='') as plot_params:
             csv_writer = csv.writer(plot_params)

@@ -14,13 +14,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.04047,
-				"description": "Maximal transcription (2.13 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 2.13,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0000399,
-				"description": "Minimal transcription (0.0021 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.0021,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -57,13 +57,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.07771,
-				"description": "Maximal transcription (4.09 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 4.09,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0005738,
-				"description": "Minimal transcription (0.0302 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.0302,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -100,13 +100,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.11647,
-				"description": "Maximal transcription (6.13 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 6.13,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.000304,
-				"description": "Minimal transcription (0.016 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.016,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -143,13 +143,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.05966,
-				"description": "Maximal transcription (3.14 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 3.14,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0000684,
-				"description": "Minimal transcription (0.0036 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.0036,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -186,13 +186,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.076,
-				"description": "Maximal transcription (4 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 4,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0003705,
-				"description": "Minimal transcription (0.0195 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.0195,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -229,13 +229,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.05947,
-				"description": "Maximal transcription (3.13 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 3.13,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0001083,
-				"description": "Minimal transcription (0.0057 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.0057,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -259,6 +259,92 @@
 
 	{
 		"collection": "input_sensors",
+		"name": "OC6_sensor",
+		"model": "OC6_sensor_model",
+		"structure": "OC6_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "OC6_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 6.9,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0275,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OC6_sensor_structure",
+		"outputs": [
+			"PLuxB"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PLuxB",
+		"type": "promoter",
+		"dnasequence": "ACCTGTAGGATCGTACAGGTTTACGCAAGAAAATGGTTTGTTACAGTCGAATAAA"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "DAPG_sensor",
+		"model": "DAPG_sensor_model",
+		"structure": "DAPG_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "DAPG_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.07,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0088,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "DAPG_sensor_structure",
+		"outputs": [
+			"PPhlF"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PPhlF",
+		"type": "promoter",
+		"dnasequence": "aacgatcgttggctgcgacgtacggtggaatctgattcgttaccaattgacatgatacgaaacgtaccgtatcgttaaggt"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
 		"name": "Sal_sensor",
 		"model": "Sal_sensor_model",
 		"structure": "Sal_sensor_structure"
@@ -272,13 +358,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.06023,
-				"description": "Maximal transcription (3.17 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 3.17,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.0002622,
-				"description": "Minimal transcription (0.0138 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.0138,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -315,13 +401,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.1311,
-				"description": "Maximal transcription (6.9 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 6.9,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00114,
-				"description": "Minimal transcription (0.06 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.06,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -330,12 +416,33 @@
 		"name": "RpaR-AM2_sensor_structure",
 		"outputs": [
 			"PRpa_A"
+		],
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "PRpa_A_RiboRpa_RpaR-AM2_TerRpa",
+				"components": [
+					"#in1",
+					"PRpa_A_RiboRpa_RpaR-AM2_TerRpa_cassette"
+				]
+			},
+			{
+				"name": "PRpa_A_RiboRpa_RpaR-AM2_TerRpa_cassette",
+				"components": [
+					"RiboRpa_RpaR-AM2_TerRpa"
+				]
+			}
 		]
 	},
 	{
 		"collection": "parts",
-		"type": "promoter",
-		"name": "PRpa_A",
+		"type": "cassette",
+		"name": "RiboRpa_RpaR-AM2_TerRpa",
 		"dnasequence": "AAAAAAAAAGGCTCCAAAAGGAGCCttgacggctagctcagtcctaggtacagtgctagctactAGATGCTGTAGTGGGATGTGTGTCTCACCTGAAGAGTACAAAAGTCCGAAACGGTATCCTCTACAAATAATTTTGTTTAAaAGCGATACTTAGGGTAACAGtAATGattgtgggtgaagatcagctgtggggtcgtcgtacactggaatttgttgatagcgttgaacgtctggaagcaccggcactgattagccgttttgaaagcctgattgcaagctgtggttttaccgcctatatcatggcaggtctgccgagccgtaatgccggtctgccggaactgaccctggcaaatggttggcctcgtgattggtttgatctgtatgttagcgaaaactttagcgcagttgatccggttccgcgttatggtgcaaccactgttcatccgtttgtttggagtgatgcaccgtatgatcgtgaccgtgatcaggcagcacatcgtgttatgacccgtgcagcagaatttggtctggttgaaggttattgtattccgctgcattacgatgatggtagcgcagcaattagtatggcaggtgaagatcctgatctgagtccggcagcccgtggtgtaatgcagctggttagcatttatgcacatagccgtctgcgtgtactgagccgtccgaaaccgattcgtcgtaatcgtctgacaccgcgtgaatgtgaaattctgcagtgggcagcacagggtaaaaccgcatgggaaattagcgttattctgtgtattaccgaacgcaccgttaaatttcatctgattgaagcagcacgtaaactggatgcagcaaatcgtaccgcagcagttgcaaaagcactgacactgggtctgattcgtctgtaatagagttaaccaaAAAGGGGGGATTTTATCTCCCCTTTaatttttcct"
 	},
 
@@ -370,13 +477,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.1425,
-				"description": "Maximal transcription (7.5 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 7.5,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00114,
-				"description": "Minimal transcription (0.06 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.06,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -414,13 +521,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.0646,
-				"description": "Maximal transcription (3.4 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 3.4,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00019,
-				"description": "Minimal transcription (0.01 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.01,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -458,13 +565,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.114,
-				"description": "Maximal transcription (6 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 6,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00038,
-				"description": "Minimal transcription (0.02 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.02,
+				"description": "Minimal transcription"
 			}
 		]
 	},
@@ -502,13 +609,13 @@
 		"parameters": [
 			{
 				"name": "ymax",
-				"value": 0.0646,
-				"description": "Maximal transcription (3.4 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 3.4,
+				"description": "Maximal transcription"
 			},
 			{
 				"name": "ymin",
-				"value": 0.00038,
-				"description": "Minimal transcription (0.02 RPU * 0.019 for conversion to RNAP/s)"
+				"value": 0.02,
+				"description": "Minimal transcription"
 			}
 		]
 	},

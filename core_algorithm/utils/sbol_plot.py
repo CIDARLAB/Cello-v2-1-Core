@@ -27,10 +27,10 @@ import matplotlib.pyplot as plt
 import os.path
 
 # Original script by...
-__author__ = 'Thomas E. Gorochowski <tom@chofski.co.uk>, Voigt Lab, MIT\n\
-               Bryan Der <bder@mit.edu>, Voigt Lab, MIT'
-__license__ = 'MIT'
-__version__ = '1.0'
+# __author__ = 'Thomas E. Gorochowski <tom@chofski.co.uk>, Voigt Lab, MIT\n\
+#                Bryan Der <bder@mit.edu>, Voigt Lab, MIT'
+# __license__ = 'MIT'
+# __version__ = '1.0'
 
 
 def make_float_if_needed(s):
@@ -295,7 +295,8 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
     # Clear the plotting cache
     plt.close('all')
 
-    logging.disable(logging.NOTSET)  # Re-enable console output
+    # Re-enable console output
+    logging.disable(logging.NOTSET)
 
 
 def is_valid_file(parser, arg):
