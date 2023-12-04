@@ -7,10 +7,7 @@ TODO: Also update examples and assets folder...
 
 import itertools
 import scipy
-import sys
-import os
 import time
-import shutil
 
 from core_algorithm.utils.gate_assignment import *
 from core_algorithm.utils.logic_synthesis import *
@@ -18,36 +15,35 @@ from core_algorithm.utils.netlist_class import Netlist
 from core_algorithm.utils.ucf_class import UCF
 from core_algorithm.utils.make_eugene_script import *
 from core_algorithm.utils.dna_design import *
-from core_algorithm.utils.plotters import plotter
+from core_algorithm.utils.sbol_plot import plotter
 from core_algorithm.utils.response_plot import plot_bars
-from core_algorithm.utils import log
 from core_algorithm.utils.sbol import *
 
 
-def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
-    start_time = time.time()
-    CELLO3(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options)
-    log.cf.info(
-        f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
-    print("Cello completed execution")
+def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options):
+    try:
+        start_time = time.time()
+        CELLO3(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options)
+        log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
+        print("Cello completed execution")
+        return {'status': 'SUCCESS', 'msg': 'Cello process executed successfully'}
+    except CelloError as e:
+        return e.to_dict()
 
 
 class CelloError(Exception):
-    def __init__(self, error_message, exception):
-        super().__init__(error_message)
-        self.message = error_message
+    def __init__(self, error_msg, exception):
+        super().__init__(error_msg)
+        self.msg = error_msg
         self.exception = exception
+        self.status = "FAILURE"
+
+    def to_dict(self):
+        return {'status': self.status, 'msg': self.msg}
 
 
 class CELLO3:
     """
-    CELLO arguments:
-    1. verilog name
-    2. ucf name
-    3. path-to-verilog-and-ucf
-    4. path-for-output
-    5. options (optional)
-
     General flow of control...
         call_YOSYS()
         UCF Class (read in UCF data)
@@ -65,35 +61,28 @@ class CELLO3:
                     ...
         techmap() returns best graph
         info printed
-        eugene file created
+        eugene file, dna designs, SBOL diagram, plots, zipfile, etc. created
         [end]
     """
 
-    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, in_path: str, out_path: str,
+    def __init__(self, v_name, ucf_name, in_name, out_name, verilogs_path, constraints_path, out_path,
                  options: dict = None):
 
         # NOTE: Initialization
         try:
             # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
-            # Set of commands passed to YOSYS to convert Verilog to netlist and for image generation
-            yosys_cmd_choice = 1
-            # Print more info to console and log. See logging.config to change log metadata verbosity
-            self.verbose = False
-            # Print to console info on *all* tested iterations (produces copious amounts of text)
-            self.print_iters = False
-            # Run *all* possible permutations to find true optimum score (may run for *long* time)
-            self.exhaustive = False
-            # Runs brief tests of all configs, producing logs and a csv summary of all tests
-            self.test_configs = False
-            # Removes date/time from file name, allowing overwrite of log from equivalent config
-            self.log_overwrite = False
+            yosys_cmd_choice = 1  # Set of cmds passed to YOSYS to convert Verilog to netlist & image generation
+            self.verbose = False  # Print more info to console & log. See logging.config to change verbosity
+            self.print_iters = False  # Print to console info on *all* tested iters (produces copious amounts of text)
+            self.exhaustive = False  # Run *all* possible permutes to find true optimum score (*long* run time)
+            self.test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
+            self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of logs
 
             if 'yosys_cmd_choice' in options:
                 yosys_cmd_choice = options['yosys_cmd_choice']
             if 'verbose' in options:
                 self.verbose = options['verbose']
-            if 'print_iters' in options:
-                # NOTE: Never prints to log (some configs have billions of iters)
+            if 'print_iters' in options:  # NOTE: Never prints to log (some configs have billions of iters)
                 self.print_iters = options['print_iters']
             if 'test_configs' in options:
                 self.test_configs = options['test_configs']
@@ -103,7 +92,8 @@ class CELLO3:
                 # Normally uses Scipy's dual annealing
                 self.exhaustive = options['exhaustive']
 
-            self.in_path = os.path.abspath(in_path)
+            self.verilogs_path = os.path.abspath(verilogs_path)
+            self.constraints_path = os.path.abspath(constraints_path)
             self.out_path = os.path.abspath(out_path)
             self.verilog_name = v_name
             self.ucf_name = ucf_name
@@ -112,13 +102,13 @@ class CELLO3:
             self.iter_count = 0
             self.best_score = 0
             self.best_graphs = []
+            self.units = 'Unknown_Units'
 
             # Loggers
-            log.config_logger(v_name, ucf_name, self.log_overwrite)
+            log.config_logger(self.verilog_name, self.ucf_name, self.log_overwrite)
             log.reset_logs()
             # TODO: print settings already chosen
-            print_centered(
-                ['CELLO V3', self.verilog_name + ' + ' + self.ucf_name])
+            print_centered(['CELLO V2.1', self.verilog_name + ' + ' + self.ucf_name])
 
         except Exception as e:
             raise CelloError("Error with initialization", e)
@@ -126,7 +116,7 @@ class CELLO3:
         # NOTE: Logic Synthesis (YOSYS)
         try:
             # yosys cmd set 1 seems best after trial & error
-            cont = call_YOSYS(in_path, out_path, v_name, yosys_cmd_choice)
+            cont = call_YOSYS(self.verilogs_path, self.out_path, self.verilog_name, self.ucf_name[:-4], yosys_cmd_choice)
 
             print_centered('End of Logic Synthesis')
             if not cont:
@@ -142,50 +132,47 @@ class CELLO3:
         except Exception as e:
             raise CelloError('Error with logic synthesis', e)
 
-
-
         # NOTE: Initializes UCF, Input, and Output from filepaths
         try:
-            self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
-
+            self.ucf = UCF(self.constraints_path, self.ucf_name, self.in_name, self.out_name)
+            units = self.ucf.query_top_level_collection(self.ucf.UCFout, 'measurement_std')
+            if units:
+                self.units = units[0]['signal_carrier_units']
+            else:
+                units = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'measurement_std')
+                if units:
+                    self.units = units[0]['signal_carrier_units']
+                else:
+                    log.cf.warning('Cannot find units...')
             if not self.ucf.valid:
                 return  # breaks early if UCF file has errors
         except Exception as e:
             raise CelloError('Error reading UCF', e)
 
-
-        # NOTE: Verilog/UCF Comatibility Check
+        # NOTE: Verilog/UCF Compatibility Check
         try:
             valid: bool
             iter_: int
             valid, iter_ = self.check_conditions(verbose=True)
-
             if not valid:
-                return
-
+                raise Exception("Condition check failed")
             log.cf.info(f'\nCondition check passed? {valid}\n')
         except Exception as e:
             raise CelloError('Error with Verilog/UCF compatibility check', e)
 
-
         # NOTE: Circuit Scoring
         try:
-            best_result = self.techmap(
-                iter_)  # Executing the algorithm if things check out
+            best_result = self.techmap(iter_)  # Executing the algorithm if things check out
             if best_result is None:
                 log.cf.error('\nProblem with best_result...\n')
                 return
-            # best_score = best_result[0]
             best_graph = best_result[1]
             truth_table = best_result[2]
             truth_table_labels = best_result[3]
 
-            graph_inputs_for_printing = list(
-                zip(self.rnl.inputs, best_graph.inputs))
-            graph_gates_for_printing = list(
-                zip(self.rnl.gates, best_graph.gates))
-            graph_outputs_for_printing = list(
-                zip(self.rnl.outputs, best_graph.outputs))
+            graph_inputs_for_printing = list(zip(self.rnl.inputs, best_graph.inputs))
+            graph_gates_for_printing = list(zip(self.rnl.gates, best_graph.gates))
+            graph_outputs_for_printing = list(zip(self.rnl.outputs, best_graph.outputs))
 
             if self.verbose:
                 debug_print(
@@ -193,7 +180,6 @@ class CELLO3:
                 debug_print(best_result[1])
         except Exception as e:
             raise CelloError('Error with circuit scoring', e)
-
 
         # NOTE: RESULTS/CIRCUIT DESIGN
         try:
@@ -204,39 +190,35 @@ class CELLO3:
                         f' - Best Circuit Score: {self.best_score}')
 
             log.cf.info(
-                f'\nInputs ( input_response = {best_graph.inputs[0].functions} ):')
+                f'\nInputs ( input response = {best_graph.inputs[0].resp_func_eq} ):')
             in_labels = {}
             for rnl_in, g_in in graph_inputs_for_printing:
                 log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of'
                             f' {str(list(g_in.out_scores.items()))}')
                 in_labels[rnl_in[0]] = g_in.name
 
-            log.cf.info(f'\nGates ( hill_response = {best_graph.gates[0].hill_response}, '
-                        f'input_composition = {best_graph.gates[0].input_comp} ):')
+            log.cf.info(f'\nGates ( response function = {best_graph.gates[0].response_func};   '
+                        f'input composition = {best_graph.gates[0].input_comp} ):')
             gate_labels = {}
             for rnl_g, g_g in graph_gates_for_printing:
                 log.cf.info(f' - {rnl_g} {g_g}')
                 gate_labels[rnl_g] = g_g.gate_in_use
 
-            log.cf.info(
-                f'\nOutputs ( unit_conversion = {best_graph.outputs[0].function} ):')
+            log.cf.info(f'\nOutputs ( unit conversion and/or hill response... ):')
             out_labels = {}
             for rnl_out, g_out in graph_outputs_for_printing:
                 log.cf.info(f' - {rnl_out} {str(g_out)}')
                 out_labels[rnl_out[0]] = g_out.name
 
-            tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
-            replace_techmap_diagram_labels(
-                tech_diagram_filepath, gate_labels, in_labels, out_labels)
+            tech_diagram_filepath = os.path.join(self.out_path, v_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
+            replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
             raise CelloError('Error with results/circuit design', e)
-
 
         # NOTE: TRUTH TABLE/GATE SCORING
         try:
             # Create the full path for the file
-            filepath = os.path.join(
-                out_path, self.verilog_name, f"{self.verilog_name}_activity-table.csv")
+            filepath = os.path.join(out_path, self.verilog_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
 
             # Ensure the directory exists
             directory_path = os.path.dirname(filepath)
@@ -248,7 +230,7 @@ class CELLO3:
             print('(See log for more precision)')
 
             # Now write the CSV file
-            with open(filepath, 'w', newline='') as csvfile:
+            with open(f'{filepath}_activity-table.csv', 'w', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(['Scores...'])
                 csv_writer.writerows(zip(*[["{:.2e}".format(float(c)) if i > 0 else c for i, c in enumerate(row)]
@@ -268,8 +250,7 @@ class CELLO3:
 
         # NOTE: CIRCUIT SCORE FILE
         try:
-            filename = f"{self.verilog_name}_circuit-score.csv"
-            fullpath = os.path.join(out_path, self.verilog_name, filename)
+            fullpath = os.path.join(os.path.dirname(filepath), f"{os.path.basename(filepath)}_circuit-score.csv")
 
             with open(fullpath, 'w', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
@@ -281,7 +262,7 @@ class CELLO3:
         try:
             eugene = EugeneObject(self.ucf, graph_inputs_for_printing, graph_gates_for_printing,
                                   graph_outputs_for_printing, best_graph)
-            log.cf.info('\n\nEUGENE FILE:')
+            log.cf.info('\n\nEUGENE FILES:')
             if eugene.generate_eugene_structs():
                 log.cf.info(" - Eugene object and structs created...")
             if eugene.generate_eugene_cassettes():
@@ -301,8 +282,6 @@ class CELLO3:
             dna_designs = DNADesign(
                 structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
             mini_eugene_part_orders = dna_designs.get_part_orders()  # Calls miniEugene
-            dna_designs.get_part_orders()  # Calls miniEugene
-            # dna_designs.gen_seq(filepath)  # Alternative to miniEugene
             dna_designs.write_dna_parts_info(filepath)
             dna_designs.write_dna_parts_order(filepath)
             dna_designs.write_plot_params(filepath)
@@ -319,32 +298,26 @@ class CELLO3:
 
             base_dir = os.path.dirname(filepath)
 
-            plot_parameters_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_plot_parameters.csv")
-            dpl_part_info_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl_part_information.csv")
-            dpl_regulatory_info_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl_regulatory_information.csv")
-            dpl_dna_designs_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl_dna_designs.csv")
-            dpl_png_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl.png")
-            dpl_pdf_file = os.path.join(
-                base_dir, f"{os.path.basename(filepath)}_dpl.pdf")
+            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-plot-parameters.csv")
+            dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-part-information.csv")
+            dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-regulatory-info.csv")
+            dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-dna-designs.csv")
+            dpl_png_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.png")
+            dpl_pdf_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.pdf")
 
             print(' - ', end='')
-            plotter(plot_parameters_file, dpl_part_info_file, dpl_regulatory_info_file,
+            plotter(plot_parameters_file, dpl_part_info_file, dpl_reg_info_file,
                     dpl_dna_designs_file, dpl_png_file, dpl_pdf_file)
 
-            log.cf.info('SBOL and other DPL files generated')
+            log.cf.info('SBOL XML and related files generated')
         except Exception as e:
             raise CelloError('Error with generating SBOL diagram', e)
 
         # NOTE: PLOTS
         try:
             plot_name = self.verilog_name + ' + ' + self.ucf_name
-            plot_bars(filepath, plot_name, best_graph, tb)
-            log.cf.info(' - Response plots generated')
+            plot_bars(filepath, plot_name, best_graph, tb, self.units)
+            log.cf.info(' - Response plots generated\n\n')
         except Exception as e:
             log.cf.error(
                 f'Unable to generate response plots:\n{e}', exc_info=True)
@@ -353,7 +326,7 @@ class CELLO3:
         # NOTE: ZIPFILE
         try:
             archive_name = os.path.join(
-                out_path, f"{self.verilog_name}_all-files")
+                out_path, f"{self.verilog_name}_{self.ucf_name[:-4]}_all-files")
             target_directory = os.path.join(out_path, self.verilog_name)
 
             shutil.make_archive(archive_name, 'zip', target_directory)
@@ -362,10 +335,7 @@ class CELLO3:
             raise CelloError('Error with generating zipfile', e)
 
     def __load_netlist(self):
-        # net_path = self.out_path + '/' + self.verilog_name + '/' + self.verilog_name + '.json'
-        # net_path = os.path.join(*net_path.split('/'))
-        net_path = os.path.join(
-            self.out_path, self.verilog_name, self.verilog_name + '.json')
+        net_path = os.path.join(self.out_path, self.verilog_name,f'{self.verilog_name}_{self.ucf_name[:-4]}_yosys.json')
         net_file = open(net_path, 'r')
         net_json = json.load(net_file)
         netlist = Netlist(net_json)
@@ -375,8 +345,7 @@ class CELLO3:
 
     def check_conditions(self, verbose=True):
         """
-
-        NOTE: Ignore logic_constraints value, which is unreliable, and instead use the actual gate count
+        Ignores logic_constraints value, which is unreliable, and instead use the actual gate count
 
         :param verbose: bool: default True
         :return:
@@ -398,16 +367,13 @@ class CELLO3:
             self.ucf.UCFin, 'input_sensors')
         print(in_sensors)
         num_ucf_input_sensors = len(in_sensors)
-        num_ucf_input_structures = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
-        num_ucf_input_models = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
-        num_ucf_input_parts = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts'))
+        num_ucf_input_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
+        num_ucf_input_models = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
+        num_ucf_input_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'parts'))
         num_netlist_inputs = len(self.rnl.inputs) if netlist_valid else 99999
         inputs_match = (num_ucf_input_sensors == num_ucf_input_models) and \
                        (num_ucf_input_models == num_ucf_input_structures) and \
-                       (num_ucf_input_parts >= num_netlist_inputs)  # CRIT: why must part number match in line above?
+                       (num_ucf_input_parts >= num_netlist_inputs)  # TODO: why must part number match in line above?
         # == num_ucf_input_parts
         if verbose:
             log.cf.info(f'\nINPUTS (including the communication devices): \n'
@@ -422,19 +388,15 @@ class CELLO3:
             log.cf.info(
                 f"{'Valid' if inputs_match else 'NOT valid'} input match!")
 
-        out_sensors = self.ucf.query_top_level_collection(
-            self.ucf.UCFout, 'output_devices')
+        out_sensors = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
         num_ucf_output_sensors = len(out_sensors)
-        num_ucf_output_structures = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures'))
-        num_ucf_output_models = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'))
-        num_ucf_output_parts = len(
-            self.ucf.query_top_level_collection(self.ucf.UCFout, 'parts'))
+        num_ucf_output_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'structures'))
+        num_ucf_output_models = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'models'))
+        num_ucf_output_parts = len(self.ucf.query_top_level_collection(self.ucf.UCFout, 'parts'))
         num_netlist_outputs = len(self.rnl.outputs) if netlist_valid else 99999
         outputs_match = (num_ucf_output_sensors == num_ucf_output_models) and \
                         (num_ucf_output_models == num_ucf_output_parts == num_ucf_output_structures) and \
-                        (num_ucf_output_parts >= num_netlist_outputs)  # CRIT: why must part number match in line above?
+                        (num_ucf_output_parts >= num_netlist_outputs)  # TODO: why must part number match in line above?
         if verbose:
             log.cf.info(f'\nOUTPUTS: \n'
                         f'num OUT-SENSORS in {self.ucf_name} out-UCF: {num_ucf_output_sensors}\n'
@@ -451,8 +413,7 @@ class CELLO3:
         num_models = self.ucf.collection_count['models']
         num_gates = self.ucf.collection_count['gates']
         num_parts = self.ucf.collection_count['parts']
-        ucf_gates = self.ucf.query_top_level_collection(
-            self.ucf.UCFmain, 'gates')
+        ucf_gates = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'gates')
         gate_names = []
         g_list = []
         for gate in ucf_gates:
@@ -471,8 +432,7 @@ class CELLO3:
                         f'num GATES in {self.ucf_name} UCF: {num_gates}')
 
         num_gates_available = []
-        logic_constraints = self.ucf.query_top_level_collection(
-            self.ucf.UCFmain, 'logic_constraints')
+        logic_constraints = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'logic_constraints')
         for logic_constraint in logic_constraints:
             for g in logic_constraint['available_gates']:
                 num_gates_available.append(g['max_instances'])
@@ -487,7 +447,7 @@ class CELLO3:
             log.cf.info(sorted(gate_names))
 
         gates_match = (num_structs == num_models == num_gates) and (
-            num_gates_available[0] >= num_netlist_gates)
+                num_gates_available[0] >= num_netlist_gates)
         if verbose:
             log.cf.info(
                 f"{'Valid' if gates_match else 'NOT valid'} intermediate match!")
@@ -519,14 +479,12 @@ class CELLO3:
         # NOTE: Give it parameter for which evaluative algorithm to use regardless of iter (exhaustive vs simulation)
         print_centered('Beginning GATE ASSIGNMENT')
 
-        in_sensors = self.ucf.query_top_level_collection(
-            self.ucf.UCFin, 'input_sensors')
+        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
         i_list = []
         for sensor in in_sensors:
             i_list.append(sensor['name'])
 
-        out_devices = self.ucf.query_top_level_collection(
-            self.ucf.UCFout, 'output_devices')
+        out_devices = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
         o_list = []
         for device in out_devices:
             o_list.append(device['name'])
@@ -545,7 +503,7 @@ class CELLO3:
 
         circuit = GraphParser(self.rnl.inputs, self.rnl.outputs, self.rnl.gates)
 
-        log.cf.info('Netlist de-construction: ')
+        log.cf.info('\nNetlist de-construction: ')
         log.cf.info(circuit.inputs)
         log.cf.info(circuit.gates)
         log.cf.info(circuit.outputs)
@@ -599,11 +557,13 @@ class CELLO3:
             o_perms.append(o_perm)
         for g_perm in itertools.permutations(g_list, g):
             g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 100 else 100
+        max_fun = iter_ if iter_ < 1000 else 1000
 
         # DUAL ANNEALING SCIPY FUNC
-        def func(x): return self.prep_assign_for_scoring(
-            x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+        def func(x):
+            return self.prep_assign_for_scoring(
+                x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+
         lo = [0, 0, 0]
         hi = [len(i_perms), len(o_perms), len(g_perms)]
         bounds = list(zip(lo, hi))
@@ -708,8 +668,11 @@ class CELLO3:
             if self.print_iters:
                 print_centered(
                     f'beginning iteration {self.iter_count}:', also_logfile=False)
+
             # Output the combination
-            def map_helper(l, c): return list(map(lambda x_, y: (x_, y), l, c))
+            def map_helper(l, c):
+                return list(map(lambda x_, y: (x_, y), l, c))
+
             new_i = map_helper(i_perm, netgraph.inputs)
             new_g = map_helper(g_perm, netgraph.gates)
             new_o = map_helper(o_perm, netgraph.outputs)
@@ -794,8 +757,7 @@ class CELLO3:
         '''
 
         # First, make sure that all inputs use the same 'sensor_response' function; this has to do with UCF formatting
-        input_function_json = self.ucf.query_top_level_collection(
-            self.ucf.UCFin, 'functions')
+        input_function_json = self.ucf.query_top_level_collection(self.ucf.UCFin, 'functions')
         input_model_names = [i.name + '_model' for i in graph.inputs]
         input_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'),
                                   'name', input_model_names)
@@ -811,7 +773,7 @@ class CELLO3:
             print(f'INPUT parameters:')
             for p in input_params:
                 print(f'{p} {input_params[p]}')
-            print(f"input_response = {(funcs:=next(iter(input_equations.values())))['response_function']}")
+            print(f"input_response = {(funcs := next(iter(input_equations.values())))['response_function']}")
             if 'tandem_interference_factor' in funcs.keys():
                 print(f"\ntandem_interference_factor = {funcs['tandem_interference_factor']}")
             print(f'\nParameters in sensor_response function json: \n{input_params}\n')
@@ -823,12 +785,12 @@ class CELLO3:
         gate_ids = [(g['group'], g['name']) for g in gate_query]
         gate_id_names = [i[1] + '_model' for i in gate_ids]
         gate_info = query_helper(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'models'),
-                                      'name', gate_id_names)
+                                 'name', gate_id_names)
         gate_functions = {c['name'][:-6]: c['functions'] for c in gate_info}
         gate_equations = gate_functions.copy()
         for key, input in gate_functions.items():
             gate_equations[key] = {k: (e['equation']) for e in main_function_json for (k, f) in input.items()
-                                    if (e['name'] == f and 'equation' in e.keys())}
+                                   if (e['name'] == f and 'equation' in e.keys())}
         gate_func_names = gate_info[0]['functions']
         gate_params = {gf['name'][:-6]: {g['name']: g['value'] for g in gf['parameters']} for gf in gate_info}
         if self.print_iters:
@@ -852,8 +814,7 @@ class CELLO3:
         #     print(f'linear_input_composition = {linear_input_composition}')
         #     print('\n')
 
-        output_function_json = self.ucf.query_top_level_collection(
-            self.ucf.UCFout, 'functions')
+        output_function_json = self.ucf.query_top_level_collection(self.ucf.UCFout, 'functions')
         output_function_str = output_function_json[0]['equation']
         output_names = [o.name for o in graph.outputs]
         output_model_names = [o + '_model' for o in output_names]
@@ -864,7 +825,7 @@ class CELLO3:
         output_equations = {k: (e['equation']) for e in output_function_json for (k, f) in
                             output_functions.items() if (e['name'] == f)}
         output_vars = {k: (e['variables']) for e in output_function_json for (k, f) in
-                           output_functions.items() if (e['name'] == f)}
+                       output_functions.items() if (e['name'] == f)}
 
         if self.print_iters:
             print('OUTPUT parameters: ')
@@ -1017,8 +978,7 @@ class CELLO3:
                 output_name = graph_output.name
                 graph_output_idx = truth_table_labels.index(output_name)
                 if truth_table[r][graph_output_idx] is None:
-                    output_score = graph.get_score(
-                        graph_output, verbose=self.verbose)
+                    output_score = graph.get_score(graph_output, verbose=self.verbose)[0]
                     truth_table[r][graph_output_idx] = output_score
                     circuit_scores.append((output_score, output_name))
 

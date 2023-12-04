@@ -8,7 +8,6 @@ Class: EugeneObject: generate_eugene_structs(), generate_eugene_cassettes(), wri
 import os
 from dataclasses import dataclass, field
 from core_algorithm.utils.cello_helpers import debug_print
-from core_algorithm.utils.log import *
 from core_algorithm.utils.dna_design import *
 from typing import List, Dict, Tuple, Any
 
@@ -259,6 +258,8 @@ class EugeneObject:
         """
 
         # Get PartTypes and Sequences
+        # TODO: Why include all terminators and all scars even if corresponding parts not in the circuit?
+        # TODO: Why does SC1 have no terminators?
         ins, mains, outs = [], [], []
         # From UCFin:   'structures' name > 'outputs' name > 'parts' type (probably 'promoter')
         # From UCFmain: 'structures' name > 'outputs' name and cassette 'components' names > 'parts' type (e.g. cds)

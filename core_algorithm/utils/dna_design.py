@@ -11,9 +11,6 @@ from dataclasses import dataclass
 from core_algorithm.utils.py4j_gateway.run_eugene_script import call_mini_eugene
 from copy import deepcopy
 from core_algorithm.utils import log
-import re
-import random
-from textwrap import shorten
 
 
 @dataclass
@@ -66,14 +63,15 @@ def hex_to_rgb(hex_value):
         return '0.0;0.0;0.0'
     value = hex_value.lstrip('#')
     lv = len(value)
-    vals = list(round(int(value[i:i + lv // 3], 16) / 255, 2) for i in range(0, lv, lv // 3))
+    vals = list(round(int(value[i:i + lv // 3], 16) / 255, 2)
+                for i in range(0, lv, lv // 3))
     return ';'.join(str(val) for val in vals)
 
 
 class DNADesign:
     """
     Object that generates DNA design (i.e. order of parts/dna sequences).
-    Produces a csv of the part order. (Corresponds to v2.0 'dpl_dna_designs.csv'.)
+    Produces a csv of the part order. (Corresponds to v2.0 'dpl-dna-designs.csv'.)
     Relies heavily on the make_eugene_script.py object:
         ~ EugeneObject.structs_cas_dict{EugeneCassette{cassette name, inputs, outputs, components}}
 
@@ -109,7 +107,7 @@ class DNADesign:
     # NOTE: CREATE OUTPUT FILES BASED ON DNA PART ORDER AND RELATED INFO ###############################################
     def get_part_orders(self):
 
-        def cycle_thru_alt_rulesets():
+        def cycle_thru_alt_rulesets():  # TODO: Finish setting up ruleset traversal
 
             rules_keywords = ['NOT', 'EQUALS',
                               'NEXTTO', 'CONTAINS',
@@ -175,7 +173,7 @@ class DNADesign:
                     parts.extend([self.sequences[device].parts_name])
             if parts not in self.valid_circuits:
                 self.valid_circuits.append(parts)
-        log.cf.info(f'\nDPL FILES:'
+        log.cf.info(f'\nSBOL FILES:'
                     f'\n - Circuit orders selected...')
         for circuit_order in self.valid_circuits:
             log.cf.info(f'   + {circuit_order}')
@@ -205,7 +203,7 @@ class DNADesign:
                         self.sequences[part].color = '000000'
 
         transfer_part_colors()
-        dna_part_info_path = filepath + '_dpl_part_information.csv'
+        dna_part_info_path = filepath + '_dpl-part-information.csv'
         os.makedirs(os.path.dirname(dna_part_info_path), exist_ok=True)
         with open(dna_part_info_path, 'w', newline='') as dna_part_info:
             csv_writer = csv.writer(dna_part_info)
@@ -217,11 +215,7 @@ class DNADesign:
                     csv_writer.writerow([part, 'UserDefined', 30, '', '', 25,
                                          '1.00;1.00;1.00', '', '', '', '', '',
                                          part[:-10], 4, '0.0;0.0;0.0', -10, 90])
-            # csv_writer.writerow(['_NONCE_PAD', 'UserDefined', '30', '', '', '',
-            #                      '1.00;1.00;1.00', '', '', '', '', '',
-            #                      '', 4, '1.00;1.00;1.00', -10, 90])
             for seq in self.sequences.values():
-                # lab = shorten(seq.parts_name, 10, placeholder='...')
                 lab = seq.parts_name[:10] + '...' if len(seq.parts_name) > 12 else seq.parts_name
                 if seq.parts_type == 'cassette':
                     csv_writer.writerow(
@@ -246,7 +240,7 @@ class DNADesign:
 
         :param filepath:
         """
-        dna_part_order_path = filepath + '_dpl_dna_designs.csv'
+        dna_part_order_path = filepath + '_dpl-dna-designs.csv'
         os.makedirs(os.path.dirname(dna_part_order_path), exist_ok=True)
         with open(dna_part_order_path, 'w', newline='') as dna_part_order:
             csv_writer = csv.writer(dna_part_order)
@@ -263,7 +257,7 @@ class DNADesign:
 
         :param filepath:
         """
-        plot_parameters = filepath + '_plot_parameters.csv'
+        plot_parameters = filepath + '_dpl-plot-parameters.csv'
         os.makedirs(os.path.dirname(plot_parameters), exist_ok=True)
         with open(plot_parameters, 'w', newline='') as plot_params:
             csv_writer = csv.writer(plot_params)
@@ -282,7 +276,7 @@ class DNADesign:
 
         :param filepath:
         """
-        regulatory_info = filepath + '_dpl_regulatory_information.csv'
+        regulatory_info = filepath + '_dpl-regulatory-info.csv'
         os.makedirs(os.path.dirname(regulatory_info), exist_ok=True)
         with open(regulatory_info, 'w', newline='') as reg_info:
             csv_writer = csv.writer(reg_info)
@@ -294,7 +288,7 @@ class DNADesign:
                 #                hex_to_rgb(struct.color)]
                 #     csv_writer.writerow(new_row)
                 if struct.struct_cassettes:
-                    for part in struct.struct_cassettes[0][3]:
+                    for part in struct.struct_cassettes[0][3]:  # TODO: Validate
                         if self.sequences[part].parts_type.lower() == 'cds':
                             new_row = [part, 'Repression', struct.outputs[0], 3, '-', '',
                                        hex_to_rgb(struct.color)]
@@ -307,7 +301,7 @@ class DNADesign:
 
         :param filepath:
         """
-        dna_sequences = filepath + '_dna_sequences.csv'
+        dna_sequences = filepath + '_dna-sequences.csv'
         os.makedirs(os.path.dirname(dna_sequences), exist_ok=True)
         with open(dna_sequences, 'w', newline='') as dna_seq:
             csv_writer = csv.writer(dna_seq)

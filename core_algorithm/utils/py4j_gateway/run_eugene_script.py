@@ -18,11 +18,11 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     """
     NOTE: Commands to be executed before the Python script...
     External command to compile miniEugenePermuter class:
-        javac -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter.java   // mac / lin
-        javac -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter.java     // win
+        javac -cp '.:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter.java   // mac / lin
+        javac -cp .;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter.java     // win
     External command to execute program to instantiate Py4J Java Gateway:
-        java -cp '.:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar./src' miniEugenePermuter    // mac / lin
-        java -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar./src miniEugenePermuter      // win
+        java -cp .:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter    // mac / lin
+        java -cp ;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter      // win
     NOTE: May need to add java to the path and restart the console...
 
     :param rules:
@@ -77,6 +77,9 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     # 'CONTAINS P3_PhlF', 'CONTAINS Loc1', 'CONTAINS Loc2', 'CONTAINS Jscar', '[3] EQUALS Jscar']
 
     # Call the miniPermute function in the Java program, which will in turn invoke miniEugene
+    # print('Rules: ', rules)
+    # print('\nPart_count: ', part_count)
+    # print('\nOrders_count: ', orders_count)
     java_part_orders = miniEugeneInstance.miniPermute(
         rules, part_count, orders_count)  # FIXME: Add device rule loop
     if java_part_orders:
@@ -89,6 +92,7 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
                     order.append(part)
                 valid_orders.append(order)
                 # log.cf.info(f'   + {order}')
+        # print("valid_orders: ", valid_orders)
         return valid_orders
     else:
         log.cf.error("miniEugene did not return valid part orders...")

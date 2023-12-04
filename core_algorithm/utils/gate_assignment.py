@@ -6,10 +6,7 @@ generate_truth_table()
 Classes: IO, Input(IO), Output(IO), Gate, AssignGraph, GraphParser
 """
 
-# import networkx as nx
-# import matplotlib.pyplot as plt
 from core_algorithm.utils.ucf_class import *
-from core_algorithm.utils.log import *
 
 
 def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_list):
@@ -26,7 +23,7 @@ def generate_truth_table(num_in, num_gates, num_out, in_list, gate_list, out_lis
     table = []
     for i in range(2 ** num_in):
         row = [(i >> j) & 1 for j in range(num_in - 1, -1, -1)] + ([None] * num_in) + ([None] * num_gates) * 2 + (
-                    [None] * num_out) * 2
+            [None] * num_out) * 2
         table.append(row)
     labels = [f'{i.name}_I/O' for i in in_list] + [i.name for i in in_list] + \
              [f'{g.name}_I/O' for g in gate_list] + [g.name for g in gate_list] + \
@@ -38,6 +35,7 @@ class IO:
     """
 
     """
+
     def __init__(self, name, id_):
         self.name = name
         self.id = id_
@@ -60,6 +58,7 @@ class Input(IO):
     """
 
     """
+
     def __init__(self, name, id_):
         super().__init__(name, id_)
         self.functions = None
@@ -103,10 +102,10 @@ class Input(IO):
             # self.states['low'] = self.ymin
             try:
                 self.resp_func_eq = self.functions.get('response_function', '')
-                self.tandem_func_eq = self.functions.get('tandem_interference_factor', '')
                 self.resp_func_eq = self.resp_func_eq.replace('$', '')
-                self.tandem_func_eq = self.tandem_func_eq.replace('^', '**')
+                self.tandem_func_eq = self.functions.get('tandem_interference_factor', '')
                 self.tandem_func_eq = self.tandem_func_eq.replace('$', '')
+                self.tandem_func_eq = self.tandem_func_eq.replace('^', '**')
                 for p in params.keys():
                     locals()[p] = params[p]
                 for (lvl, val) in self.states.items():
@@ -114,7 +113,7 @@ class Input(IO):
                     self.out_scores[lvl] = eval(self.resp_func_eq)
                     if self.tandem_func_eq:
                         self.tandem_scores[lvl] = eval(self.tandem_func_eq)
-                # print(f'\nIN - {self.name}: {self.params} -> {self.out_scores}')
+                # print(f'IN - {self.name}: {self.params} -> {self.out_scores} (tandem: {self.tandem_scores})')
             except Exception as e:
                 debug_print(f'ERROR calculating input score for {str(self)}, with function {self.resp_func_eq}\n{e}')
         except Exception as e:
@@ -131,6 +130,7 @@ class Output(IO):
     """
 
     """
+
     def __init__(self, name, id_):
         super().__init__(name, id_)
         self.function = None
@@ -170,22 +170,23 @@ class Output(IO):
         c = self.unit_conversion
         for p in self.params.keys():
             locals()[p] = self.params[p]
-        score = eval(self.function)
-        # print(f'\nOUT - {self.name}: {self.params} -> {score}')
-        self.out_score = score
-        return score
+        self.out_score = eval(self.function)
+        # print(f'OUT - {self.name}: (unit_conv: {self.unit_conversion}, CM params: {self.params}) -> {self.out_score}')
+        return self.out_score
 
     def __str__(self):
         if self.function is None:
             return f'output {self.name} {self.id}'
         else:
-            return f'output {self.name} {self.id} with c: {self.unit_conversion}'
+            return f'output {self.name} {self.id} with {self.function}: ' \
+                   f'{("c = " + str(self.unit_conversion)) if self.unit_conversion else self.params}'
 
 
 class Gate:
     """
     Used ot represent a gate in a netlist.
     """
+
     def __init__(self, gate_id, gate_type, inputs, output):
         self.name = gate_id
         self.gate_type = gate_type
@@ -211,9 +212,9 @@ class Gate:
         :param params:
         """
         self.response_func = gate_funcs.get('response_function', '')
+        self.response_func = self.response_func.replace('^', '**')
         self.input_comp = gate_funcs.get('input_composition', '')
         self.tandem_factor_func = gate_funcs.get('tandem_interference_factor', '')
-        self.response_func = self.response_func.replace('^', '**')
         self.tandem_factor_func = self.tandem_factor_func.replace('^', '**')
 
         # if 'response_function' in gate_funcs.keys():
@@ -246,14 +247,15 @@ class Gate:
 
         if self.response_func is not None and self.input_comp is not None:
             # this means that add_eval_params was already called
-            gate_scores = []
+            scores = []
             for gname in self.gate_params.keys():
-                gate_scores.append(self.eval_gate(gname, in_comp))
+                scores.append(self.eval_gate(gname, in_comp))
                 # NOTE: this eval function needs to be modified
-            best_score = max(gate_scores)
-            self.gate_in_use = best_score[1]
+            best_score = max(scores)
             self.best_score = best_score[0]
-            return best_score[0]
+            self.gate_in_use = best_score[1]
+            self.tandem_score = best_score[2]
+            return best_score[0], best_score[2]
 
     def eval_gate(self, gate_name, in_comp):
         """
@@ -266,7 +268,11 @@ class Gate:
         for k in eval_params.keys():
             locals()[k] = eval_params[k]
         x = in_comp  # NOTE: UCF has to use 'x' as input_composition in the gate response_function
-        return eval(self.response_func), gate_name
+        result = eval(self.response_func)
+        tandem = 0
+        if self.tandem_factor_func:
+            tandem = eval(self.tandem_factor_func)
+        return result, gate_name, tandem
 
     def __str__(self):
         if self.response_func is not None:
@@ -300,6 +306,7 @@ class AssignGraph:
     """
 
     """
+
     def __init__(self, inputs: list = None, outputs: list = None, gates: list = None):
         if gates is None:
             gates = []
@@ -356,7 +363,7 @@ class AssignGraph:
             return ValueError()
 
     # NOTE: needs modification
-    def get_score(self, node, verbose=False):  # TODO: Base case is tandem calc on the input?
+    def get_score(self, node, verbose=False):
         """
 
         :param node:
@@ -367,27 +374,26 @@ class AssignGraph:
             if node.score_in_use is not None:
                 # if verbose:
                 #     print(f'{node.name} {node.out_scores[node.score_in_use]}')
-                return node.out_scores[node.score_in_use]
+                return node.out_scores[node.score_in_use], node.tandem_scores[node.score_in_use]
             else:
                 log.cf.warning('this should not happen')
-                return max(node.out_scores.values())
+                return max(node.out_scores.values()), node.tandem_scores[node.score_in_use]
         elif type(node) == Output:
-            input_score = self.get_score(self.find_prev(node))
+            input_score = self.get_score(self.find_prev(node))[0]
             output_score = node.eval_output(input_score=input_score)
             # if verbose:
             #     print(f'{node.name} {output_score}')
-            return output_score
+            return output_score, 0
         elif type(node) == Gate:
-            if node.gate_type == 'NOT':
-                input_score = self.get_score(self.find_prev(node))
+            if node.gate_type == 'NOT':  # has single input
+                input_score = self.get_score(self.find_prev(node))[0]
                 x = input_score
-                # TODO: Retrieve tandem score
-            elif node.gate_type == 'NOR':
-
-                input_scores = [self.get_score(x) for x in self.find_prev(node)]
-                x1 = input_scores[0]
-                x2 = input_scores[1]
-                # TODO: Retrieve tanadem score(s)
+            elif node.gate_type == 'NOR':  # has two inputs
+                scores = [self.get_score(x) for x in self.find_prev(node)]
+                x1 = scores[0][0]
+                x2 = scores[1][0]
+                t1 = scores[0][1]
+                # TODO: Retrieve tandem score(s)
                 eval_params = node.gate_params
                 for k in eval_params.values():
                     for r in k:
@@ -397,10 +403,10 @@ class AssignGraph:
                 # there shouldn't be gates other than NOR/NOT
                 raise Exception
             # below tries to calculate scores for a gate (the best gate choice in this case)
-            gate_score = node.eval_gates(x)
+            gate_score, tandem_score = node.eval_gates(x)
             # if verbose:
             #     print(f'{node.gate_in_use} {gate_score}')
-            return gate_score
+            return gate_score, tandem_score  # CRIT: Fix tandem scoring...
         else:
             raise Exception
 
@@ -412,6 +418,7 @@ class GraphParser:
     """
     Used to initialize all permutations of gate assignments from UCF to netlist.
     """
+
     def __init__(self, inputs, outputs, gates):
         self.inputs = self.load_inputs(inputs)
         self.outputs = self.load_outputs(outputs)
