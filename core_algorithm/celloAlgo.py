@@ -27,8 +27,8 @@ from core_algorithm.utils.sbol import *
 def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
     try:
         start_time = time.time()
-        CELLO3(v_name_, ucf_name_, in_name_,
-               out_name_, in_path_, out_path_, options)
+        process = CELLO3(v_name_, ucf_name_, in_name_,
+                         out_name_, in_path_, out_path_, options)
         log.cf.info(
             f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
         print("Cello completed execution")
@@ -121,6 +121,7 @@ class CELLO3:
             self.iter_count = 0
             self.best_score = 0
             self.best_graphs = []
+            self.status = False
 
             # Loggers
             log.config_logger(v_name, ucf_name, self.log_overwrite)
@@ -141,13 +142,13 @@ class CELLO3:
             if not cont:
                 # raise an error
                 # break if run into problem with yosys, call_YOSYS() will show the error.
-                return
+                raise CelloError('Error with logic synthesis')
 
             # initialize RG from netlist JSON output from Yosys
             self.rnl = self.__load_netlist()
 
             if not self.rnl:
-                return
+                raise CelloError('Error with logic synthesis')
         except Exception as e:
             raise CelloError('Error with logic synthesis', e)
 
@@ -156,7 +157,7 @@ class CELLO3:
             self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
 
             if not self.ucf.valid:
-                return  # breaks early if UCF file has errors
+                raise CelloError('Error with UCF')
         except Exception as e:
             raise CelloError('Error reading UCF', e)
 
@@ -179,7 +180,7 @@ class CELLO3:
                 iter_)  # Executing the algorithm if things check out
             if best_result is None:
                 log.cf.error('\nProblem with best_result...\n')
-                return
+                raise CelloError('Problem with best result')
             # best_score = best_result[0]
             best_graph = best_result[1]
             truth_table = best_result[2]
