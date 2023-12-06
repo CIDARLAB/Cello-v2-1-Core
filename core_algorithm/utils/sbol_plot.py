@@ -282,7 +282,7 @@ def plot_dna(dna_designs, png_filename, pdf_filename, plot_params, regs_info):
         ax.set_title(f'Design Option {i + 1}', fontsize=5, loc='left')
 
     # Update the size of the figure to fit the constructs drawn
-    fig_x_dim = max_dna_len / 70.0
+    fig_x_dim = max_dna_len / 110.0
     if fig_x_dim < 1.0:
         fig_x_dim = 1.0
     fig_y_dim = 1.2 * len(ax_list)
