@@ -48,9 +48,12 @@ class UCF:
     def __parse_helper(self):
         # filepath = os.path.join(*self.filepath.split('/'))
         # # Communication Molecule filepaths
-        u = os.path.join(self.filepath, self.ucf_file + '.json')
-        i = os.path.join(self.filepath, self.in_file + '.json')
-        o = os.path.join(self.filepath, self.out_file + '.json')
+        # u = os.path.join(self.filepath, self.ucf_file)
+        # i = os.path.join(self.filepath, self.in_file)
+        # o = os.path.join(self.filepath, self.out_file)
+        u = os.path.join(self.filepath, f'{self.ucf_file}{".json" if not self.ucf_file.endswith(".json") else ""}')
+        i = os.path.join(self.filepath, f'{self.in_file}{".json" if not self.in_file.endswith(".json") else ""}')
+        o = os.path.join(self.filepath, f'{self.out_file}{".json" if not self.out_file.endswith(".json") else ""}')
         paths = [u, i, o]
         out = []
         for f in paths:
