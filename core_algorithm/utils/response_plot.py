@@ -117,8 +117,7 @@ def plot_bars(filepath, plot_name, best_graph, table, units):
     matplotlib_logger.setLevel(logging.INFO)
     logging.disable(logging.INFO)
 
-    plt.savefig(f'{filepath}_response-plots.png')
-    plt.savefig(f'{filepath}_response-plots.pdf')
+    plt.savefig(f'{filepath}_response_plots.png')
 
     # Re-enable console output
     logging.disable(logging.NOTSET)

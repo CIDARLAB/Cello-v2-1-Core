@@ -1,6 +1,6 @@
 import os
 from core_algorithm.celloAlgo import cello_initializer
-from config import LIBRARY_DIR, VERILOGS_DIR, CONSTRAINTS_DIR, TEMP_OUTPUTS_DIR
+from config import LIBRARY_DIR, TEMP_OUTPUTS_DIR
 from core_algorithm.utils import log
 from core_algorithm.utils.config_tester import test_all_configs
 
@@ -22,8 +22,6 @@ def start_cli():
     # TODO: source UCF files from CELLO-UCF instead
     # (contains the verilog files, and UCF files)
     in_path_ = LIBRARY_DIR
-    verilogs_path = VERILOGS_DIR
-    ucf_path = CONSTRAINTS_DIR
     out_path_ = TEMP_OUTPUTS_DIR
     v_name_ = ''
     ucf_name_ = ''
@@ -54,7 +52,7 @@ def start_cli():
         # Example v_names: 'and', 'xor', 'priorityDetector', 'g70_boolean'
         print(user_input := input(
             f'\n\nFor which Verilog file do you want a genetic circuit design and score to be generated?\n'
-            f'(Hint: ___.v, without the .v, from the {verilogs_path[:-1]} folder...or type \'help\' for more info.)\n\n'
+            f'(Hint: ___.v, without the .v, from the {in_path_[:-1]} folder...or type \'help\' for more info.)\n\n'
             f'Verilog File: '))
 
         if user_input == 'help':
@@ -129,17 +127,17 @@ def start_cli():
                 log.cf.info(ucf_name_ := input(
                     f'\n\nPlease specify the name of the UCF file you want to use...\n'
                     f'(Hint: {label}.json, with the .UCF but not the .json, from the'
-                    f' {ucf_path[:-1]} folder.)\n\n'
+                    f' {in_path_[:-1]} folder.)\n\n'
                     f'UCF File Name: '))
                 label = "\u001b[4m" + '   .input' + "\u001b[0m"
                 log.cf.info(in_name_ := input(
                     f'\n\nPlease specify the name of the Input file you want to use...\n'
-                    f'(Hint: {label}.json, with the .input but not the .json, from the {ucf_path[:-1]} folder.)\n\n'
+                    f'(Hint: {label}.json, with the .input but not the .json, from the {in_path_[:-1]} folder.)\n\n'
                     f'Input File Name: '))
                 label = "\u001b[4m" + '   .output' + "\u001b[0m"
                 log.cf.info(out_name_ := input(
                     f'\n\nPlease specify the name of the Output file you want to use...\n'
-                    f'(Hint: {label}.json, with the .output but not the .json, from the {ucf_path[:-1]} folder.)\n\n'
+                    f'(Hint: {label}.json, with the .output but not the .json, from the {in_path_[:-1]} folder.)\n\n'
                     f'Output File Name: '))
 
             options = ''
@@ -167,7 +165,7 @@ def start_cli():
             # if 'ex' in options_list:
             #     exhaustive = True
 
-    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, verilogs_path, ucf_path, out_path_,
+    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_,
                                options={'yosys_cmd_choice': yosys_cmd_choice,
                                         'verbose': verbose,
                                         'log_overwrite': log_overwrite,

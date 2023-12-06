@@ -203,7 +203,7 @@ class DNADesign:
                         self.sequences[part].color = '000000'
 
         transfer_part_colors()
-        dna_part_info_path = filepath + '_dpl-part-information.csv'
+        dna_part_info_path = filepath + '_dpl_part_information.csv'
         os.makedirs(os.path.dirname(dna_part_info_path), exist_ok=True)
         with open(dna_part_info_path, 'w', newline='') as dna_part_info:
             csv_writer = csv.writer(dna_part_info)
@@ -240,7 +240,7 @@ class DNADesign:
 
         :param filepath:
         """
-        dna_part_order_path = filepath + '_dpl-dna-designs.csv'
+        dna_part_order_path = filepath + '_dpl_dna_designs.csv'
         os.makedirs(os.path.dirname(dna_part_order_path), exist_ok=True)
         with open(dna_part_order_path, 'w', newline='') as dna_part_order:
             csv_writer = csv.writer(dna_part_order)
@@ -257,7 +257,7 @@ class DNADesign:
 
         :param filepath:
         """
-        plot_parameters = filepath + '_dpl-plot-parameters.csv'
+        plot_parameters = filepath + '_plot_parameters.csv'
         os.makedirs(os.path.dirname(plot_parameters), exist_ok=True)
         with open(plot_parameters, 'w', newline='') as plot_params:
             csv_writer = csv.writer(plot_params)
@@ -276,7 +276,7 @@ class DNADesign:
 
         :param filepath:
         """
-        regulatory_info = filepath + '_dpl-regulatory-info.csv'
+        regulatory_info = filepath + '_dpl_regulatory_information.csv'
         os.makedirs(os.path.dirname(regulatory_info), exist_ok=True)
         with open(regulatory_info, 'w', newline='') as reg_info:
             csv_writer = csv.writer(reg_info)

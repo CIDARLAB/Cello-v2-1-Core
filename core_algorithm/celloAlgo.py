@@ -20,11 +20,13 @@ from core_algorithm.utils.response_plot import plot_bars
 from core_algorithm.utils.sbol import *
 
 
-def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options):
+def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_, options):
     try:
         start_time = time.time()
-        CELLO3(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options)
-        log.cf.info(f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
+        process = CELLO3(v_name_, ucf_name_, in_name_,
+                         out_name_, in_path_, out_path_, options)
+        log.cf.info(
+            f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
         print("Cello completed execution")
         return {'status': 'SUCCESS', 'msg': 'Cello process executed successfully'}
     except CelloError as e:
@@ -65,7 +67,7 @@ class CELLO3:
         [end]
     """
 
-    def __init__(self, v_name, ucf_name, in_name, out_name, verilogs_path, constraints_path, out_path,
+    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, in_path: str, out_path: str,
                  options: dict = None):
 
         # NOTE: Initialization
@@ -92,8 +94,7 @@ class CELLO3:
                 # Normally uses Scipy's dual annealing
                 self.exhaustive = options['exhaustive']
 
-            self.verilogs_path = os.path.abspath(verilogs_path)
-            self.constraints_path = os.path.abspath(constraints_path)
+            self.in_path = os.path.abspath(in_path)
             self.out_path = os.path.abspath(out_path)
             self.verilog_name = v_name
             self.ucf_name = ucf_name
@@ -105,7 +106,7 @@ class CELLO3:
             self.units = 'Unknown_Units'
 
             # Loggers
-            log.config_logger(self.verilog_name, self.ucf_name, self.log_overwrite)
+            log.config_logger(v_name, ucf_name, self.log_overwrite)
             log.reset_logs()
             # TODO: print settings already chosen
             print_centered(['CELLO V2.1', self.verilog_name + ' + ' + self.ucf_name])
@@ -116,25 +117,25 @@ class CELLO3:
         # NOTE: Logic Synthesis (YOSYS)
         try:
             # yosys cmd set 1 seems best after trial & error
-            cont = call_YOSYS(self.verilogs_path, self.out_path, self.verilog_name, self.ucf_name[:-4], yosys_cmd_choice)
+            cont = call_YOSYS(in_path, out_path, v_name, yosys_cmd_choice)
 
             print_centered('End of Logic Synthesis')
             if not cont:
                 # raise an error
                 # break if run into problem with yosys, call_YOSYS() will show the error.
-                return
+                raise CelloError('Error with logic synthesis')
 
             # initialize RG from netlist JSON output from Yosys
             self.rnl = self.__load_netlist()
 
             if not self.rnl:
-                return
+                raise CelloError('Error with logic synthesis')
         except Exception as e:
             raise CelloError('Error with logic synthesis', e)
 
         # NOTE: Initializes UCF, Input, and Output from filepaths
         try:
-            self.ucf = UCF(self.constraints_path, self.ucf_name, self.in_name, self.out_name)
+            self.ucf = UCF(self.in_path, ucf_name, in_name, out_name)
             units = self.ucf.query_top_level_collection(self.ucf.UCFout, 'measurement_std')
             if units:
                 self.units = units[0]['signal_carrier_units']
@@ -145,7 +146,7 @@ class CELLO3:
                 else:
                     log.cf.warning('Cannot find units...')
             if not self.ucf.valid:
-                return  # breaks early if UCF file has errors
+                raise CelloError('Error with UCF')
         except Exception as e:
             raise CelloError('Error reading UCF', e)
 
@@ -165,7 +166,8 @@ class CELLO3:
             best_result = self.techmap(iter_)  # Executing the algorithm if things check out
             if best_result is None:
                 log.cf.error('\nProblem with best_result...\n')
-                return
+                raise CelloError('Problem with best result')
+            # best_score = best_result[0]
             best_graph = best_result[1]
             truth_table = best_result[2]
             truth_table_labels = best_result[3]
@@ -210,7 +212,7 @@ class CELLO3:
                 log.cf.info(f' - {rnl_out} {str(g_out)}')
                 out_labels[rnl_out[0]] = g_out.name
 
-            tech_diagram_filepath = os.path.join(self.out_path, v_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
+            tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
             replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
             raise CelloError('Error with results/circuit design', e)
@@ -218,7 +220,7 @@ class CELLO3:
         # NOTE: TRUTH TABLE/GATE SCORING
         try:
             # Create the full path for the file
-            filepath = os.path.join(out_path, self.verilog_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
+            filepath = os.path.join(out_path, self.verilog_name, f"{self.verilog_name}_activity-table.csv")
 
             # Ensure the directory exists
             directory_path = os.path.dirname(filepath)
@@ -298,15 +300,21 @@ class CELLO3:
 
             base_dir = os.path.dirname(filepath)
 
-            plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-plot-parameters.csv")
-            dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-part-information.csv")
-            dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-regulatory-info.csv")
-            dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-dna-designs.csv")
-            dpl_png_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.png")
-            dpl_pdf_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.pdf")
+            plot_parameters_file = os.path.join(
+                base_dir, f"{os.path.basename(filepath)}_plot_parameters.csv")
+            dpl_part_info_file = os.path.join(
+                base_dir, f"{os.path.basename(filepath)}_dpl_part_information.csv")
+            dpl_regulatory_info_file = os.path.join(
+                base_dir, f"{os.path.basename(filepath)}_dpl_regulatory_information.csv")
+            dpl_dna_designs_file = os.path.join(
+                base_dir, f"{os.path.basename(filepath)}_dpl_dna_designs.csv")
+            dpl_png_file = os.path.join(
+                base_dir, f"{os.path.basename(filepath)}_dpl.png")
+            dpl_pdf_file = os.path.join(
+                base_dir, f"{os.path.basename(filepath)}_dpl.pdf")
 
             print(' - ', end='')
-            plotter(plot_parameters_file, dpl_part_info_file, dpl_reg_info_file,
+            plotter(plot_parameters_file, dpl_part_info_file, dpl_regulatory_info_file,
                     dpl_dna_designs_file, dpl_png_file, dpl_pdf_file)
 
             log.cf.info('SBOL XML and related files generated')
@@ -326,7 +334,7 @@ class CELLO3:
         # NOTE: ZIPFILE
         try:
             archive_name = os.path.join(
-                out_path, f"{self.verilog_name}_{self.ucf_name[:-4]}_all-files")
+                out_path, f"{self.verilog_name}_all-files")
             target_directory = os.path.join(out_path, self.verilog_name)
 
             shutil.make_archive(archive_name, 'zip', target_directory)
@@ -335,7 +343,8 @@ class CELLO3:
             raise CelloError('Error with generating zipfile', e)
 
     def __load_netlist(self):
-        net_path = os.path.join(self.out_path, self.verilog_name,f'{self.verilog_name}_{self.ucf_name[:-4]}_yosys.json')
+        net_path = os.path.join(self.out_path, self.verilog_name, self.verilog_name + '.json')
+        # net_path = os.path.join(self.out_path, self.verilog_name, self.verilog_name)
         net_file = open(net_path, 'r')
         net_json = json.load(net_file)
         netlist = Netlist(net_json)

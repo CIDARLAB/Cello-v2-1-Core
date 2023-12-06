@@ -12,7 +12,7 @@ from core_algorithm.utils import log
 import re
 
 
-def call_YOSYS(in_path=None, out_path=None, v_name=None, ucf_name=None, choice=0, no_files=False):
+def call_YOSYS(in_path=None, out_path=None, v_name=None, choice=0, no_files=False):
     try:
         # Setting up the output directory
         new_out = os.path.join(out_path, v_name)
@@ -60,13 +60,13 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, ucf_name=None, choice=0
     # Commands depending on whether to create files or not
     if no_files:
         command_end = [
-            f"show -format pdf -prefix {os.path.join(new_out, f'{v_name}_{ucf_name}_yosys')}"]
+            f"show -format pdf -prefix {os.path.join(new_out, f'{v_name}_yosys')}"]
     else:
         command_end = [
-            f"show -format pdf -prefix {os.path.join(new_out, f'{v_name}_{ucf_name}_yosys')}",
-            f"write_verilog -noexpr {os.path.join(new_out, f'{v_name}_{ucf_name}_yosys')}",
-            f"write_edif {os.path.join(new_out, f'{v_name}_{ucf_name}_yosys.edif')}",
-            f"write_json {os.path.join(new_out, f'{v_name}_{ucf_name}_yosys.json')}"
+            f"show -format pdf -prefix {os.path.join(new_out, f'{v_name}_yosys')}",
+            f"write_verilog -noexpr {os.path.join(new_out, f'struct_{v_name}')}",
+            f"write_edif {os.path.join(new_out, f'{v_name}.edif')}",
+            f"write_json {os.path.join(new_out, f'{v_name}.json')}"
         ]
 
     core_commands = [
@@ -160,6 +160,6 @@ def replace_techmap_diagram_labels(path: str, gate_labels: dict[str], in_labels:
                                       f'{old_label[2]}\\\\nPRIMARY_OUTPUT\\\\n{new_label}', line)
                 dot_new.write(line)
 
-    os.system(f'dot -o{path}_tech-mapping.png -Tpng {path}_yosys.dot')
+    os.system(f'dot -o{path}_tech_mapping.png -Tpng {path}_yosys.dot')
     os.remove(f'{path}_yosys.pdf')
-    os.system(f'dot -o{path}_tech-mapping.pdf -Tpdf {path}_yosys.dot')
+    os.system(f'dot -o{path}_tech_mapping.pdf -Tpdf {path}_yosys.dot')
