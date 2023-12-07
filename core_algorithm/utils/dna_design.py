@@ -306,8 +306,8 @@ class DNADesign:
         with open(dna_sequences, 'w', newline='') as dna_seq:
             csv_writer = csv.writer(dna_seq)
             for order in self.valid_circuits:
-                segments = ['', 'Location 1']
-                count = 2
+                segments = ['']
+                count = 1
                 for seq in order:
                     # if seq == '_NONCE_PAD':
                     if seq.endswith('_NONCE_PAD'):
@@ -315,8 +315,8 @@ class DNADesign:
                         count += 1
             csv_writer.writerow(segments)
             for num, order in enumerate(self.valid_circuits):
-                sequence = [f'Design Option {num + 1}:', '']
-                index = 1
+                sequence = [f'Design Option {num + 1}:']
+                index = 0
                 for seq in order:
                     # if seq != '_NONCE_PAD':
                     if not seq.endswith('_NONCE_PAD'):
