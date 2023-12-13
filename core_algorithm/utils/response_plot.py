@@ -64,7 +64,7 @@ def plot_bars(filepath, plot_name, best_graph, table, units):
 
     # fig = plt.subplots()
     px = 1 / plt.rcParams['figure.dpi']
-    plt.figure(figsize=((640 + 180*input_cnt)*px, (80 + 360*output_cnt)*px))
+    plt.figure(figsize=(px*(640 + 180*input_cnt), px*(120 + output_cnt*(280 + 120*input_cnt))))
     plt.subplots_adjust(top=0.8 + (0.03*output_cnt), hspace=0.5, wspace=0.5)
     if plot_name.endswith('.UCF'):
         plot_name = plot_name[:-4]

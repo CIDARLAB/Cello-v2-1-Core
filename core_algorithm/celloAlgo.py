@@ -471,7 +471,11 @@ class CELLO3:
                 f'\n#{max_iterations} possible permutations for {self.verilog_name}.v+{self.ucf_name}...')
             log.cf.info(
                 f'(#{confirm} permutations of UCF gate groups confirmed.)')
-
+            # For testing/tracking input, gate, output, permutation counts
+            # with open(f'permutation_cnts.csv', 'a', newline='') as csvfile:
+            #     csv_writer = csv.writer(csvfile)
+            #     csv_writer.writerow([self.verilog_name, num_netlist_inputs, num_netlist_gates, num_netlist_outputs, max_iterations])
+            # return
             print_centered('End of condition checks')
 
         return pass_check, max_iterations
