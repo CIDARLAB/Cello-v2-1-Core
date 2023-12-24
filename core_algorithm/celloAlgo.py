@@ -5,9 +5,20 @@ TODO: Add space/time complexity metrics for simulated annealing to the readme?
 TODO: Also update examples and assets folder...
 """
 
-import itertools
+import os
+# Note: environment variables should set before numpy/scipy import
+os.environ["OMP_NUM_THREADS"] = "1"  # export OMP_NUM_THREADS=4
+os.environ["OPENBLAS_NUM_THREADS"] = "1"  # export OPENBLAS_NUM_THREADS=4
+os.environ["MKL_NUM_THREADS"] = "1"  # export MKL_NUM_THREADS=6
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
+os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
+
+from threadpoolctl import threadpool_limits, threadpool_info
 import scipy
+print(threadpool_info())  # Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
+
 import time
+import itertools
 
 from core_algorithm.utils.gate_assignment import *
 from core_algorithm.utils.logic_synthesis import *
@@ -559,59 +570,58 @@ class CELLO3:
         :param iter_: int of total possible configurations
         :return: list: self.best_graphs: [(circuit_score, graph, tb, tb_labels)]
         """
+        with threadpool_limits(limits=1, user_api='blas'):  # TODO: Needed?
+            print_centered(
+                'Running SIMULATED ANNEALING gate-assignment algorithm...')
+            i_perms, o_perms, g_perms = [], [], []
+            # TODO: Optimize permutation arrays
+            for i_perm in itertools.permutations(i_list, i):
+                i_perms.append(i_perm)
+            for o_perm in itertools.permutations(o_list, o):
+                o_perms.append(o_perm)
+            for g_perm in itertools.permutations(g_list, g):
+                g_perms.append(g_perm)
+            max_fun = iter_ if iter_ < 10000 else 10000
 
-        print_centered(
-            'Running SIMULATED ANNEALING gate-assignment algorithm...')
-        i_perms, o_perms, g_perms = [], [], []
-        # TODO: Optimize permutation arrays
-        for i_perm in itertools.permutations(i_list, i):
-            i_perms.append(i_perm)
-        for o_perm in itertools.permutations(o_list, o):
-            o_perms.append(o_perm)
-        for g_perm in itertools.permutations(g_list, g):
-            g_perms.append(g_perm)
-        max_fun = iter_ if iter_ < 1000 else 1000
+            # DUAL ANNEALING SCIPY FUNC
+            def func(x):
+                return self.prep_assign_for_scoring(
+                    x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
 
-        # DUAL ANNEALING SCIPY FUNC
-        def func(x):
-            return self.prep_assign_for_scoring(
-                x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+            lo = [0, 0, 0]
+            hi = [len(i_perms), len(o_perms), len(g_perms)]
+            bounds = list(zip(lo, hi))
+            # TODO: CK: Implement seed (test in simplified script; test other scipy func seeding)
+            # TODO: CK: Implement toxicity check...
+            ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
+            """
+            Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
+            Dual Annealing combines Classical Simulated Annealing, Fast Simulated Annealing, and local search optimizations
+            to improve upon the standard simulated annealing technique. The algorithm does not guarantee a global optimal 
+            score but can find a good regional optimum in far less time than would be required by exhaustive search.
+            
+            Key Parameters:
+            :param func:    Function of form func(x, *args) with return value that dual_annealing is attempting to optimize
+            :param bounds:  Upper and lower bounds for each dimension/variable being passed into func
+            :param maxiter: Max number of ~global searches (to identify neighborhoods with potential local maxima)
+            :param max_fun: Max number of total function calls/circuit iterations, including local minimization searches
+            :param no_local_search: Enable to function more like traditional simulated annealing
+            Note: Additional parameters specified in URL above...
+    
+            :return OptimizeResult: Array including the solution input array, best score, number of iterations run, and a 
+            message indicating the specific reason for termination, among additional attributes specified here...
+            docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult  
+            """
 
-        lo = [0, 0, 0]
-        hi = [len(i_perms), len(o_perms), len(g_perms)]
-        bounds = list(zip(lo, hi))
-        # TODO: CK: Implement seed (test in simplified script; test other scipy func seeding)
-        # TODO: CK: Implement toxicity check...
-        ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
-        """
-        Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
-        Dual Annealing combines Classical Simulated Annealing, Fast Simulated Annealing, and local search optimizations
-        to improve upon the standard simulated annealing technique. The algorithm does not guarantee a global optimal 
-        score but can find a good regional optimum in far less time than would be required by exhaustive search.
-        
-        Key Parameters:
-        :param func:    Function of form func(x, *args) with return value that dual_annealing is attempting to optimize
-        :param bounds:  Upper and lower bounds for each dimension/variable being passed into func
-        :param maxiter: Max number of ~global searches (to identify neighborhoods with potential local maxima)
-        :param max_fun: Max number of total function calls/circuit iterations, including local minimization searches
-        :param no_local_search: Enable to function more like traditional simulated annealing
-        Note: Additional parameters specified in URL above...
-
-        :return OptimizeResult: Array including the solution input array, best score, number of iterations run, and a 
-        message indicating the specific reason for termination, among additional attributes specified here...
-        docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.OptimizeResult.html#scipy.optimize.OptimizeResult  
-        """
-
-        # TODO: CK: Capture multiple equivalent optimums
-        # self.best_graphs = ret.x     # solution inputs (already stored in object attribute)
-        # solution score (reverses inversion from prep_assign_for_scoring)
-        self.best_score = -ret.fun
-        # count = ret.nfev     # number of func executions
-        # reason = ret.message # reason for termination
-        log.cf.info(f'\n\nDONE!\n'
-                    f'Completed: {self.iter_count:,}/{max_fun:,} iterations (out of {iter_:,} possible iterations)\n'
-                    f'Best Score: {self.best_score}')
-
+            # TODO: CK: Capture multiple equivalent optimums
+            # self.best_graphs = ret.x     # solution inputs (already stored in object attribute)
+            # solution score (reverses inversion from prep_assign_for_scoring)
+            self.best_score = -ret.fun
+            # count = ret.nfev     # number of func executions
+            # reason = ret.message # reason for termination
+            log.cf.info(f'\n\nDONE!\n'
+                        f'Completed: {self.iter_count:,}/{max_fun:,} iterations (out of {iter_:,} possible iterations)\n'
+                        f'Best Score: {self.best_score}')
         return self.best_graphs
 
     def exhaustive_assign(self, i_list: list, o_list: list, g_list: list, i: int, o: int, g: int,
