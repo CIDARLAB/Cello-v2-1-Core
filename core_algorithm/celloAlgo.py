@@ -13,6 +13,10 @@ os.environ["MKL_NUM_THREADS"] = "1"  # export MKL_NUM_THREADS=6
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
 
+from memory_profiler import memory_usage
+# mem_usage = memory_usage(-1, interval=.2, timeout=30)
+# print(mem_usage)
+
 from threadpoolctl import threadpool_limits, threadpool_info
 import scipy
 print(threadpool_info())  # Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
@@ -581,7 +585,7 @@ class CELLO3:
                 o_perms.append(o_perm)
             for g_perm in itertools.permutations(g_list, g):
                 g_perms.append(g_perm)
-            max_fun = iter_ if iter_ < 10000 else 10000
+            max_fun = iter_ if iter_ < 1000 else 1000
 
             # DUAL ANNEALING SCIPY FUNC
             def func(x):
@@ -593,7 +597,9 @@ class CELLO3:
             bounds = list(zip(lo, hi))
             # TODO: CK: Implement seed (test in simplified script; test other scipy func seeding)
             # TODO: CK: Implement toxicity check...
+
             ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
+
             """
             Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
             Dual Annealing combines Classical Simulated Annealing, Fast Simulated Annealing, and local search optimizations
@@ -676,6 +682,8 @@ class CELLO3:
             - iter: Number of total possible configurations
         :return: Best score (only returns score because of how dual_annealing functions; graph info in obj attributes)
         """
+        mem_usage = memory_usage(-1, interval=.1, timeout=0.1)
+        log.cf.info(mem_usage)
 
         (i_perm, o_perm, g_perm) = x
         (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun) = args
