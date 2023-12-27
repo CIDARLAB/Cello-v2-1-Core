@@ -14,12 +14,11 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
 os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
 
 from memory_profiler import memory_usage
-# mem_usage = memory_usage(-1, interval=.2, timeout=30)
-# print(mem_usage)
-
+# Note: memory reported in simulated annealing function
 from threadpoolctl import threadpool_limits, threadpool_info
 import scipy
-print(threadpool_info())  # Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
+# Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
+print('\nThread count: ', threadpool_info()[0]['num_threads'])
 
 import time
 import itertools
@@ -628,6 +627,10 @@ class CELLO3:
             log.cf.info(f'\n\nDONE!\n'
                         f'Completed: {self.iter_count:,}/{max_fun:,} iterations (out of {iter_:,} possible iterations)\n'
                         f'Best Score: {self.best_score}')
+
+            mem_usage = memory_usage(-1, interval=.1, timeout=0.1)
+            print('Memory usage: ', mem_usage[0])
+
         return self.best_graphs
 
     def exhaustive_assign(self, i_list: list, o_list: list, g_list: list, i: int, o: int, g: int,
@@ -682,8 +685,6 @@ class CELLO3:
             - iter: Number of total possible configurations
         :return: Best score (only returns score because of how dual_annealing functions; graph info in obj attributes)
         """
-        mem_usage = memory_usage(-1, interval=.1, timeout=0.1)
-        log.cf.info(mem_usage)
 
         (i_perm, o_perm, g_perm) = x
         (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun) = args
@@ -1077,6 +1078,7 @@ class CELLO3:
         if self.print_iters:
             print('\nscore_circuit returns:')
             print(score)
+
         return score
 
     def __del__(self):
