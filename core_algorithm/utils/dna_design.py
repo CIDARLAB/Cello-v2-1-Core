@@ -9,7 +9,6 @@ import os
 import csv
 from dataclasses import dataclass
 from core_algorithm.utils.py4j_gateway.run_eugene_script import call_mini_eugene
-from copy import deepcopy
 from core_algorithm.utils import log
 
 
@@ -42,29 +41,20 @@ class DevChain:
     reversible: bool  # whether the chain can be reversed and still be internally valid
 
 
-def deep_copy_params(to_call):
+def hex_to_rgb(hex_value: str):
     """
-
-    :param to_call:
-    :return:
+    Converts hex color code to rgb (scaled from 0-1.0; for dnaplotlib part info .csv, which is used for SBOL diagrams)
+    :param hex_value: str (6-digits, with default of '000000', which is black)
+    :return: str (semicolon-separated decimal values)
     """
-    def f(*args, **kwargs):
-        return to_call(*deepcopy(args), **deepcopy(kwargs))
-    return f
-
-
-def hex_to_rgb(hex_value):
-    """
-
-    :param hex_value:
-    :return:
-    """
-    if not hex_value:
+    try:
+        int(hex_value, 16)
+        value = hex_value.lstrip('#')
+    except:
+        log.cf.warn('Passed non-hex val to dna_design.py hex_to_rgb func; defaulting to black...')
         return '0.0;0.0;0.0'
-    value = hex_value.lstrip('#')
-    lv = len(value)
-    vals = list(round(int(value[i:i + lv // 3], 16) / 255, 2)
-                for i in range(0, lv, lv // 3))
+    vals = list(round(int(value[i:i + 6 // 3], 16) / 255, 2)
+                for i in range(0, 6, 6 // 3))
     return ';'.join(str(val) for val in vals)
 
 
