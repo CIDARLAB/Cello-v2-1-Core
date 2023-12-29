@@ -4,7 +4,9 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.text.SimpleDateFormat;  
-import java.util.Date;  
+import java.util.Date;
+import javax.management.*;
+import java.lang.management.ManagementFactory;
 
 import org.cidarlab.minieugene.MiniEugene;
 import org.cidarlab.minieugene.dom.Component;
@@ -63,6 +65,9 @@ public class miniEugenePermuter {
 
 	    System.out.println("Returning " + solutions.length + " valid part orders to the Python script...");
 
+        System.out.println(Thread.currentThread().getThreadGroup().getName() + " threads: " + Thread.activeCount());
+        System.out.println("Total threads (all groups): " + ManagementFactory.getThreadMXBean().getThreadCount());
+
 	    Runtime rt = Runtime.getRuntime();
         long total_mem = rt.totalMemory();
         long free_mem = rt.freeMemory();
@@ -81,7 +86,6 @@ public class miniEugenePermuter {
     miniEugenePermuter app = new miniEugenePermuter();  // app is now the gateway.entry_point
     GatewayServer server = new GatewayServer(app);
     server.start();
-	
 	System.out.println("Py4J Java Gateway instantiated.");
 	System.out.println("\nWaiting for calls from the Python script...\n");
   }
