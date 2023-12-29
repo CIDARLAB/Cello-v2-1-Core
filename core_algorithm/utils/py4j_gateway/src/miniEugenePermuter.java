@@ -47,7 +47,8 @@ public class miniEugenePermuter {
 		// }
 
 		// Reformat for return to Python
-        String[][] solutions = new String[orders_count][part_count];
+		int len = me.getSolutions().size();
+        String[][] solutions = new String[len][part_count];
 		if(null != me.getSolutions()) {
 		    int i = 0;
 			for(Component[] solution : me.getSolutions()) {

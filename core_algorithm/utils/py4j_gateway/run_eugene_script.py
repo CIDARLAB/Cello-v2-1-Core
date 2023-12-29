@@ -14,20 +14,20 @@ import re
 from core_algorithm.utils import log
 
 
-def call_mini_eugene(rules: list[str], orders_count: int = 5):
+def call_mini_eugene(rules: list[str], orders_count: int = 1000):
     """
     NOTE: Commands to be executed before the Python script...
-    External command to compile miniEugenePermuter class:
-        javac -cp '.:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar' miniEugenePermuter.java   // mac / lin
-        javac -cp .;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar miniEugenePermuter.java     // win
-    External command to execute program to instantiate Py4J Java Gateway:
-        java -cp .:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter    // mac / lin
-        java -cp ;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter      // win
+    Compilation:
+      javac -cp .:jars/py4j.jar:.:jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src src/miniEugenePermuter.java
+      javac -cp .;jars/py4j.jar;.;jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src src/miniEugenePermuter.java
+    Execution:
+      java -cp .:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter // mac
+      java -cp .;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter // win
     NOTE: May need to add java to the path and restart the console...
 
     :param rules:
     :param part_count:
-    :param orders_count:
+    :param orders_count: -1 to find ALL valid permutations (may be prohibitively long)
     """
 
     from py4j.java_gateway import JavaGateway, GatewayParameters
@@ -80,8 +80,7 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
     # print('Rules: ', rules)
     # print('\nPart_count: ', part_count)
     # print('\nOrders_count: ', orders_count)
-    java_part_orders = miniEugeneInstance.miniPermute(
-        rules, part_count, orders_count)  # FIXME: Add device rule loop
+    java_part_orders = miniEugeneInstance.miniPermute(rules, part_count, orders_count)  # FIXME: Add device rule loop
     if java_part_orders:
         # log.cf.info('Valid part orders found by miniEugene...')
         valid_orders = []  # Convert back to Python-friendly form
@@ -92,7 +91,15 @@ def call_mini_eugene(rules: list[str], orders_count: int = 5):
                     order.append(part)
                 valid_orders.append(order)
                 # log.cf.info(f'   + {order}')
-        # print("valid_orders: ", valid_orders)
-        return valid_orders
+        # print("valid_orders: ")
+        # for order in valid_orders:
+        #     print(order)
+        if len(valid_orders) > 5:
+            selected_orders = []
+            for cnt in range(5):
+                selected_orders.append(valid_orders[cnt*len(valid_orders)//5])
+            return selected_orders
+        else:
+            return valid_orders
     else:
         log.cf.error("miniEugene did not return valid part orders...")
