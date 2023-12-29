@@ -95,7 +95,7 @@ class DNADesign:
         # log.cf.info(f'\nself.fenceposts:\n{self.fenceposts}')
 
     # NOTE: CREATE OUTPUT FILES BASED ON DNA PART ORDER AND RELATED INFO ###############################################
-    def get_part_orders(self):
+    def prep_to_get_part_orders(self):
 
         def cycle_thru_alt_rulesets():  # TODO: Finish setting up ruleset traversal
 
@@ -144,6 +144,8 @@ class DNADesign:
             if f'CONTAINS {loc}' not in self.circuit_rules:
                 self.circuit_rules.append(f'CONTAINS {loc}')
         # consolidated_devices = consolidate_devices()  # len(consolidated_devices)
+
+    def get_part_orders(self):
         selected_device_orders = call_mini_eugene(self.circuit_rules)  # NOTE: miniEugene*
         for order in selected_device_orders:
             main_devices = []

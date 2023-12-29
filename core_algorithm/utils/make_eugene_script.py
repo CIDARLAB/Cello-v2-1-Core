@@ -33,11 +33,11 @@ class EugeneStruct:
     """from 'gates' block in UCF"""
     gates_struct: str = ""
     """from 'gates' block in UCF"""
-    struct_cassettes: list[str, str, int, list[str]] = field(default_factory=list[str, str, int, list[str]])
+    struct_cassettes: list[list[str, str, int, list[str]]] = field(default_factory=list[list[str, str, int, list[str]]])
     """[ [ 1st name, cassette name, num of ins, [components] ] , etc.]"""
     inputs: list[str] = field(default_factory=list[str])
     """gates_name of input nodes"""
-    outputs: str = ""  # NOTE: Can only handle single output per structure
+    outputs: list[str] = ""  # NOTE: Can only handle single output per structure
     """gates_name of output nodes"""
     color: str = ""
     """color from 'gates' block in UCF; used in SBOL diagram"""
@@ -64,7 +64,7 @@ class EugeneSequence:
     """all device rules for this part (that are relevant to this circuit)"""
     cir_rules: list[str] = field(default_factory=list[str])
     """circuit rules associated with each part (mostly for scars)"""
-    color: str = ""
+    color: str = "000000"
     """"""
 
 
@@ -92,7 +92,7 @@ class EugeneCassette:
     """'outputs' (from input node's UCF structures block) name for each input node"""
     comps: list[str] = field(default_factory=list[str])
     """'components' (from main UCF 'structures' block)"""
-    outputs: str = ""   # NOTE: Can only handle single output per structure
+    outputs: list[str] = ""   # NOTE: Can only handle single output per structure
     """same 'outputs' as the EugeneStruct object"""
     color: str = ""
     """color from structs dict (i.e. from 'gates' block in UCF); used in SBOL diagram"""
