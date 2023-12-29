@@ -14,7 +14,7 @@ def start_gateway():
       java -cp .:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter // mac
       java -cp .;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter // win
 
-    :return:
+    :return: Popen subprocess
     """
 
     working_directory = os.path.join(BASE_DIR, 'core_algorithm', 'utils', 'py4j_gateway')

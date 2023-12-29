@@ -36,8 +36,7 @@ def call_mini_eugene(rules: list[str], orders_count: int = 1000):
     # from py4j.java_collections import ListConverter
 
     # Connect to JVM and setup to convert to Java-friendly containers
-    gateway = JavaGateway(
-        gateway_parameters=GatewayParameters(auto_convert=True))
+    gateway = JavaGateway(gateway_parameters=GatewayParameters(auto_convert=True))
     miniEugeneInstance = gateway.entry_point
     # java_rules = ListConverter().convert(rules, addition_app._gateway_client)  # convert to Java container explicitly
     # gateway.jvm.java.util.Collections.sort(java_rules)

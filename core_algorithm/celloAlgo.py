@@ -7,18 +7,16 @@ TODO: Also update examples and assets folder...
 
 import os
 # Note: environment variables should set before numpy/scipy import
-os.environ["OMP_NUM_THREADS"] = "1"  # export OMP_NUM_THREADS=4
-os.environ["OPENBLAS_NUM_THREADS"] = "1"  # export OPENBLAS_NUM_THREADS=4
-os.environ["MKL_NUM_THREADS"] = "1"  # export MKL_NUM_THREADS=6
-os.environ["VECLIB_MAXIMUM_THREADS"] = "1"  # export VECLIB_MAXIMUM_THREADS=4
-os.environ["NUMEXPR_NUM_THREADS"] = "1"  # export NUMEXPR_NUM_THREADS=6
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
-from memory_profiler import memory_usage
-# Note: memory reported in simulated annealing function
+from memory_profiler import memory_usage  # Note: memory reported in simulated annealing function
+mem_usage = 0
 from threadpoolctl import threadpool_limits, threadpool_info
-import scipy
-# Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
-print('\nThread count: ', threadpool_info()[0]['num_threads'])
+import scipy  # Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
 
 import time
 import itertools
@@ -39,9 +37,10 @@ def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_pat
         start_time = time.time()
         process = CELLO3(v_name_, ucf_name_, in_name_,
                          out_name_, in_path_, out_path_, options)
-        log.cf.info(
-            f'\nCompletion Time: {round(time.time() - start_time, 1)} seconds')
-        print("Cello completed execution")
+        log.cf.info(f'\nThread count: {threadpool_info()[0]["num_threads"]}')
+        log.cf.info(f'Completion Time: {round(time.time() - start_time, 1)} seconds')
+        log.cf.info(f'Annealing mem (usually peak for program): {round(mem_usage[0], 2)} MiB')
+        print("\nCello completed execution")
         return {'status': 'SUCCESS', 'msg': 'Cello process executed successfully'}
     except CelloError as e:
         return e.to_dict()
@@ -83,7 +82,6 @@ class CELLO3:
 
     def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, in_path: str, out_path: str,
                  options: dict = None):
-
         # NOTE: Initialization
         try:
             # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
@@ -191,26 +189,22 @@ class CELLO3:
             graph_outputs_for_printing = list(zip(self.rnl.outputs, best_graph.outputs))
 
             if self.verbose:
-                debug_print(
-                    f'final result for {self.verilog_name}.v+{self.ucf_name}: {best_result[0]}')
+                debug_print(f'final result for {self.verilog_name}.v+{self.ucf_name}: {best_result[0]}')
                 debug_print(best_result[1])
         except Exception as e:
             raise CelloError('Error with circuit scoring', e)
 
         # NOTE: RESULTS/CIRCUIT DESIGN
         try:
-            print_centered(
-                ['RESULTS', self.verilog_name + ' + ' + self.ucf_name])
+            print_centered(['RESULTS', self.verilog_name + ' + ' + self.ucf_name])
             log.cf.info(f'CIRCUIT DESIGN:\n'
                         f' - Best Design: {best_result[1]}\n'
                         f' - Best Circuit Score: {self.best_score}')
 
-            log.cf.info(
-                f'\nInputs ( input response = {best_graph.inputs[0].resp_func_eq} ):')
+            log.cf.info(f'\nInputs ( input response = {best_graph.inputs[0].resp_func_eq} ):')
             in_labels = {}
             for rnl_in, g_in in graph_inputs_for_printing:
-                log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of'
-                            f' {str(list(g_in.out_scores.items()))}')
+                log.cf.info(f' - {rnl_in} {str(g_in)} with max sensor output of {str(list(g_in.out_scores.items()))}')
                 in_labels[rnl_in[0]] = g_in.name
 
             log.cf.info(f'\nGates ( response function = {best_graph.gates[0].response_func};   '
@@ -250,10 +244,9 @@ class CELLO3:
                 csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(['Scores...'])
                 csv_writer.writerows(zip(*[["{:.2e}".format(float(c)) if i > 0 else c for i, c in enumerate(row)]
-                                           for row in zip(*tb) if not row[0].endswith('_I/O')]))
+                                     for row in zip(*tb) if not row[0].endswith('_I/O')]))
                 csv_writer.writerows([[''], ['Binary...']])
-                csv_writer.writerows(
-                    zip(*[row for row in zip(*tb) if row[0].endswith('_I/O')]))
+                csv_writer.writerows(zip(*[row for row in zip(*tb) if row[0].endswith('_I/O')]))
 
             if self.verbose:
                 debug_print("Truth Table (same as before, simpler format):")
@@ -295,8 +288,8 @@ class CELLO3:
 
         # NOTE: DNA DESIGN
         try:
-            dna_designs = DNADesign(
-                structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
+            dna_designs = DNADesign(structs, cassettes, sequences, device_rules, circuit_rules, fenceposts)
+            dna_designs.prep_to_get_part_orders()
             mini_eugene_part_orders = dna_designs.get_part_orders()  # Calls miniEugene
             dna_designs.write_dna_parts_info(filepath)
             dna_designs.write_dna_parts_order(filepath)
@@ -628,8 +621,8 @@ class CELLO3:
                         f'Completed: {self.iter_count:,}/{max_fun:,} iterations (out of {iter_:,} possible iterations)\n'
                         f'Best Score: {self.best_score}')
 
+            global mem_usage
             mem_usage = memory_usage(-1, interval=.1, timeout=0.1)
-            print('Memory usage: ', mem_usage[0])
 
         return self.best_graphs
 
@@ -713,7 +706,7 @@ class CELLO3:
             new_g = [Gate(g[0], g[1].gate_type, g[1].inputs, g[1].output)
                      for g in new_g]
 
-            graph = AssignGraph(new_i, new_o, new_g)
+            graph = AssignGraph(new_i, new_o, new_g)  # NOTE: specific ins, gates, outs from annealing | exhaustive
             (circuit_score, tb, tb_labels) = self.score_circuit(graph)
             # NOTE: follow the circuit scoring functions
 

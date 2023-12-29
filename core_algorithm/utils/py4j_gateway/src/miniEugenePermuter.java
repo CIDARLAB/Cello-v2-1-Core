@@ -62,7 +62,15 @@ public class miniEugenePermuter {
 		}
 
 	    System.out.println("Returning " + solutions.length + " valid part orders to the Python script...");
+
+	    Runtime rt = Runtime.getRuntime();
+        long total_mem = rt.totalMemory();
+        long free_mem = rt.freeMemory();
+        long used_mem = total_mem - free_mem;
+        System.out.println("Memory usage: " + used_mem/1000000.0 + " MB");
+
 		System.out.println("\nWaiting for additional calls from the Python script...\n");
+
         return solutions;
   }
 
