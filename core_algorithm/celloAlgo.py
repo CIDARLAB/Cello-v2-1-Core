@@ -379,9 +379,7 @@ class CELLO3:
         if verbose:
             log.cf.info(f'isvalid: {netlist_valid}')
 
-        in_sensors = self.ucf.query_top_level_collection(
-            self.ucf.UCFin, 'input_sensors')
-        print(in_sensors)
+        in_sensors = self.ucf.query_top_level_collection(self.ucf.UCFin, 'input_sensors')
         num_ucf_input_sensors = len(in_sensors)
         num_ucf_input_structures = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'structures'))
         num_ucf_input_models = len(self.ucf.query_top_level_collection(self.ucf.UCFin, 'models'))
@@ -401,8 +399,7 @@ class CELLO3:
 
         if verbose:
             log.cf.info([i['name'] for i in in_sensors])
-            log.cf.info(
-                f"{'Valid' if inputs_match else 'NOT valid'} input match!")
+            log.cf.info(f"{'Valid' if inputs_match else 'NOT valid'} input match!")
 
         out_sensors = self.ucf.query_top_level_collection(self.ucf.UCFout, 'output_devices')
         num_ucf_output_sensors = len(out_sensors)
@@ -422,8 +419,7 @@ class CELLO3:
                         f'num OUT-NODES in {self.verilog_name} netlist: {num_netlist_outputs}')
 
             log.cf.info([out['name'] for out in out_sensors])
-            log.cf.info(
-                f"{'Valid' if outputs_match else 'NOT valid'} output match!")
+            log.cf.info(f"{'Valid' if outputs_match else 'NOT valid'} output match!")
 
         num_structs = self.ucf.collection_count['structures']
         num_models = self.ucf.collection_count['models']
@@ -456,17 +452,21 @@ class CELLO3:
             log.cf.info(f'num GATE USES: {num_gates_available}')
         num_netlist_gates = len(self.rnl.gates) if netlist_valid else 99999
         if verbose:
-            log.cf.info(
-                f'num GATES in {self.verilog_name} netlist: {num_netlist_gates}')
-
+            log.cf.info(f'num GATES in {self.verilog_name} netlist: {num_netlist_gates}')
             log.cf.info(sorted(g_list))
             log.cf.info(sorted(gate_names))
 
-        gates_match = (num_structs == num_models == num_gates) and (
-                num_gates_available[0] >= num_netlist_gates)
+        gates_match = (num_structs == num_models == num_gates) and (num_gates_available[0] >= num_netlist_gates)
         if verbose:
-            log.cf.info(
-                f"{'Valid' if gates_match else 'NOT valid'} intermediate match!")
+            log.cf.info(f"{'Valid' if gates_match else 'NOT valid'} intermediate match!")
+
+        # log.cf.info(f'RULE CHECKS:')  # NOTE: make sure will start with landing pad
+        # lp_list = []
+        # landing_pads = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'genetic_locations')[0]
+        # for lp in landing_pads.values():
+        #     lp_list.append(lp['symbol'])
+        # rules = self.ucf.query_top_level_collection(self.ucf.UCFmain, 'circuit_rules')
+        # log.cf.info(f'Starts with Landing Pad: {}')
 
         pass_check = netlist_valid and inputs_match and outputs_match and gates_match
 
@@ -474,15 +474,8 @@ class CELLO3:
                                                          num_ucf_input_sensors, num_ucf_output_sensors,
                                                          num_groups) if pass_check else (None, None)
         if verbose:
-            log.cf.info(
-                f'\n#{max_iterations} possible permutations for {self.verilog_name}.v+{self.ucf_name}...')
-            log.cf.info(
-                f'(#{confirm} permutations of UCF gate groups confirmed.)')
-            # For testing/tracking input, gate, output, permutation counts
-            # with open(f'permutation_cnts.csv', 'a', newline='') as csvfile:
-            #     csv_writer = csv.writer(csvfile)
-            #     csv_writer.writerow([self.verilog_name, num_netlist_inputs, num_netlist_gates, num_netlist_outputs, max_iterations])
-            # return
+            log.cf.info(f'\n#{max_iterations} possible permutations for {self.verilog_name}.v+{self.ucf_name}...')
+            log.cf.info(f'(#{confirm} permutations of UCF gate groups confirmed.)')
             print_centered('End of condition checks')
 
         return pass_check, max_iterations

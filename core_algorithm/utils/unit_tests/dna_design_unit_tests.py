@@ -1,10 +1,26 @@
 import unittest
 from core_algorithm.utils.make_eugene_script import *
 from core_algorithm.utils.dna_design import *
+from core_algorithm.utils.py4j_gateway.gateway import start_gateway
+from py4j.java_gateway import JavaGateway
 
 
 class UnitTests(unittest.TestCase):
-    # NOTE: setup fixture for launching miniEugene
+    # NOTE: setup fixture for launching miniEugene?
+    # @unittest.expectedFailure
+    # def setUp(self):
+    #     start_gateway()
+        #
+        # try:
+        #     gateway = JavaGateway(eager_load=True)
+        #     print("\nJava Py4J gateway already started")
+        # except Exception:
+        #     print("\nAttempting to start Java Py4J gateway...")
+        #     try:
+        #         start_gateway()
+        #         print("Started Java Py4J gateway")
+        #     except Exception:
+        #         print("Failed to start Java Py4J gateway!")
 
     def outputsTest(self, first, second):
         with self.subTest():
