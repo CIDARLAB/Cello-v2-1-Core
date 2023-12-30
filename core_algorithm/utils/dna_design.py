@@ -302,7 +302,7 @@ class DNADesign:
                 count = 1
                 for seq in order:
                     if seq.endswith('_NONCE_PAD'):
-                        segments.append(f'Location {count}')
+                        segments.append(f'Location {count} ({seq[:-10]})')
                         count += 1
             csv_writer.writerow(segments)
             for num, order in enumerate(self.valid_circuits):
