@@ -480,9 +480,16 @@ class CELLO3:
                                                          num_ucf_input_sensors, num_ucf_output_sensors,
                                                          num_groups) if pass_check else (None, None)
         if verbose:
-            log.cf.info(f'\n#{max_iterations} possible permutations for {self.verilog_name}.v+{self.ucf_name}...')
-            log.cf.info(f'(#{confirm} permutations of UCF gate groups confirmed.)')
+            log.cf.info(f'\n#{max_iterations:,} possible permutations for {self.verilog_name}.v+{self.ucf_name}...')
+            log.cf.info(f'(#{confirm:,} permutations of UCF gate groups confirmed.)')
             print_centered('End of condition checks')
+
+        # QUEST: Is this feature needed/appropriate?
+        if confirm and (confirm > 10_000_000_000_000):  # if > 10 trillion iters, may not want to hand off to server
+            # TODO: Add check for server vs. local...
+            # TODO: Add instructions for now to run locally...
+            log.cf.error('Circuit too complex for online version of Cello. Simplify the circuit or run Cello locally.')
+            raise Exception
 
         return pass_check, max_iterations
 
