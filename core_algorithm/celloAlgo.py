@@ -187,6 +187,7 @@ class CELLO3:
             graph_inputs_for_printing = list(zip(self.rnl.inputs, best_graph.inputs))
             graph_gates_for_printing = list(zip(self.rnl.gates, best_graph.gates))
             graph_outputs_for_printing = list(zip(self.rnl.outputs, best_graph.outputs))
+            # NOTE: only rnl Gate nodes are dictionaries with inputs and outputs; Input and Output nodes are lists
 
             if self.verbose:
                 debug_print(f'final result for {self.verilog_name}.v+{self.ucf_name}: {best_result[0]}')
@@ -200,6 +201,10 @@ class CELLO3:
             log.cf.info(f'CIRCUIT DESIGN:\n'
                         f' - Best Design: {best_result[1]}\n'
                         f' - Best Circuit Score: {self.best_score}')
+
+            if self.best_score == 0.0:
+                log.cf.error('ERROR: Cello was unable to find any valid configurations...')
+                raise Exception
 
             log.cf.info(f'\nInputs ( input response = {best_graph.inputs[0].resp_func_eq} ):')
             in_labels = {}
@@ -223,6 +228,7 @@ class CELLO3:
             tech_diagram_filepath = os.path.join(self.out_path, v_name, v_name)
             replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
+            log.cf.error('Error with results/circuit design\n')
             raise CelloError('Error with results/circuit design', e)
 
         # NOTE: TRUTH TABLE/GATE SCORING
@@ -281,8 +287,7 @@ class CELLO3:
             if structs and cassettes and sequences and device_rules and circuit_rules and fenceposts:
                 log.cf.info(" - Eugene helpers created...")
             if eugene.write_eugene(filepath + "_eugene.eug"):
-                log.cf.info(
-                    f" - Eugene script written to {filepath}_eugene.eug")
+                log.cf.info(f" - Eugene script written to {filepath}_eugene.eug")
         except Exception as e:
             raise CelloError('Error with generating eugene file', e)
 
@@ -355,6 +360,7 @@ class CELLO3:
         net_file = open(net_path, 'r')
         net_json = json.load(net_file)
         netlist = Netlist(net_json)
+
         if not netlist.is_valid_netlist():
             return None
         return netlist
@@ -546,7 +552,7 @@ class CELLO3:
     def simulated_annealing_assign(self, i_list: list, o_list: list, g_list: list, i: int, o: int, g: int,
                                    netgraph: GraphParser, iter_: int) -> list:
         """
-        Uses scipy's dual annealing func to efficiently find a regional optimum when exhaustive search is not feasible.
+        Uses scipy's dual annealing func to efficiently find a regional optimum.
         (See notes on Dual Annealing below...)
 
         :param i_list: list of available inputs
@@ -570,21 +576,20 @@ class CELLO3:
                 o_perms.append(o_perm)
             for g_perm in itertools.permutations(g_list, g):
                 g_perms.append(g_perm)
-            max_fun = iter_ if iter_ < 1000 else 1000
+            max_fun = iter_ if iter_ < 1_000 else 1_000
 
             # DUAL ANNEALING SCIPY FUNC
             def func(x):
-                return self.prep_assign_for_scoring(
-                    x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
+                return self.prep_assign_for_scoring(x, (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun))
 
             lo = [0, 0, 0]
             hi = [len(i_perms), len(o_perms), len(g_perms)]
-            bounds = list(zip(lo, hi))
+            # NOTE: Not possible to add integrality constraint; just round to int instead; adds only minor inefficiency
+            bounds = scipy.optimize.Bounds(lo, hi, True)  # Alternatively: bounds = list(zip(lo, hi))
             # TODO: CK: Implement seed (test in simplified script; test other scipy func seeding)
             # TODO: CK: Implement toxicity check...
 
             ret = scipy.optimize.dual_annealing(func, bounds, maxfun=max_fun)
-
             """
             Dual Annealing: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.dual_annealing.html
             Dual Annealing combines Classical Simulated Annealing, Fast Simulated Annealing, and local search optimizations
@@ -676,16 +681,31 @@ class CELLO3:
         (i_perms, o_perms, g_perms, netgraph, i, o, g, max_fun) = args
         # TODO: CK: Account for duplicates
         if i_perms and o_perms and g_perms:
-            i_perm = i_perms[math.ceil(i_perm) - 1]
-            o_perm = o_perms[math.ceil(o_perm) - 1]
-            g_perm = g_perms[math.ceil(g_perm) - 1]
+            i_perm = i_perms[math.floor(i_perm)]
+            o_perm = o_perms[math.floor(o_perm)]
+            g_perm = g_perms[math.floor(g_perm)]
+
+        # Ignore invalid cases where a type of CM is both an input and output (would create feedback)
+        case_invalid = False
+        inputs = []
+        for input in i_perms[math.floor(x[0])]:
+            input_short = input.removesuffix('_in')
+            input_short = input_short.removesuffix('_input')
+            inputs.append(input_short)
+        for output in o_perms[math.floor(x[1])]:
+            output_short = output.removesuffix('_out')
+            output_short = output_short.removesuffix('_output')
+            if output_short in inputs:
+                case_invalid = True
+                break
 
         # Check if inputs, outputs, and gates are unique and the correct number
         if len(set(i_perm + o_perm + g_perm)) == i + o + g:
             self.iter_count += 1
+            if case_invalid:
+                return 0.0
             if self.print_iters:
-                print_centered(
-                    f'beginning iteration {self.iter_count}:', also_logfile=False)
+                print_centered(f'beginning iteration {self.iter_count}:', also_logfile=False)
 
             # Output the combination
             def map_helper(l, c):
@@ -857,7 +877,7 @@ class CELLO3:
                 graph_input.add_eval_params(input_equations[repr(
                     graph_input)], input_params[repr(graph_input)])
 
-        # adding parameters to outputs
+        # adding parameters to outputs (NOTE: intermediate output nodes are technically treated as gates, not outputs)
         for graph_output in graph.outputs:
             if all([repr(graph_output) in x for x in [output_params, output_equations]]):
                 graph_output.add_eval_params(output_equations[repr(graph_output)],
@@ -898,8 +918,8 @@ class CELLO3:
             if self.print_iters:
                 print(f'row{r} {truth_table[r]}')
 
-            for (input_name, input_onoff) in list(
-                    dict(zip(truth_table_labels[:num_inputs], truth_table[r][:num_inputs])).items()):
+            for (input_name, input_onoff) in list(dict(zip(truth_table_labels[:num_inputs],
+                                                           truth_table[r][:num_inputs])).items()):
                 input_name = input_name[:input_name.rfind('_')]
                 for graph_input in graph.inputs:
                     if repr(graph_input) == input_name:
@@ -951,7 +971,7 @@ class CELLO3:
                             gate_io = 1
                         else:
                             gate_io = 0
-                    else:  # (gate_type == 'NOT')
+                    elif gate_type == 'NOT':  # (gate_type == 'NOT')
                         input_io = get_tb_IO_val(repr(gate_inputs))
                         if input_io is None:
                             fill_truth_table_IO(gate_inputs)
@@ -1058,12 +1078,18 @@ class CELLO3:
         # take the output columns of the truth table, and calculate the outputs
 
         # NOTE: **return the lower-scored output of the multiple outputs**
-        score = min(truth_tested_output_values.values()
-                    ), truth_table, truth_table_labels
+        score = min(truth_tested_output_values.values()), truth_table, truth_table_labels
 
         if self.print_iters:
             print('\nscore_circuit returns:')
             print(score)
+
+        # NOTE: confirm intermediate output nodes are CMs...
+        for output in graph.outputs:
+            if 'Hill_response' != output.func_name:  # TODO: What is appropriate CM detection?
+                for gate in graph.gates:
+                    if output.id in gate.inputs:
+                        score = 0.0, truth_table, truth_table_labels
 
         return score
 
