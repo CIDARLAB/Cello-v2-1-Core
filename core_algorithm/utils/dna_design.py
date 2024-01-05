@@ -9,7 +9,6 @@ import os
 import csv
 from dataclasses import dataclass
 from core_algorithm.utils.py4j_gateway.run_eugene_script import call_mini_eugene
-from copy import deepcopy
 from core_algorithm.utils import log
 
 
@@ -42,29 +41,20 @@ class DevChain:
     reversible: bool  # whether the chain can be reversed and still be internally valid
 
 
-def deep_copy_params(to_call):
+def hex_to_rgb(hex_value: str):
     """
-
-    :param to_call:
-    :return:
+    Converts hex color code to rgb (scaled from 0-1.0; for dnaplotlib part info .csv, which is used for SBOL diagrams)
+    :param hex_value: str (6-digits, with default of '000000', which is black)
+    :return: str (semicolon-separated decimal values)
     """
-    def f(*args, **kwargs):
-        return to_call(*deepcopy(args), **deepcopy(kwargs))
-    return f
-
-
-def hex_to_rgb(hex_value):
-    """
-
-    :param hex_value:
-    :return:
-    """
-    if not hex_value:
+    try:
+        int(hex_value, 16)
+        value = hex_value.lstrip('#')
+    except:
+        log.cf.warn('Passed non-hex val to dna_design.py hex_to_rgb func; defaulting to black...')
         return '0.0;0.0;0.0'
-    value = hex_value.lstrip('#')
-    lv = len(value)
-    vals = list(round(int(value[i:i + lv // 3], 16) / 255, 2)
-                for i in range(0, lv, lv // 3))
+    vals = list(round(int(value[i:i + 6 // 3], 16) / 255, 2)
+                for i in range(0, 6, 6 // 3))
     return ';'.join(str(val) for val in vals)
 
 
@@ -105,7 +95,7 @@ class DNADesign:
         # log.cf.info(f'\nself.fenceposts:\n{self.fenceposts}')
 
     # NOTE: CREATE OUTPUT FILES BASED ON DNA PART ORDER AND RELATED INFO ###############################################
-    def get_part_orders(self):
+    def prep_to_get_part_orders(self):
 
         def cycle_thru_alt_rulesets():  # TODO: Finish setting up ruleset traversal
 
@@ -154,6 +144,8 @@ class DNADesign:
             if f'CONTAINS {loc}' not in self.circuit_rules:
                 self.circuit_rules.append(f'CONTAINS {loc}')
         # consolidated_devices = consolidate_devices()  # len(consolidated_devices)
+
+    def get_part_orders(self):
         selected_device_orders = call_mini_eugene(self.circuit_rules)  # NOTE: miniEugene*
         for order in selected_device_orders:
             main_devices = []
@@ -306,19 +298,17 @@ class DNADesign:
         with open(dna_sequences, 'w', newline='') as dna_seq:
             csv_writer = csv.writer(dna_seq)
             for order in self.valid_circuits:
-                segments = ['', 'Location 0']
+                segments = ['']
                 count = 1
                 for seq in order:
-                    # if seq == '_NONCE_PAD':
                     if seq.endswith('_NONCE_PAD'):
-                        segments.append(f'Location {count}')
+                        segments.append(f'Location {count} ({seq[:-10]})')
                         count += 1
             csv_writer.writerow(segments)
             for num, order in enumerate(self.valid_circuits):
-                sequence = [f'Design Option {num + 1}:', '']
-                index = 1
+                sequence = [f'Design Option {num + 1}:']
+                index = 0
                 for seq in order:
-                    # if seq != '_NONCE_PAD':
                     if not seq.endswith('_NONCE_PAD'):
                         sequence[index] += self.sequences[seq].parts_sequence
                     else:

@@ -8,13 +8,13 @@ from config import BASE_DIR
 def start_gateway():
     """
     Compilation:
-        javac -cp .:py4j.jar:.:miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter.java // mac?
-        javac -cp .;py4j.jar;.;miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter.java // win?
+      javac -cp .:jars/py4j.jar:.:jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src src/miniEugenePermuter.java
+      javac -cp .;jars/py4j.jar;.;jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src src/miniEugenePermuter.java
     Execution:
-        java -cp .:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter // mac
-        java -cp .;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter // win
+      java -cp .:jars/py4j.jar:./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar:./src miniEugenePermuter // mac
+      java -cp .;jars/py4j.jar;./jars/miniEugene-core-1.0.0-jar-with-dependencies.jar;./src miniEugenePermuter // win
 
-    :return:
+    :return: Popen subprocess
     """
 
     working_directory = os.path.join(BASE_DIR, 'core_algorithm', 'utils', 'py4j_gateway')
