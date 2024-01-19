@@ -10,11 +10,12 @@ https://github.com/CIDARLAB/miniEugene-core
 
 import logging
 import re
+import itertools
 
 from core_algorithm.utils import log
 
 
-def call_mini_eugene(rules: list[str], orders_count: int = 1000):
+def call_mini_eugene(rules: list[str], orders_count: int = 100):
     """
     NOTE: Commands to be executed before the Python script...
     Compilation:
@@ -80,25 +81,43 @@ def call_mini_eugene(rules: list[str], orders_count: int = 1000):
     # print('\nPart_count: ', part_count)
     # print('\nOrders_count: ', orders_count)
     java_part_orders = miniEugeneInstance.miniPermute(rules, part_count, orders_count)  # FIXME: Add device rule loop
-    if java_part_orders:
-        # log.cf.info('Valid part orders found by miniEugene...')
-        valid_orders = []  # Convert back to Python-friendly form
-        for component in java_part_orders:
-            if component[0] is not None:
-                order = []
-                for part in component:
-                    order.append(part)
-                valid_orders.append(order)
-                # log.cf.info(f'   + {order}')
-        # print("valid_orders: ")
-        # for order in valid_orders:
-        #     print(order)
-        if len(valid_orders) > 5:
-            selected_orders = []
-            for cnt in range(5):
-                selected_orders.append(valid_orders[cnt*len(valid_orders)//5])
-            return selected_orders
-        else:
+    # java_part_orders_2 = miniEugeneInstance.miniPermute(rules, part_count, orders_count)
+    rules.reverse()
+    # java_part_orders_rev = miniEugeneInstance.miniPermute(rules, part_count, orders_count)
+
+    def convert_to_list_of_lists(part_orders):
+        if java_part_orders:
+            # log.cf.info('Valid part orders found by miniEugene...')
+            valid_orders = []  # Convert back to Python-friendly form
+            for component in java_part_orders:
+                if component[0] is not None:
+                    order = []
+                    for part in component:
+                        order.append(part)
+                    valid_orders.append(order)
+                    # log.cf.info(f'   + {order}')
+            # print("valid_orders: ")
+            # for order in valid_orders:
+            #     print(order)
             return valid_orders
+        else:
+            log.cf.error("miniEugene did not return valid part orders...")
+
+    valid_orders = convert_to_list_of_lists(java_part_orders)
+    # valid_orders_2 = convert_to_list_of_lists(java_part_orders_2)
+    # valid_orders_rev = convert_to_list_of_lists(java_part_orders_rev)
+    # if valid_orders == valid_orders_2:
+    #     print('\n\nCONSISTENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
+    # else:
+    #     print('\n\nNOT CONSISTENT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
+    # if valid_orders == valid_orders_rev:
+    #     print('\n\nORDER DOES NOT MATTER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
+    # else:
+    #     print('\n\nORDER DOES MATTER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n')
+    if len(valid_orders) > 5:
+        selected_orders = []
+        for cnt in range(5):
+            selected_orders.append(valid_orders[cnt*len(valid_orders)//5])
+        return selected_orders
     else:
-        log.cf.error("miniEugene did not return valid part orders...")
+        return valid_orders
