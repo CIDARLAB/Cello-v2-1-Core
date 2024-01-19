@@ -1,0 +1,173 @@
+[
+	{
+		"collection": "measurement_std",
+		"signal_carrier_units": "RNAP/s",
+		"normalization_instructions": "The values are converted from RPUG (from the Eco2C1G3T1 UCF) to RNAP/s with the following conversion factor: RPU = 0.019 RNAP/s (see 10.15252/msb.20209584).  Note: change unit conversion factors accordingly if using a different or modified UCF."
+	},
+
+
+
+
+
+	{
+		"collection": "output_devices",
+		"name": "YFP_reporter",
+		"model": "YFP_reporter_model",
+		"structure": "YFP_reporter_structure"
+	},
+	{
+		"collection": "models",
+		"name": "YFP_reporter_model",
+		"functions": {
+			"response_function": "linear_response",
+			"input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "unit_conversion",
+				"value": 0.019,
+				"description": "Unit conversion"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "YFP_reporter_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "YFP_reporter_a",
+				"components": [
+					"#in1",
+					"YFP_reporter_cassette"
+				]
+			},
+			{
+				"name": "YFP_reporter_b",
+				"components": [
+					"#in2",
+					"YFP_reporter_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "YFP_reporter_cassette",
+		"type": "cassette",
+		"dnasequence": "AGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGAAAGAGGAGAAATACTAGATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACAGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCTTCGGCTACGGCCTGCAATGCTTCGCCCGCTACCCCGACCACATGAAGCTGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCAATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTTAGCTACCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAAGCTCATGTATGTGTCTACGCGAGATTCTCGCCCGAGAACTTCTGCAAGGCACTGCTCTTGGCT"
+	},
+	{
+		"collection": "output_devices",
+		"name": "YFP_reporter_2",
+		"model": "YFP_reporter_2_model",
+		"structure": "YFP_reporter_2_structure"
+	},
+	{
+		"collection": "models",
+		"name": "YFP_reporter_2_model",
+		"functions": {
+			"response_function": "linear_response",
+			"input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "unit_conversion",
+				"value": 0.019,
+				"description": "Unit conversion"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "YFP_reporter_2_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "YFP_reporter_2_a",
+				"components": [
+					"#in1",
+					"YFP_reporter_cassette"
+				]
+			},
+			{
+				"name": "YFP_reporter_2_b",
+				"components": [
+					"#in2",
+					"YFP_reporter_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "YFP_reporter_cassette",
+		"type": "cassette",
+		"dnasequence": "AGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGAAAGAGGAGAAATACTAGATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACAGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCTTCGGCTACGGCCTGCAATGCTTCGCCCGCTACCCCGACCACATGAAGCTGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCAATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTTAGCTACCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAAGCTCATGTATGTGTCTACGCGAGATTCTCGCCCGAGAACTTCTGCAAGGCACTGCTCTTGGCT"
+	},
+
+
+
+
+
+	{
+		"collection": "functions",
+		"name": "linear_response",
+		"equation": "c * x",
+		"variables": [
+			{
+				"name": "x",
+				"map": "#//model/functions/input_composition"
+			}
+		],
+		"parameters": [
+			{
+				"name": "c",
+				"map": "#//model/parameters/unit_conversion"
+			}
+		]
+	},
+
+
+
+
+
+	{
+        "collection": "circuit_rules",
+        "rules": {
+            "function": "AND",
+            "rules": [
+				"YFP_reporter_a AFTER L3",
+				"YFP_reporter_b AFTER L2",
+				"YFP_reporter_b BEFORE L3"
+			]
+        }
+    },
+	{
+		"collection": "device_rules",
+		"rules": {
+			"function": "AND",
+			"rules": [
+				"ALL_FORWARD"
+			]
+		}
+	}
+]

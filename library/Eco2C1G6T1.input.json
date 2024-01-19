@@ -1,0 +1,575 @@
+[
+	{
+		"collection": "input_sensors",
+		"name": "Ara_sensor",
+		"model": "Ara_sensor_model",
+		"structure": "Ara_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "Ara_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 2.13,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0021,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "Ara_sensor_structure",
+		"outputs": [
+			"PBad"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PBad",
+		"type": "promoter",
+		"dnasequence": "agaaaccaattgtccatattgcatcagacattgccgtcactgcgtcttttactggctcttctcgctaaccaaaccggtaaccccgcttattaaaagcattctgtaacaaagcgggaccaaagccatgacaaaaacgcgtaacaaaagtgtctataatcacggcagaaaagtccacattgattatttgcacggcgtcacactttgctatgccatagcatttttatccataagattagcggatcctacctgacgctttttatcgcaactctctactgtttctccat"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "IPTG_sensor",
+		"model": "IPTG_sensor_model",
+		"structure": "IPTG_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "IPTG_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 4.09,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0302,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "IPTG_sensor_structure",
+		"outputs": [
+			"PTac"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PTac",
+		"type": "promoter",
+		"dnasequence": "tgttgacaattaatcatcggctcgtataatgtgtggaattgtgagcgctcacaatt"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "aTc_sensor",
+		"model": "aTc_sensor_model",
+		"structure": "aTc_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "aTc_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 6.13,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.016,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "aTc_sensor_structure",
+		"outputs": [
+			"PTet"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PTet",
+		"type": "promoter",
+		"dnasequence": "ttttttccctatcagtgatagagattgacatccctatcagtgatagagataatgagcac"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "Cuma_sensor",
+		"model": "Cuma_sensor_model",
+		"structure": "Cuma_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "Cuma_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.14,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0036,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "Cuma_sensor_structure",
+		"outputs": [
+			"PCymRC"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PCymRC",
+		"type": "promoter",
+		"dnasequence": "aacaaacagacaatctggtctgtttgtattatggaaaatttttctgtataatagattcaacaaacagacaatctggtctgtttgtattat"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "Van_sensor",
+		"model": "Van_sensor_model",
+		"structure": "Van_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "Van_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 4,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0195,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "Van_sensor_structure",
+		"outputs": [
+			"PVanCC"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PVanCC",
+		"type": "promoter",
+		"dnasequence": "attggatccaattgacagctagctcagtcctaggtaccattggatccaat"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "OHC14_sensor",
+		"model": "OHC14_sensor_model",
+		"structure": "OHC14_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "OHC14_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.13,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0057,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OHC14_sensor_structure",
+		"outputs": [
+			"PCin"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PCin",
+		"type": "promoter",
+		"dnasequence": "gaatcgcaccaagacaggtttgtccaccctttgtgcgtccaaacggacgcacggcgctctaaagcgggtcgcgatctttcagattcgctcctcgcgctttcagtctttgttttggcgcatgtcgttatcgcaaaaccgctgcacacttttgcgcgacatgctctgatccccctcatctgggggggcctatctgagggaatttccgatccggctcgcctgaaccattctgctttccacgaacttgaaaacgct"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "Sal_sensor",
+		"model": "Sal_sensor_model",
+		"structure": "Sal_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "Sal_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.17,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.0138,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "Sal_sensor_structure",
+		"outputs": [
+			"PSalTTC"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PSalTTC",
+		"type": "promoter",
+		"dnasequence": "ggggcctcgcttgggttattgctggtgcccggccgggcgcaatattcatgttgatgatttattatatatcgagtggtgtatttatttatattgtttgctccgttaccgttattaac"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "RpaR-AM2_sensor",
+		"model": "RpaR-AM2_sensor_model",
+		"structure": "RpaR-AM2_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "RpaR-AM2_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 6.9,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.06,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "RpaR-AM2_sensor_structure",
+		"outputs": [
+			"PRpa_A"
+		],
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "PRpa_A_RiboRpa_RpaR-AM2_TerRpa",
+				"components": [
+					"#in1",
+					"PRpa_A_RiboRpa_RpaR-AM2_TerRpa_cassette"
+				]
+			},
+			{
+				"name": "PRpa_A_RiboRpa_RpaR-AM2_TerRpa_cassette",
+				"components": [
+					"RiboRpa_RpaR-AM2_TerRpa"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "cassette",
+		"name": "RiboRpa_RpaR-AM2_TerRpa",
+		"dnasequence": "AAAAAAAAAGGCTCCAAAAGGAGCCttgacggctagctcagtcctaggtacagtgctagctactAGATGCTGTAGTGGGATGTGTGTCTCACCTGAAGAGTACAAAAGTCCGAAACGGTATCCTCTACAAATAATTTTGTTTAAaAGCGATACTTAGGGTAACAGtAATGattgtgggtgaagatcagctgtggggtcgtcgtacactggaatttgttgatagcgttgaacgtctggaagcaccggcactgattagccgttttgaaagcctgattgcaagctgtggttttaccgcctatatcatggcaggtctgccgagccgtaatgccggtctgccggaactgaccctggcaaatggttggcctcgtgattggtttgatctgtatgttagcgaaaactttagcgcagttgatccggttccgcgttatggtgcaaccactgttcatccgtttgtttggagtgatgcaccgtatgatcgtgaccgtgatcaggcagcacatcgtgttatgacccgtgcagcagaatttggtctggttgaaggttattgtattccgctgcattacgatgatggtagcgcagcaattagtatggcaggtgaagatcctgatctgagtccggcagcccgtggtgtaatgcagctggttagcatttatgcacatagccgtctgcgtgtactgagccgtccgaaaccgattcgtcgtaatcgtctgacaccgcgtgaatgtgaaattctgcagtgggcagcacagggtaaaaccgcatgggaaattagcgttattctgtgtattaccgaacgcaccgttaaatttcatctgattgaagcagcacgtaaactggatgcagcaaatcgtaccgcagcagttgcaaaagcactgacactgggtctgattcgtctgtaatagagttaaccaaAAAGGGGGGATTTTATCTCCCCTTTaatttttcct"
+	},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "OC6_in",
+		"model": "OC6_in_model",
+		"structure": "OC6_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "OC6_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 7.5,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.06,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OC6_in_structure",
+		"outputs": [
+			"pLuxB"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pLuxB",
+		"dnasequence": "ACCTGTAGGATCGTACAGGTTTACGCAAGAAAATGGTTTGTTACAGTCGAATAAAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAG"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "OHC12_in",
+		"model": "OHC12_in_model",
+		"structure": "OHC12_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "OHC12_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.4,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.01,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OHC12_in_structure",
+		"outputs": [
+			"pCin"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pCin",
+		"dnasequence": "CGTAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAG"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "pC-HSL_in",
+		"model": "pC-HSL_in_model",
+		"structure": "pC-HSL_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "pC-HSL_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 6,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.02,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "pC-HSL_in_structure",
+		"outputs": [
+			"pRpa"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pRpa",
+		"dnasequence": "CGTAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAG"
+	},
+
+
+
+
+
+	{
+		"collection": "input_sensors",
+		"name": "DAPG_in",
+		"model": "DAPG_in_model",
+		"structure": "DAPG_in_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "DAPG_in_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.4,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.02,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "DAPG_in_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pPhlF"
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pPhlF",
+		"dnasequence": "AGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAG"
+	},
+
+
+
+
+
+	{
+		"collection": "functions",
+		"name": "sensor_response",
+		"equation": "$STATE * (ymax - ymin) + ymin",
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			}
+		]
+	}
+]
