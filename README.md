@@ -70,7 +70,7 @@ You can also set the ```verbose``` option as either ```True / False``` in the ``
 
 **To run Cello, type in terminal:**
 ```
-python celloAlgo.py
+python run.py
 ```
 
 Follow the prompts for which Verilog and UCF you would like to use.
@@ -80,8 +80,8 @@ You will see the results and the optimized design in the *outpath* folder.
 Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
 #
-### Sample Inputs
-Can be found in the [inputs](/inputs/) folder. This includes the UCF files for Cello, as well as a few dozen 
+### Library/Sample Inputs
+Can be found in the [library](/library/) folder. This includes the UCF files for Cello, as well as a few dozen 
 Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different a different folder to store them by speifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
 
 #
