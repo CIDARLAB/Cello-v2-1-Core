@@ -28,27 +28,32 @@ def main():
     }
     """
 
-    print("\nStarting ucf-collection_to_csv.py program...")
+    print("\nStarting ucf-collection_to_csv.py program...\n")
 
-    # Validate Arguments
-    def validate_file_arg(arg: str) -> dict[Path, Path | None]:
-        file_paths = {}
-        arg_paths = arg.split(':')
-        try:
-            file_paths[(input_file := Path(arg_paths[0]))] = None
-            print(file_paths)
-            assert input_file.is_file()               # check that input file exists
-            assert input_file.suffix == '.json'  # check that input file type is '.json'
-            if len(arg_paths) == 2:
-                file_paths[input_file] = (output_file := Path(arg_paths[1]))  # if output_file specified...
-                assert output_file.parent.is_dir()        # check that output file directory exists
-                assert output_file.with_suffix == '.csv'  # check that output file type is '.csv'
-        except AssertionError as err_msg:
-            print(f"\nProblem with file specification: {arg}\n"
-                  f"Confirm file(s) exist. Inputs must be '.json' and outputs must be '.csv'.")
-            # raise
-            sys.exit(1)
-        print(file_paths)
+    # Validates Arguments
+    def validate_file_paths(args: str) -> list[list[Path, Path | None]]:
+        """
+        Validates the file paths and extensions, generating a list of [input file, <optionally: output file>] lists.
+        """
+        file_paths = []
+        for i, arg in enumerate(args):
+            arg_paths = arg.split('>')
+            try:
+                file_paths.append([input_file := Path(arg_paths[0])])
+                assert input_file.is_file()          # check that input file exists
+                assert input_file.suffix == '.json'  # check that input file type is '.json'
+                if len(arg_paths) == 2:  # if output_file specified...
+                    file_paths[i].extend([output_file := Path(arg_paths[1])])
+                    assert output_file.parent.is_dir()   # check that output file directory exists
+                    assert output_file.suffix == '.csv'  # check that output file type is '.csv'
+                else:
+                    file_paths[i].extend([Path(input_file).with_suffix('.csv')])
+            except AssertionError:
+                print(f"\nProblem with file specification: {arg}\n"
+                      f"Confirm file(s) exist. Inputs must be '.json' and outputs must be '.csv'.")
+                # raise
+                sys.exit(1)
+
         return file_paths
 
     # Parse Arguments
@@ -74,28 +79,25 @@ def main():
                 - Note, unless a unique output file name is specified, an existing .csv file will be overwritten.
         ''')
     )
-    # parser.add_argument('--related', action='store_true', help='')  # TODO: setup to automatically run .input & .output
-    parser.add_argument('paths', type=validate_file_arg, nargs='+',
-                        help="Space-separated list of input files. "
-                             "To specify output path/name for a file, follow that file by ':' and then the filepath.")
-    # parser.add_argument('out_file', nargs='?', type=argparse.FileType('w'))  # TODO: replace with colon per file...
+    parser.add_argument('paths', type=str, nargs='+', help="Space-separated list of input files. "
+                        "To specify output path/name for a file, follow that file by '>' and then the filepath.")
     args = parser.parse_args()
-    print(args)
-    file_paths = args.paths
-    # for arg in args.paths:
-    #     file_paths[arg.split(':')[0]] = file_paths[arg.split(':')[1]] if ':' in arg else None
+    file_paths = validate_file_paths(args.paths)
 
     # Process Files
-    for ucf_file, csv_file in file_paths.items():
+    for pair_of_filepaths in file_paths:
+        ucf_file = pair_of_filepaths[0]
+        csv_file = pair_of_filepaths[1]
+
         # Read from UCF .json
-        with open(list(ucf_file.keys())[0], 'r') as file:
+        with open(ucf_file, 'r') as file:
             json_data = json.load(file)
 
         # Write to .csv
         with open(csv_file, 'w', newline='') as file:
             csv_writer = csv.writer(file)
             # TODO: Reason for rename?
-            csv_writer.writerow(['id', 'role', 'sequence'])  # name -> id, type -> role, dnasequence -> sequence
+            csv_writer.writerow(['name', 'type', 'dnasequence'])  # name -> id, type -> role, dnasequence -> sequence
             for block in json_data:
                 if block['collection'] == 'parts':
                     try:
@@ -114,7 +116,7 @@ def main():
             print(f"\nError generating {csv_file} from {ucf_file} (unknown reason); see help documentation...\n")
 
     # Exit
-    print("\n\nProgram completed execution...")
+    print("\nProgram completed execution...")
 
 
 if __name__ == '__main__':
