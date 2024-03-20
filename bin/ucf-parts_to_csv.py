@@ -116,7 +116,7 @@ def main():
             print(f"\nError generating {csv_file} from {ucf_file} (unknown reason); see help documentation...\n")
 
     # Exit
-    print("\nProgram completed execution...")
+    print("\nProgram completed execution\n")
 
 
 if __name__ == '__main__':
