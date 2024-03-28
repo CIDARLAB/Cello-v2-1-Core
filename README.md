@@ -1,30 +1,59 @@
 # Cello-v2.1-Core
 This software package is a streamlined algorithm for designing genetic circuits based on logic gate designs written in the Verilog format. It executes through the command-line interface by calling the 'celloAlgo.py' script. CELLO-2.1 is capable of efficiently handling single-cellular (with multicellular support coming soon) partitioning with multiple-output support, generating results saved in a local directory on your machine, with verbose logging, ang with GUI interface coming soon.
 
+
 #
-## Cloning the Repo
+## Running with Docker (Option 1)
+If you don't mind running the program in the console without a graphical user interface, you can do the following...
+
+### Docker Pull
+You can pull the image for this core algorithm from the Docker Hub...
+```
+docker pull
+```
+
+### Docker Build
+Alternatively, you can build the docker image with the following command, executed from the root directory...
+```
+docker build . -t "cidarlab/cello-core-v2-1"
+```
+
+### Docker Run
+After either pulling or building the image, you can start the container as follows...
+```
+docker run -i -v <LOCAL_DIR_TO_SAVE_RESULTS>:/app/temp_out -v <LOCAL_DIR_TO_SAVE_LOGS>:/app/logs -t cello-core-test
+```
+-i makes the run interactive so that you can interface with the program in the console
+
+-v creates a bind mount to save files on your local system
+
+
+#
+## Running with Source (Option 2)
+
+### Cloning the Repo
 ```
 git clone https://github.com/CIDARLAB/Cello-v3-Core.git
 cd Cello-v3-Core/
 ```
 
 #
-## Installing Python Packages
-Install using pip
+### Installing Python Packages
+Install using pip (will be updated with poetry...)
 ```
 pip install -r requirements.txt
 ```
 
 #
-## Installing [YOSYS](https://yosyshq.net/yosys/download.html) and Graphviz
-### For OSX / Linux
+### Installing [YOSYS](https://yosyshq.net/yosys/download.html) and Graphviz
+#### For OSX / Linux
 To install Yosys (which includes Graphviz), the easiest way is through [Homebrew](https://brew.sh). With homebrew installed, you can simply run:
 ```
 brew install yosys
 ```
 
 #
-### For Windows
+#### For Windows
 **Graphviz**
 
 First, you will need to manually install Graphviz, required for running Yosys. You can download the latest .exe installer [here](https://www.graphviz.org/download/). Then, follow the instructions for the install dialog box.
@@ -52,27 +81,14 @@ Running the above commands will load the "oss-cad-suite" libraries in your exist
 With your shell now set up, you can now cd into ```\Cello-v3-Core``` and begin experimenting.
 
 #
-### For Other Platforms
+#### For Other Platforms
 Please check [YOSYS installation guide](https://yosyshq.net/yosys/download.html) for other platforms
 
 #
-## Using CELLO
-CELLO-V3 takes the following parameters, and you can modify them in the __main__ function for celloAlgo.py, for example:
-```
-inpath = '/home/user/example/path/to/input_folder'
-outpath = '/home/user/example/path/to/output_folder'
-```
-
-By default, the ```inpath``` is the [inputs](/inputs/) folder, and the ```outpath``` is the [outputs](/outputs/) 
-folder, so users can use Cello without having to specify the paths.
-
-You can also set the ```verbose``` option as either ```True / False``` in the ```main``` function of celloAlgo.py. The non-verbose output will show a progress bar, whereas verbose option will show every individual iteration. (It is recommended to only set verbose to True if you are debugging to avoid cluttering.)
-
-**To run Cello, type in terminal:**
+### Running CELLO
 ```
 python run.py
 ```
-
 Follow the prompts for which Verilog and UCF you would like to use.
 
 You will see the results and the optimized design in the *outpath* folder.
@@ -80,13 +96,17 @@ You will see the results and the optimized design in the *outpath* folder.
 Alternatively, you could make a script to call the ```CELLO3``` process and use this codebase as an API.
 
 #
-### Library/Sample Inputs
-Can be found in the [library](/library/) folder. This includes the UCF files for Cello, as well as a few dozen 
-Verilog files to test Cello with. You may use your own Verilog files or modified UCF files to run Cello and choose a different a different folder to store them by speifying "inpath". But make sure that all the input files are valid, and they are organized in the right folder.
+### Library
+Input files can be found in the [library](/library/) folder. This includes the UCF files for Cello, as well as a few dozen 
+Verilog files. You may use your own Verilog files (structural or behavioral) or modified UCF files.
 
 #
 ### Example Output
-Here is an example of what the result from Cello looks like in the terminal. It uses the and.v circuit pared with Bth1C1G1T1 UCF. After running this experiment, you will see other files generated in the output folder as well. The important takeaways are the *circuit score* and the *design*, which will be returned to the terminal. Because additional convenience features are on the backlog, it is important to check the terminal for the *circuit score* and the *design* Cello made.
+Here is an example of what the result from Cello looks like in the terminal. 
+It uses the and.v circuit pared with Bth1C1G1T1 UCF. 
+After running this experiment, you will see other files generated in the output folder as well. 
+The important takeaways are the *circuit score* and the *design*, which will be returned to the terminal. 
+Because additional convenience features are on the backlog, it is important to check the terminal for the *circuit score* and the *design* Cello made.
 
 Example resulting design outputted by Cello.
 
@@ -120,6 +140,7 @@ Only one iteration is stored in the memory at a time in the exhaustive pass. Eac
 ## Other Info
 ### Contributing
 We welcome contributions from the community! If you'd like to contribute to CELLO-2.1, please follow the guidelines in the CONTRIBUTING.md file.
+(Cello 2.1 is still being developed, but we would welcome any feedback.)
 
 #
 ### Credits
