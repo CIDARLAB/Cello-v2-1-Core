@@ -124,7 +124,7 @@ class EugeneObject:
         '''device var name: EugeneCassette [See 'example_eugene_objects' for example data...]'''
 
         self.parts_types: [str] = ['spacer', 'scar']  # always present; *all* associated parts used  # and terminator?
-        self.genlocs_fenceposts: dict[str, List[str]] = {} # usually 'L1', 'L2', etc.
+        self.genlocs_fenceposts: dict[str, List[str]] = {}  # usually 'L1', 'L2', etc.
         self.device_rules: list[str] = []
         self.circuit_rules: list[str] = []
 
@@ -395,12 +395,10 @@ class EugeneObject:
         locations = genetic_locations['locations']
         for location in locations:
             self.genlocs_fenceposts[location['symbol']] = []
-
         # Includes parts, cassettes, and fenceposts, any of which could appear in the rule sets
         all_things = list(self.parts_seq_dict.keys()) + \
                      list(self.structs_cas_dict.keys()) + \
                      list(self.genlocs_fenceposts.keys())
-
         # Get Device Rules
         in_d_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFin, 'device_rules'))
         gate_d_rules = init_extraction(self.ucf.query_top_level_collection(self.ucf.UCFmain, 'device_rules'))
@@ -451,7 +449,6 @@ class EugeneObject:
                             circuit_rules.append(r)
                         # self.genlocs_fenceposts[o].append(r)
         self.circuit_rules = circuit_rules
-
         for device in self.structs_cas_dict.keys():
             self.circuit_rules.append(f'CONTAINS {device}')
 

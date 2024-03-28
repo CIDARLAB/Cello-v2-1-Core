@@ -80,17 +80,16 @@ class CELLO3:
         [end]
     """
 
-    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, verilogs_path: str, constraints_path:
-    str, out_path: str,
-                 options: dict = None):
+    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, verilogs_path: str,
+                 constraints_path: str, out_path: str, options: dict = None):
         # NOTE: Initialization
         try:
             # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
             yosys_cmd_choice = 1  # Set of cmds passed to YOSYS to convert Verilog to netlist & image generation
-            self.verbose = False  # Print more info to console & log. See logging.config to change verbosity
-            self.print_iters = False  # Print to console info on *all* tested iters (produces copious amounts of text)
-            self.exhaustive = False  # Run *all* possible permutes to find true optimum score (*long* run time)
-            self.test_configs = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
+            self.verbose       = False  # Print more info to console & log. See logging.config to change verbosity
+            self.print_iters   = False  # Print to console info on *all* tested iters (produces copious amounts of text)
+            self.exhaustive    = False  # Run *all* possible permutes to find true optimum score (*long* run time)
+            self.test_configs  = False  # Runs brief tests of all configs, producing logs and a csv summary of all tests
             self.log_overwrite = False  # Removes date/time from file name, allowing overwrite of logs
 
             if 'yosys_cmd_choice' in options:
@@ -315,11 +314,11 @@ class CELLO3:
             base_dir = os.path.dirname(filepath)
 
             plot_parameters_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-plot-parameters.csv")
-            dpl_part_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-part-information.csv")
-            dpl_reg_info_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-regulatory-info.csv")
+            dpl_part_info_file   = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-part-information.csv")
+            dpl_reg_info_file    = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-regulatory-info.csv")
             dpl_dna_designs_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-dna-designs.csv")
-            dpl_png_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.png")
-            dpl_pdf_file = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.pdf")
+            dpl_png_file         = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.png")
+            dpl_pdf_file         = os.path.join(base_dir, f"{os.path.basename(filepath)}_dpl-sbol.pdf")
 
             print(' - ', end='')
             plotter(plot_parameters_file, dpl_part_info_file, dpl_reg_info_file,
@@ -351,7 +350,7 @@ class CELLO3:
             raise CelloError('Error with generating zipfile', e)
 
     def __load_netlist(self):
-        net_path = os.path.join(self.out_path, self.verilog_name,f'{self.verilog_name}_{self.ucf_name[:-4]}_yosys.json')
+        net_path = os.path.join(self.out_path, self.verilog_name, f'{self.verilog_name}_{self.ucf_name[:-4]}_yosys.json')
         # net_path = os.path.join(self.out_path, self.verilog_name, self.verilog_name)
         net_file = open(net_path, 'r')
         net_json = json.load(net_file)
@@ -457,7 +456,6 @@ class CELLO3:
             log.cf.info(f'num GATES in {self.verilog_name} netlist: {num_netlist_gates}')
             log.cf.info(sorted(g_list))
             log.cf.info(sorted(gate_names))
-
         gates_match = (num_structs == num_models == num_gates) and (num_gates_available[0] >= num_netlist_gates)
         if verbose:
             log.cf.info(f"{'Valid' if gates_match else 'NOT valid'} intermediate match!")
@@ -569,8 +567,7 @@ class CELLO3:
         :return: list: self.best_graphs: [(circuit_score, graph, tb, tb_labels)]
         """
         with threadpool_limits(limits=1, user_api='blas'):  # TODO: Needed?
-            print_centered(
-                'Running SIMULATED ANNEALING gate-assignment algorithm...')
+            print_centered('Running SIMULATED ANNEALING gate-assignment algorithm...')
             i_perms, o_perms, g_perms = [], [], []
             # TODO: Optimize permutation arrays
             for i_perm in itertools.permutations(i_list, i):

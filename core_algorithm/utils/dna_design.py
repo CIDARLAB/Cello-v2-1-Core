@@ -51,7 +51,7 @@ def hex_to_rgb(hex_value: str):
         int(hex_value, 16)
         value = hex_value.lstrip('#')
     except:
-        log.cf.warn('Passed non-hex val to dna_design.py hex_to_rgb func; defaulting to black...')
+        log.cf.warn(f'Passed non-hex val ({hex_value}) to dna_design.py hex_to_rgb func; defaulting to black...')
         return '0.0;0.0;0.0'
     vals = list(round(int(value[i:i + 6 // 3], 16) / 255, 2)
                 for i in range(0, 6, 6 // 3))
@@ -182,17 +182,34 @@ class DNADesign:
             """
 
             """
+            # print(self.cassettes)
+            # print('\nself.cassettes count: ', len(self.cassettes))
             for device in self.cassettes:
+                # print('device: ', device)
+                # print('\nself.cassettes[device].comps count: ', len(self.cassettes[device].comps))
                 for part in list(self.cassettes[device].comps):
+                    # print('comp: ', part)
                     if self.cassettes[device].color:
                         self.sequences[part].color = self.cassettes[device].color
                     else:
                         self.sequences[part].color = '000000'
+                # print('\nself.cassettes[device].outputs count: ', len(self.cassettes[device].outputs))
                 for part in list(self.cassettes[device].outputs):
+                    # print('output: ', part)
+                    # print('self.cassettes[device].color: ', self.cassettes[device].color)
                     if self.cassettes[device].color:
+                        # print('IF START..........')
+                        # print(self.cassettes[device].color)
+                        # print('self.sequences', self.sequences)
+                        # print('self.cassettes[device].color', self.cassettes[device].color)
+                        # print('part', part)
+                        # print('self.sequences[part]', self.sequences[part])
                         self.sequences[part].color = self.cassettes[device].color
+                        # print('IF END...........')
                     else:
+                        # print('ELSE START........')
                         self.sequences[part].color = '000000'
+                        # print('ELSE END..........')
 
         transfer_part_colors()
         dna_part_info_path = filepath + '_dpl-part-information.csv'
