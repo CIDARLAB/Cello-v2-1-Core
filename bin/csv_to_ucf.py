@@ -25,8 +25,9 @@ def parse_header(header: str):
 
 def main():
     """
-    Takes user input as filepath to .csv, runs the conversion, and generates a .json UCF file. The .json file will have
+    Takes user input as filepath to a .csv, runs the conversion, and generates a .json UCF file. The .json file will have
     the same name as and be in the same folder as the .csv file.
+
 
         Just for reference...
 
@@ -67,7 +68,7 @@ def main():
         # Check if boolean
         if value == 'true' or value == 'false':
             return bool(value)
-        # Check if float  # TODO: Adjust?
+        # Check if float
         elif key == 'value':
             return float(value)
         # Check if int
@@ -75,7 +76,6 @@ def main():
             return int(value)
         else:
             return value
-
 
     ucf_list = []  # outermost list of collections
 
