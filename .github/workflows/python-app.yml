@@ -42,4 +42,4 @@ jobs:
 #        coverage run -m pytest
 #        coverage report
     - name: Profile code
-      run: python -m cProfile src/utils/test_dna_design.py
+      run: python -m cProfile core_algorithm/utils/unit_tests/test_dna_design.py
