@@ -9,23 +9,23 @@ If you don't mind running the program in the console without a graphical user in
 ### Docker Pull
 You can pull the image for this core algorithm from the Docker Hub...
 ```
-docker pull
+docker pull ckrenz/cello-core-v2-1
 ```
 
 ### Docker Build
 Alternatively, you can build the docker image with the following command, executed from the root directory...
 ```
-docker build . -t "cidarlab/cello-core-v2-1"
+docker build . -t ckrenz/cello-core-v2-1
 ```
 
 ### Docker Run
 After either pulling or building the image, you can start the container as follows...
 ```
-docker run -i -v <LOCAL_DIR_TO_SAVE_RESULTS>:/app/temp_out -v <LOCAL_DIR_TO_SAVE_LOGS>:/app/logs -t cello-core-test
+docker run -i -v <LOCAL_DIR_TO_SAVE_RESULTS>:/app/temp_out -v <LOCAL_DIR_TO_SAVE_LOGS>:/app/logs -v <LOCAL_DIR_TO_GET_VERILOGS>:/app/library/verilogs -v <LOCAL_DIR_TO_GET_CONSTRAINT_FILES>:/app/library/constraints -t ckrenz/cello-core-v2-1
 ```
 -i makes the run interactive so that you can interface with the program in the console
 
--v creates a bind mount to save files on your local system
+-v creates a mounts a volume to save files on or read files from your local system
 
 
 #
@@ -100,6 +100,10 @@ Alternatively, you could make a script to call the ```CELLO3``` process and use 
 Input files can be found in the [library](/library/) folder. This includes the UCF files for Cello, as well as a few dozen 
 Verilog files. You may use your own Verilog files (structural or behavioral) or modified UCF files.
 
+
+#
+## Other Info
+
 #
 ### Example Output
 Here is an example of what the result from Cello looks like in the terminal. 
@@ -137,7 +141,6 @@ $$
 Only one iteration is stored in the memory at a time in the exhaustive pass. Each iteration has to store a truth table where each row has inputs toggled ON/OFF. The circuit for the intermediate logic circuit design placement is stored in memory with different data for each row.
 
 #
-## Other Info
 ### Contributing
 We welcome contributions from the community! If you'd like to contribute to CELLO-2.1, please follow the guidelines in the CONTRIBUTING.md file.
 (Cello 2.1 is still being developed, but we would welcome any feedback.)

@@ -1085,11 +1085,11 @@ class CELLO3:
             print(score)
 
         # NOTE: confirm intermediate output nodes are CMs...
-        for output in graph.outputs:
-            if 'Hill_response' != output.func_name:  # TODO: What is appropriate CM detection?
-                for gate in graph.gates:
-                    if output.id in gate.inputs:
-                        score = 0.0, truth_table, truth_table_labels
+        # for output in graph.outputs:
+        #     if 'Hill_response' != output.func_name:  # TODO: What is appropriate CM detection?
+        #         for gate in graph.gates:
+        #             if output.id in gate.inputs:
+        #                 score = 0.0, truth_table, truth_table_labels
 
         return score
 
