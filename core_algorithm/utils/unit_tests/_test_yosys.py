@@ -4,7 +4,7 @@ Batch runs YOSYS to a folder to quickly compare results.
 
 import sys
 
-sys.path.insert(0, '../')  # Add parent directory to Python path
+sys.path.insert(0, '../../')  # Add parent directory to Python path
 from logic_synthesis import *
 import time
 from log import *
