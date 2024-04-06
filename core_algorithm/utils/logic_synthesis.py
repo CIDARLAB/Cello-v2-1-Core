@@ -26,10 +26,11 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, ucf_name=None, choice=0
             f"YOSYS output folder for {v_name} could not be re-initialized, please double-check. \n{e}")
         return False
 
-    log.cf.info(new_out)  # Log the new out_path
+    log.cf.info(f'new_out: {new_out}')  # Log the new out_path
 
+    print('v_name: ', v_name)
     # Check if v_name has a directory component
-    if '/' in v_name:
+    if '/' in v_name or '\\' in v_name:
         new_in = os.path.join(in_path, os.path.dirname(v_name))
         v_name = os.path.basename(v_name)
         log.cf.info(new_in)
@@ -43,15 +44,15 @@ def call_YOSYS(in_path=None, out_path=None, v_name=None, ucf_name=None, choice=0
     v_loc = os.path.join(new_in, verilog)
 
     # Logging the information
-    log.cf.info(verilog)
-    log.cf.info(v_loc)
-    log.cf.info(new_in)
-    log.cf.info(new_out)
+    log.cf.info(f'verilog: {verilog}')
+    log.cf.info(f'v_loc: {v_loc}')
+    log.cf.info(f'new_in: {new_in}')
+    log.cf.info(f'new_out: {new_out}')
     log.cf.info('\n')
 
     # Check for file existence
     if not os.path.isfile(v_loc):
-        error_message = f"ERROR finding {verilog}, please check verilog input."
+        error_message = f"ERROR finding {verilog} in {v_loc}, please check verilog input."
         log.cf.error(error_message)
         raise Exception(error_message)
 
