@@ -1,8 +1,7 @@
 """
 This software package is for designing genetic circuits based on logic gate designs written in the Verilog format.
-TODO: Link to articles and other sources
-TODO: Add space/time complexity metrics for simulated annealing to the readme?
-TODO: Also update examples and assets folder...
+TODO: Update examples/docs
+TODO: Space/time complexity metrics for dual annealing
 """
 
 import os
@@ -13,8 +12,8 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
-from memory_profiler import memory_usage  # Note: memory reported in simulated annealing function
-mem_usage = 0
+# from memory_profiler import memory_usage  # Note: memory reported in simulated annealing function
+# mem_usage = 0
 from threadpoolctl import threadpool_limits, threadpool_info
 import scipy  # Note: 'user_api' for use in thread-limiting with statement around scipy annealing algo
 
@@ -32,14 +31,16 @@ from core_algorithm.utils.response_plot import plot_bars
 from core_algorithm.utils.sbol import *
 
 
-def cello_initializer(v_name_, ucf_name_, in_name_, out_name_, verilogs_path_, constraints_path_, out_path_, options):
+def cello_initializer(v_name, ucf_name, in_name, out_name, in_path, out_path, options):
     try:
         start_time = time.time()
-        process = CELLO3(v_name_, ucf_name_, in_name_,
-                         out_name_, verilogs_path_, constraints_path_, out_path_, options)
+        verilogs_path = os.path.join(in_path, 'verilogs')
+        constraints_path = os.path.join(in_path, 'constraints')
+        process = CELLO3(v_name, ucf_name, in_name, out_name, verilogs_path, constraints_path,
+                         out_path, options)
         log.cf.info(f'\nThread count: {threadpool_info()[0]["num_threads"]}')
         log.cf.info(f'Completion Time: {round(time.time() - start_time, 1)} seconds')
-        log.cf.info(f'Annealing mem (usually peak for program): {round(mem_usage[0], 2)} MiB')
+        # log.cf.info(f'Annealing mem (usually peak for program): {round(mem_usage[0], 2)} MiB')
         print("\nCello completed execution")
         return {'status': 'SUCCESS', 'msg': 'Cello process executed successfully'}
     except CelloError as e:
@@ -80,8 +81,8 @@ class CELLO3:
         [end]
     """
 
-    def __init__(self, v_name: str, ucf_name: str, in_name: str, out_name: str, verilogs_path: str,
-                 constraints_path: str, out_path: str, options: dict = None):
+    def __init__(self, v_name, ucf_name, in_name, out_name, verilogs_path, constraints_path, out_path,
+                 options: dict = None):
         # NOTE: Initialization
         try:
             # NOTE: SETTINGS (Defaults for specific Cello object; see __main__ at bottom for global program defaults)
@@ -619,8 +620,8 @@ class CELLO3:
                         f'Completed: {self.iter_count:,}/{max_fun:,} iterations (out of {iter_:,} possible iterations)\n'
                         f'Best Score: {self.best_score}')
 
-            global mem_usage
-            mem_usage = memory_usage(-1, interval=.1, timeout=0.1)
+            # global mem_usage
+            # mem_usage = memory_usage(-1, interval=.1, timeout=0.1)
 
         return self.best_graphs
 

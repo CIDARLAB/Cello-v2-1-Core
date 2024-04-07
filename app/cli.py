@@ -167,7 +167,7 @@ def start_cli():
             # if 'ex' in options_list:
             #     exhaustive = True
 
-    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, verilogs_path, ucf_path, out_path_,
+    result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_,
                                options={'yosys_cmd_choice': yosys_cmd_choice,
                                         'verbose': verbose,
                                         'log_overwrite': log_overwrite,
