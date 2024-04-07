@@ -1,4 +1,4 @@
-# Cello-v2.1-Core
+# Cello-v2.1-Core (pre-alpha for v3)
 This software package is a streamlined algorithm for designing genetic circuits based on logic gate designs written in the Verilog format. It executes through the command-line interface by calling the 'celloAlgo.py' script. CELLO-2.1 is capable of efficiently handling single-cellular (with multicellular support coming soon) partitioning with multiple-output support, generating results saved in a local directory on your machine, with verbose logging, ang with GUI interface coming soon.
 
 
