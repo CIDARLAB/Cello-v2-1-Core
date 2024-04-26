@@ -237,7 +237,7 @@ class Gate:
         # self.input_comp = input_composition
         self.gate_params[g_name] = params
 
-    def eval_gates(self, in_comp):
+    def eval_gates(self, in_comp, io_gate_val):
         """
         Returns the best gate assignment from gate group.
 
@@ -252,6 +252,14 @@ class Gate:
                 scores.append(self.eval_gate(gname, in_comp))
                 # NOTE: this eval function needs to be modified
             best_score = max(scores)
+            # print(best_score)
+            # if io_gate_val == 1:
+            #     best_score = max(scores)
+            # elif io_gate_val == 0:
+            #     best_score = min(scores)
+            # else:
+            #     print('ERROR')
+            # TODO: CK: Correct this ^ to replace simplistic max func
             self.best_score = best_score[0]
             self.gate_in_use = best_score[1]
             self.tandem_score = best_score[2]
@@ -272,6 +280,7 @@ class Gate:
         tandem = 0
         if self.tandem_factor_func:
             tandem = eval(self.tandem_factor_func)
+        # print(gate_name, result)
         return result, gate_name, tandem
 
     def __str__(self):
@@ -363,13 +372,14 @@ class AssignGraph:
             return ValueError()
 
     # NOTE: needs modification
-    def get_score(self, node, verbose=False):
+    def get_score(self, node, verbose=False, table_info={}):
         """
 
         :param node:
         :param verbose:
         :return:
         """
+
         if type(node) == Input:
             if node.score_in_use is not None:
                 # if verbose:
@@ -379,17 +389,22 @@ class AssignGraph:
                 log.cf.warning('this should not happen')
                 return max(node.out_scores.values()), node.tandem_scores[node.score_in_use]
         elif type(node) == Output:
-            input_score = self.get_score(self.find_prev(node))[0]
+            input_score = self.get_score(self.find_prev(node), table_info=table_info)[0]
             output_score = node.eval_output(input_score=input_score)
             # if verbose:
             #     print(f'{node.name} {output_score}')
             return output_score, 0
         elif type(node) == Gate:
+            if table_info:
+                table, labels, r = table_info['table'], table_info['labels'], table_info['r']
+                c = labels.index(node.name + '_I/O')
+                io_gate_val = table[r][c]
+                # print(node.name, io_gate_val)
             if node.gate_type == 'NOT':  # has single input
-                input_score = self.get_score(self.find_prev(node))[0]
+                input_score = self.get_score(self.find_prev(node), table_info=table_info)[0]
                 x = input_score
             elif node.gate_type == 'NOR':  # has two inputs
-                scores = [self.get_score(x) for x in self.find_prev(node)]
+                scores = [self.get_score(x, table_info=table_info) for x in self.find_prev(node)]
                 x1 = scores[0][0]
                 x2 = scores[1][0]
                 t1 = scores[0][1]
@@ -403,7 +418,7 @@ class AssignGraph:
                 # there shouldn't be gates other than NOR/NOT
                 raise Exception
             # below tries to calculate scores for a gate (the best gate choice in this case)
-            gate_score, tandem_score = node.eval_gates(x)
+            gate_score, tandem_score = node.eval_gates(x, io_gate_val)
             # if verbose:
             #     print(f'{node.gate_in_use} {gate_score}')
             return gate_score, tandem_score  # CRIT: Fix tandem scoring...
