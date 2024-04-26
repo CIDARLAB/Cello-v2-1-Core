@@ -118,7 +118,7 @@ class CELLO3:
             self.best_score = 0
             self.best_graphs = []
             self.units = 'Unknown_Units'
-
+            self.filepath = os.path.join(out_path, self.verilog_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
             # Loggers
             log.config_logger(self.verilog_name, self.ucf_name, self.log_overwrite)
             log.reset_logs()
@@ -226,7 +226,6 @@ class CELLO3:
             for rnl_out, g_out in graph_outputs_for_printing:
                 log.cf.info(f' - {rnl_out} {str(g_out)}')
                 out_labels[rnl_out[0]] = g_out.name
-
             tech_diagram_filepath = os.path.join(self.out_path, v_name, f'{self.verilog_name}_{self.ucf_name[:-4]}')
             replace_techmap_diagram_labels(tech_diagram_filepath, gate_labels, in_labels, out_labels)
         except Exception as e:
@@ -248,7 +247,8 @@ class CELLO3:
             print('(See log for more precision)')
 
             # Now write the CSV file
-            with open(f'{filepath}_activity-table.csv', 'w', newline='') as csvfile:
+            fullpath = os.path.join(os.path.dirname(filepath), f"{os.path.basename(filepath)}_activity-table.csv")
+            with open(fullpath, 'w', newline='') as csvfile:
                 csv_writer = csv.writer(csvfile)
                 csv_writer.writerow(['Scores...'])
                 csv_writer.writerows(zip(*[["{:.2e}".format(float(c)) if i > 0 else c for i, c in enumerate(row)]
@@ -647,14 +647,28 @@ class CELLO3:
         for I_perm in itertools.permutations(i_list, i):
             for O_perm in itertools.permutations(o_list, o):
                 for G_perm in itertools.permutations(g_list, g):
-                    self.prep_assign_for_scoring(
-                        (I_perm, O_perm, G_perm), (None, None, None, netgraph, i, o, g, iter_))
-
+                    self.prep_assign_for_scoring((I_perm, O_perm, G_perm),
+                                                 (None, None, None, netgraph, i, o, g, iter_))
         if not self.verbose:
             log.cf.info('\n')
         log.cf.info(f'\nDONE!\nCounted: {self.iter_count:,} iterations')
 
         return self.best_graphs
+
+    # def user_specified_assign(self, i_list: list, o_list: list, g_list: list, i: int, o: int, g: int,
+    #                           netgraph: GraphParser, iter_: int) -> list:
+    #     """
+    #
+    #     """
+    #     print_centered('Running USER-SPECIFIED gate-assignment algorithm...')
+    #     log.cf.info('Scoring potential gate assignments...')
+    #
+    #     for perm in perms:
+    #         self.prep_assign_for_scoring()
+    #
+    #     self.prep_assign_for_scoring()
+    #
+    #     return self.best_graphs
 
     def prep_assign_for_scoring(self, x, args):
         """
@@ -686,19 +700,23 @@ class CELLO3:
             o_perm = o_perms[math.floor(o_perm)]
             g_perm = g_perms[math.floor(g_perm)]
 
+        # print('\ni_perm: \n', i_perm)
+        # print('g_perm: \n', g_perm)
+        # print('o_perm: \n', o_perm)
+
         # Ignore invalid cases where a type of CM is both an input and output (would create feedback)
         case_invalid = False
-        inputs = []
-        for input in i_perms[math.floor(x[0])]:
-            input_short = input.removesuffix('_in')
-            input_short = input_short.removesuffix('_input')
-            inputs.append(input_short)
-        for output in o_perms[math.floor(x[1])]:
-            output_short = output.removesuffix('_out')
-            output_short = output_short.removesuffix('_output')
-            if output_short in inputs:
-                case_invalid = True
-                break
+        # inputs = []
+        # for input in i_perms[math.floor(x[0])]:
+        #     input_short = input.removesuffix('_in')
+        #     input_short = input_short.removesuffix('_input')
+        #     inputs.append(input_short)
+        # for output in o_perms[math.floor(x[1])]:
+        #     output_short = output.removesuffix('_out')
+        #     output_short = output_short.removesuffix('_output')
+        #     if output_short in inputs:
+        #         case_invalid = True
+        #         break
 
         # Check if inputs, outputs, and gates are unique and the correct number
         if len(set(i_perm + o_perm + g_perm)) == i + o + g:
@@ -739,6 +757,14 @@ class CELLO3:
                 print_centered(f'end of iteration {self.iter_count} : intermediate circuit score = {circuit_score}',
                                also_logfile=False)
 
+            # # Now write the CSV file if verbose
+            # if self.verbose:
+            #     with open((fp := f'{self.filepath}_all_scores.csv'), 'a+') as csvfile:
+            #         csv_writer = csv.writer(csvfile)
+            #         if os.stat(fp).st_size == 0:
+            #             csv_writer.writerow(['Scores', 'Designs...'])
+            #         csv_writer.writerow([circuit_score, graph])
+
             if circuit_score > self.best_score:
                 self.best_score = circuit_score
                 self.best_graphs = [(circuit_score, graph, tb, tb_labels)]
@@ -750,6 +776,7 @@ class CELLO3:
                 self.best_graphs.append((circuit_score, graph, tb, tb_labels))
 
         # Inverted because Dual Annealing designed to find minimum; should ONLY return score
+
         return -self.best_score
 
     def score_circuit(self, graph: AssignGraph):
@@ -1017,7 +1044,10 @@ class CELLO3:
                 output_name = graph_output.name
                 graph_output_idx = truth_table_labels.index(output_name)
                 if truth_table[r][graph_output_idx] is None:
-                    output_score = graph.get_score(graph_output, verbose=self.verbose)[0]
+                    output_score = graph.get_score(graph_output, verbose=self.verbose,
+                                                   table_info={'table': truth_table,
+                                                               'labels': truth_table_labels,
+                                                               'r': r})[0]
                     truth_table[r][graph_output_idx] = output_score
                     circuit_scores.append((output_score, output_name))
 

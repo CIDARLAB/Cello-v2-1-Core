@@ -143,29 +143,29 @@ def start_cli():
                     f'Output File Name: '))
 
             options = ''
-            # log.cf.info(options := input(
-            #     f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
-            #     f'Available Settings:\n'
-            #     f' - (v)  Verbose: {verbose} \n'
-            #     f'        Include \'v\' to print more details to both console and the log file\n'
-            #     f' - (o)  Log overwrite: {log_overwrite} \n'
-            #     f'        Include \'o\' to overwrite an old log when a new log is run; removes dates from log name\n'
-            #     f' - (pi) Print all iterations: {print_iters} \n'
-            #     f'        Include \'pi\' to print info on all iterations (copious output)\n'
-            #     f' - (ex) Exhaustive: {exhaustive} \n'
-            #     f'        Include \'ex\' to test *all* possible permutations to get global optimum \n'
-            #     f'        May take *long* time; normally uses simulated annealing to efficiently find good solution\n'
-            #     f'Otherwise, just press Enter to proceed with default settings...\n\n'
-            #     f'Options (if any): '))
+            log.cf.info(options := input(
+                f'\n\nIf you want any additional options set, type the space-separated strings below...\n'
+                f'Available Settings:\n'
+                f' - (v)  Verbose: {verbose} \n'
+                f'        Include \'v\' to print more details to both console and the log file\n'
+                f' - (o)  Log overwrite: {log_overwrite} \n'
+                f'        Include \'o\' to overwrite an old log when a new log is run; removes dates from log name\n'
+                f' - (pi) Print all iterations: {print_iters} \n'
+                f'        Include \'pi\' to print info on all iterations (copious output)\n'
+                f' - (ex) Exhaustive: {exhaustive} \n'
+                f'        Include \'ex\' to test *all* possible permutations to get global optimum \n'
+                f'        May take *long* time; normally uses simulated annealing to efficiently find good solution\n'
+                f'Otherwise, just press Enter to proceed with default settings...\n\n'
+                f'Options (if any): '))
             options_list = options.split()
-            # if 'v' in options_list:
-            #     verbose = True
-            # if 'o' in options_list:
-            #     log_overwrite = True
-            # if 'pi' in options_list:
-            #     print_iters = True
-            # if 'ex' in options_list:
-            #     exhaustive = True
+            if 'v' in options_list:
+                verbose = True
+            if 'o' in options_list:
+                log_overwrite = True
+            if 'pi' in options_list:
+                print_iters = True
+            if 'ex' in options_list:
+                exhaustive = True
 
     result = cello_initializer(v_name_, ucf_name_, in_name_, out_name_, in_path_, out_path_,
                                options={'yosys_cmd_choice': yosys_cmd_choice,
