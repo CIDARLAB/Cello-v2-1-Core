@@ -14,7 +14,7 @@ module and_gate (in_A, in_B, out);
 
     output out;
 
-    assign out = in_A & in_B;
+    and(out, in_A, in_B);
 
 endmodule
 
