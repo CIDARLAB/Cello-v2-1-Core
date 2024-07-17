@@ -1,0 +1,93 @@
+[
+	{
+		"collection": "input_sensors",
+		"name": "aTc_sensor",
+		"model": "aTc_sensor_model",
+		"structure": "aTc_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "aTc_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 5.41,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.02,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "aTc_sensor_structure",
+		"outputs": [
+			"PTet"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PTet",
+		"type": "promoter",
+		"dnasequence": "AACGATCGTTGGCTGTCCCTATCAGTGATAGAGATTGACATCCCTATCAGTGATAGATATAATGAGCAC"
+	},
+	{
+		"collection": "input_sensors",
+		"name": "Cuma_sensor",
+		"model": "Cuma_sensor_model",
+		"structure": "Cuma_sensor_structure"
+	},
+	{
+		"collection": "models",
+		"name": "Cuma_sensor_model",
+		"functions": {
+			"response_function": "sensor_response"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 2.39,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.19,
+				"description": "Minimal transcription"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "Cuma_sensor_structure",
+		"outputs": [
+			"PCymRC"
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "PCymRC",
+		"type": "promoter",
+		"dnasequence": "TTCCGATGTAGGAGTAACAAACAGACAATCTGGTCTGTTTGTATTATGGAAAATTTTTCTGTATAATAGATTC"
+	},
+	{
+		"collection": "functions",
+		"name": "sensor_response",
+		"equation": "$STATE * (ymax - ymin) + ymin",
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			}
+		]
+	}
+]

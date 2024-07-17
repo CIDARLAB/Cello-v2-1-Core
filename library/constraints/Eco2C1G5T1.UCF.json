@@ -1,0 +1,2006 @@
+[
+	{
+		"collection": "header",
+		"description": "cI homologs: lambda, P22, TP901, r1t, Tuc2009, phage186, 933W, L5, N15, P2hd, P2, VP585, Wphi",
+		"version": "Eco2C1G5T1",
+		"date": "Tue April 13 16:01:11 EDT 2021",
+		"author": [
+			"Jai Padmakumar",
+			"Alexander J. Triassi",
+			"Hamid Doosthosseini",
+			"Samuel M.D. Oliveira"
+		],
+		"organism": "Escherichia coli MG1655 (Extended #Gates))",
+		"genome": "Wildtype (NCBI RefSeq: CP007799) with three landing pads integrated",
+		"media": "M9 minimal media composed of M9 media salts (6.78 g/L Na2HPO4, 3 g/L KH2PO4, 1 g/L NH4Cl, 0.5 g/L NaCl, 0.34 g/L thiamine hydrochloride, 0.4% D-glucose, 0.2% Casamino acids, 2 mM MgSO4, and 0.1 mM CaCl2",
+		"temperature": "37",
+		"growth": "Inoculation: Individual colonies into M9 media, 16 hours overnight in plate shaker.\tDilution: Next day, cells diluted 150-fold into M9 media without antibiotics, growth for 1.5 hours.\tInduction: Cells diluted into M9 media without antibiotics (starting OD600 = 0.0033).\tGrowth: shaking incubator for 5 hours.\tArrest protein production: PBS and 1 mg/ml kanamycin.  Measurement: flow cytometry, data processing for RPU normalization."
+	},
+	{
+		"collection": "measurement_std",
+		"signal_carrier_units": "RPUG",
+		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPU.  RPU = (YFP - YFP0)/(YFPRPUG - YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median fluorescence of the cells containing full sensor array with two other landing pads empty, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad",
+		"plasmid_description": "Genome integrated RPU standard where YFP fluorescent protein is driven by J23101 promoter and B0034 RBS. RiboJ was used as a ribozyme insulator. A bidirectional terminator DT3 was used to insulate YFP from the genome. The insertion is in the landing pad #2, at the position of 4633382"
+	},
+	{
+		"collection": "input_composition",
+		"signal_carrier_units": "RPUG",
+		"normalization_instructions": "The following equation converts the median YFP fluorescence to RPU.  RPU = (YFP - YFP0)/(YFPRPUG - YFP0), where YFP is the median fluorescence of the cells of interest, YFP0 is the median fluorescence of the cells containing full sensor array with two other landing pads empty, and YFPRPUG is the median fluorescence of the cells containing the measurement standard on the genome landing pad.",
+		"plasmid_description": "We used the pRpa*A (pC-HSL inducer) sensor cassette, which was cloned alongside the circuit. The DNA sequence of this particular input sensor includes a promoter, ribozyme, RBS, sensor protein, and terminator (all required components)"
+	},
+	{
+		"collection": "genetic_locations",
+		"locations": [
+			{
+				"symbol": "attB2",
+				"description": "",
+				"locus": {
+					"start": 0,
+					"end": 0
+				},
+				"sequence": {
+					"type": "",
+					"ref": ""
+				}
+			},
+			{
+				"symbol": "attB7",
+				"description": "",
+				"locus": {
+					"start": 0,
+					"end": 0
+				},
+				"sequence": {
+					"type": "",
+					"ref": ""
+				}
+			},
+			{
+				"symbol": "attB5",
+				"description": "",
+				"locus": {
+					"start": 0,
+					"end": 0
+				},
+				"sequence": {
+					"type": "",
+					"ref": ""
+				}
+			}
+		]
+	},
+	{
+		"collection": "logic_constraints",
+		"available_gates": [
+			{
+				"type": "NOR",
+				"max_instances": 12
+			},
+			{
+				"type": "OUTPUT_OR",
+				"max_instances": true
+			}
+		]
+	},
+	{
+		"collection": "gates",
+		"name": "R1_Lambda",
+		"system": "TetR",
+		"group": "Lambda",
+		"regulator": "Lambda",
+		"gate_type": "NOR",
+		"color": "F9A427",
+		"model": "R1_Lambda_model",
+		"structure": "R1_Lambda_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R2_Lambda",
+		"system": "TetR",
+		"group": "Lambda",
+		"regulator": "Lambda",
+		"gate_type": "NOR",
+		"color": "3BA9E0",
+		"model": "R2_Lambda_model",
+		"structure": "R2_Lambda_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R3_P22",
+		"system": "TetR",
+		"group": "P22",
+		"regulator": "P22",
+		"gate_type": "NOR",
+		"color": "EE2F2B",
+		"model": "R3_P22_model",
+		"structure": "R3_P22_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R4_TP901",
+		"system": "TetR",
+		"group": "TP901",
+		"regulator": "TP901",
+		"gate_type": "NOR",
+		"color": "6FCDE1",
+		"model": "R4_TP901_model",
+		"structure": "R4_TP901_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R5_R1t",
+		"system": "TetR",
+		"group": "R1t",
+		"regulator": "R1t",
+		"gate_type": "NOR",
+		"color": "C24B9C",
+		"model": "R5_R1t_model",
+		"structure": "R5_R1t_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R8_933W",
+		"system": "TetR",
+		"group": "933W",
+		"regulator": "933W",
+		"gate_type": "NOR",
+		"color": "3A563F",
+		"model": "R8_933W_model",
+		"structure": "R8_933W_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R9_933W",
+		"system": "TetR",
+		"group": "933W",
+		"regulator": "933W",
+		"gate_type": "NOR",
+		"color": "9635CF",
+		"model": "R9_933W_model",
+		"structure": "R9_933W_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R12_P2hd",
+		"system": "TetR",
+		"group": "P2hd",
+		"regulator": "P2hd",
+		"gate_type": "NOR",
+		"color": "261239",
+		"model": "R12_P2hd_model",
+		"structure": "R12_P2hd_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R13_P2",
+		"system": "TetR",
+		"group": "P2",
+		"regulator": "P2",
+		"gate_type": "NOR",
+		"color": "CA30C6",
+		"model": "R13_P2_model",
+		"structure": "R13_P2_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R14_P2",
+		"system": "TetR",
+		"group": "P2",
+		"regulator": "P2",
+		"gate_type": "NOR",
+		"color": "08A297",
+		"model": "R14_P2_model",
+		"structure": "R14_P2_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R15_P2",
+		"system": "TetR",
+		"group": "P2",
+		"regulator": "P2",
+		"gate_type": "NOR",
+		"color": "81BC02",
+		"model": "R15_P2_model",
+		"structure": "R15_P2_structure"
+	},
+	{
+		"collection": "gates",
+		"name": "R17_Wphi",
+		"system": "TetR",
+		"group": "Wphi",
+		"regulator": "Wphi",
+		"gate_type": "NOR",
+		"color": "D3799B",
+		"model": "R17_Wphi_model",
+		"structure": "R17_Wphi_structure"
+	},
+	{
+		"collection": "structures",
+		"name": "R1_Lambda_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pLambda"
+		],
+		"devices": [
+			{
+				"name": "R1_Lambda_a",
+				"components": [
+					"#in1",
+					"R1_Lambda_a_cassette"
+				]
+			},
+			{
+				"name": "R1_Lambda_a_cassette",
+				"components": [
+					"RiboJ54",
+					"R1",
+					"Lambda",
+					"Ret0"
+				]
+			},
+			{
+				"name": "R1_Lambda_b",
+				"components": [
+					"#in2",
+					"R1_Lambda_b_cassette"
+				]
+			},
+			{
+				"name": "R1_Lambda_b_cassette",
+				"components": [
+					"RiboJ54",
+					"R1",
+					"Lambda",
+					"Ret0"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R2_Lambda_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pLambda"
+		],
+		"devices": [
+			{
+				"name": "R2_Lambda_a",
+				"components": [
+					"#in1",
+					"R2_Lambda_a_cassette"
+				]
+			},
+			{
+				"name": "R2_Lambda_a_cassette",
+				"components": [
+					"RiboJ54",
+					"R2",
+					"Lambda",
+					"Ret0"
+				]
+			},
+			{
+				"name": "R2_Lambda_b",
+				"components": [
+					"#in2",
+					"R2_Lambda_b_cassette"
+				]
+			},
+			{
+				"name": "R2_Lambda_b_cassette",
+				"components": [
+					"RiboJ54",
+					"R2",
+					"Lambda",
+					"Ret0"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R3_P22_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pP22"
+		],
+		"devices": [
+			{
+				"name": "R3_P22_a",
+				"components": [
+					"#in1",
+					"R3_P22_a_cassette"
+				]
+			},
+			{
+				"name": "R3_P22_a_cassette",
+				"components": [
+					"RiboJ71",
+					"R3",
+					"P22",
+					"IlvGEDA"
+				]
+			},
+			{
+				"name": "R3_P22_b",
+				"components": [
+					"#in2",
+					"R3_P22_b_cassette"
+				]
+			},
+			{
+				"name": "R3_P22_b_cassette",
+				"components": [
+					"RiboJ71",
+					"R3",
+					"P22",
+					"IlvGEDA"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R4_TP901_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pTP901"
+		],
+		"devices": [
+			{
+				"name": "R4_TP901_a",
+				"components": [
+					"#in1",
+					"R4_TP901_a_cassette"
+				]
+			},
+			{
+				"name": "R4_TP901_a_cassette",
+				"components": [
+					"RiboJ69",
+					"R4",
+					"TP901",
+					"RpoC"
+				]
+			},
+			{
+				"name": "R4_TP901_b",
+				"components": [
+					"#in2",
+					"R4_TP901_b_cassette"
+				]
+			},
+			{
+				"name": "R4_TP901_b_cassette",
+				"components": [
+					"RiboJ69",
+					"R4",
+					"TP901",
+					"RpoC"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R5_R1t_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pR1t"
+		],
+		"devices": [
+			{
+				"name": "R5_R1t_a",
+				"components": [
+					"#in1",
+					"R5_R1t_a_cassette"
+				]
+			},
+			{
+				"name": "R5_R1t_a_cassette",
+				"components": [
+					"BydvJ",
+					"R5",
+					"R1t",
+					"ECK120029600"
+				]
+			},
+			{
+				"name": "R5_R1t_b",
+				"components": [
+					"#in2",
+					"R5_R1t_b_cassette"
+				]
+			},
+			{
+				"name": "R5_R1t_b_cassette",
+				"components": [
+					"BydvJ",
+					"R5",
+					"R1t",
+					"ECK120029600"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R8_933W_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"p933W"
+		],
+		"devices": [
+			{
+				"name": "R8_933W_a",
+				"components": [
+					"#in1",
+					"R8_933W_a_cassette"
+				]
+			},
+			{
+				"name": "R8_933W_a_cassette",
+				"components": [
+					"PlmJ",
+					"R8",
+					"933W",
+					"DT36"
+				]
+			},
+			{
+				"name": "R8_933W_b",
+				"components": [
+					"#in2",
+					"R8_933W_b_cassette"
+				]
+			},
+			{
+				"name": "R8_933W_b_cassette",
+				"components": [
+					"PlmJ",
+					"R8",
+					"933W",
+					"DT36"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R9_933W_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"p933W"
+		],
+		"devices": [
+			{
+				"name": "R9_933W_a",
+				"components": [
+					"#in1",
+					"R9_933W_a_cassette"
+				]
+			},
+			{
+				"name": "R9_933W_a_cassette",
+				"components": [
+					"PlmJ",
+					"R9",
+					"933W",
+					"DT36"
+				]
+			},
+			{
+				"name": "R9_933W_b",
+				"components": [
+					"#in2",
+					"R9_933W_b_cassette"
+				]
+			},
+			{
+				"name": "R9_933W_b_cassette",
+				"components": [
+					"PlmJ",
+					"R9",
+					"933W",
+					"DT36"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R12_P2hd_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pP2hd"
+		],
+		"devices": [
+			{
+				"name": "R12_P2hd_a",
+				"components": [
+					"#in1",
+					"R12_P2hd_a_cassette"
+				]
+			},
+			{
+				"name": "R12_P2hd_a_cassette",
+				"components": [
+					"RiboJ60",
+					"R12",
+					"P2hd",
+					"DT56"
+				]
+			},
+			{
+				"name": "R12_P2hd_b",
+				"components": [
+					"#in2",
+					"R12_P2hd_b_cassette"
+				]
+			},
+			{
+				"name": "R12_P2hd_b_cassette",
+				"components": [
+					"RiboJ60",
+					"R12",
+					"P2hd",
+					"DT56"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R13_P2_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pP2"
+		],
+		"devices": [
+			{
+				"name": "R13_P2_a",
+				"components": [
+					"#in1",
+					"R13_P2_a_cassette"
+				]
+			},
+			{
+				"name": "R13_P2_a_cassette",
+				"components": [
+					"RiboJ64",
+					"R13",
+					"P2",
+					"DT86"
+				]
+			},
+			{
+				"name": "R13_P2_b",
+				"components": [
+					"#in2",
+					"R13_P2_b_cassette"
+				]
+			},
+			{
+				"name": "R13_P2_b_cassette",
+				"components": [
+					"RiboJ64",
+					"R13",
+					"P2",
+					"DT86"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R14_P2_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pP2"
+		],
+		"devices": [
+			{
+				"name": "R14_P2_a",
+				"components": [
+					"#in1",
+					"R14_P2_a_cassette"
+				]
+			},
+			{
+				"name": "R14_P2_a_cassette",
+				"components": [
+					"RiboJ64",
+					"R14",
+					"P2",
+					"DT86"
+				]
+			},
+			{
+				"name": "R14_P2_b",
+				"components": [
+					"#in2",
+					"R14_P2_b_cassette"
+				]
+			},
+			{
+				"name": "R14_P2_b_cassette",
+				"components": [
+					"RiboJ64",
+					"R14",
+					"P2",
+					"DT86"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R15_P2_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pP2"
+		],
+		"devices": [
+			{
+				"name": "R15_P2_a",
+				"components": [
+					"#in1",
+					"R15_P2_a_cassette"
+				]
+			},
+			{
+				"name": "R15_P2_a_cassette",
+				"components": [
+					"RiboJ64",
+					"R15",
+					"P2",
+					"DT86"
+				]
+			},
+			{
+				"name": "R15_P2_b",
+				"components": [
+					"#in2",
+					"R15_P2_b_cassette"
+				]
+			},
+			{
+				"name": "R15_P2_b_cassette",
+				"components": [
+					"RiboJ64",
+					"R15",
+					"P2",
+					"DT86"
+				]
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "R17_Wphi_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"outputs": [
+			"pWphi"
+		],
+		"devices": [
+			{
+				"name": "R17_Wphi_a",
+				"components": [
+					"#in1",
+					"R17_Wphi_a_cassette"
+				]
+			},
+			{
+				"name": "R17_Wphi_a_cassette",
+				"components": [
+					"SarJ",
+					"R17",
+					"Wphi",
+					"DT19"
+				]
+			},
+			{
+				"name": "R17_Wphi_b",
+				"components": [
+					"#in2",
+					"R17_Wphi_b_cassette"
+				]
+			},
+			{
+				"name": "R17_Wphi_b_cassette",
+				"components": [
+					"SarJ",
+					"R17",
+					"Wphi",
+					"DT19"
+				]
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R1_Lambda_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R1_Lambda_toxicity",
+			"cytometry": "R1_Lambda_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.779420838,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.035229117,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.043390621,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.25481011,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R2_Lambda_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R2_Lambda_toxicity",
+			"cytometry": "R2_Lambda_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 5.216970779,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.04588324,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.162932102,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.090738632,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R3_P22_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R3_P22_toxicity",
+			"cytometry": "R3_P22_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 2.4406312,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.103434868,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.217708584,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 1.5512218,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R4_TP901_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R4_TP901_toxicity",
+			"cytometry": "R4_TP901_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.268995418,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.031118983,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.032539108,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 1.529782691,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R5_R1t_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R5_R1t_toxicity",
+			"cytometry": "R5_R1t_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.542309059,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.058783804,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.054176575,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 1.819793098,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R8_933W_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R8_933W_toxicity",
+			"cytometry": "R8_933W_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 1.576950293,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.021819985,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.02909727,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.548280961,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R9_933W_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R9_933W_toxicity",
+			"cytometry": "R9_933W_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 3.75792433,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.026776673,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.078436787,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.058969157,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R12_P2hd_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R12_P2hd_toxicity",
+			"cytometry": "R12_P2hd_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 1.488230227,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.013941128,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.074900767,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 1.860140268,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R13_P2_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R13_P2_toxicity",
+			"cytometry": "R13_P2_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 1.896985729,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.031406958,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.481807912,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.659059916,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R14_P2_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R14_P2_toxicity",
+			"cytometry": "R14_P2_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 1.819126514,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.024877707,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.092760168,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.18283262,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R15_P2_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R15_P2_toxicity",
+			"cytometry": "R15_P2_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 1.023211547,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.021905529,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.032525222,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.521017808,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "models",
+		"name": "R17_Wphi_model",
+		"functions": {
+			"response_function": "Hill_response",
+			"input_composition": "linear_input_composition",
+			"toxicity": "R17_Wphi_toxicity",
+			"cytometry": "R17_Wphi_cytometry"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 2.636669224,
+				"description": "Maximal transcription"
+			},
+			{
+				"name": "ymin",
+				"value": 0.018283171,
+				"description": "Minimal transcription"
+			},
+			{
+				"name": "K",
+				"value": 0.103894911,
+				"description": "Half-maximum"
+			},
+			{
+				"name": "n",
+				"value": 2.04086841,
+				"description": "Cooperativety"
+			}
+		]
+	},
+	{
+		"collection": "functions",
+		"name": "Hill_response",
+		"equation": "ymin + (ymax - ymin) / (1.0 + (x / K)^n)",
+		"variables": [
+			{
+				"name": "x",
+				"map": "#//model/functions/input_composition"
+			}
+		],
+		"parameters": [
+			{
+				"name": "ymax",
+				"map": "#//model/parameters/ymax"
+			},
+			{
+				"name": "ymin",
+				"map": "#//model/parameters/ymin"
+			},
+			{
+				"name": "K",
+				"map": "#//model/parameters/K"
+			},
+			{
+				"name": "n",
+				"map": "#//model/parameters/n"
+			}
+		]
+	},
+	{
+		"collection": "functions",
+		"name": "linear_input_composition",
+		"equation": "x1 + x2",
+		"variables": [
+			{
+				"name": "x1",
+				"map": "#//structure/inputs/in1/model/functions/response_function"
+			},
+			{
+				"name": "x2",
+				"map": "#//structure/inputs/in2/model/functions/response_function"
+			}
+		]
+	},
+	{
+		"collection": "circuit_rules",
+		"rules": {
+			"function": "AND",
+			"rules": [
+				{
+					"function": "AND",
+					"rules": [
+						"STARTSWITH attB2",
+						"TP901-1 NEXTTO L1",
+						"attB7 BEFORE attB5",
+						"R1_Lambda BEFORE attB5",
+						"R2_Lambda BEFORE attB5",
+						"R3_P22 BEFORE attB5",
+						"R4_TP901 BEFORE attB5",
+						"R5_R1t BEFORE attB5",
+						"R8_933W BEFORE attB5",
+						"R9_933W BEFORE attB5",
+						"R12_P2hd BEFORE attB5",
+						"R13_P2 BEFORE attB5",
+						"R14_P2 BEFORE attB5",
+						"R15_P2 BEFORE attB5",
+						"R17_Wphi BEFORE attB5",
+						"R6_Tuc2009 BEFORE attB5",
+						"R7_Phage186 BEFORE attB5",
+						"R10_L5 BEFORE attB5",
+						"R11_N15 BEFORE attB5",
+						"R16_VP585 BEFORE attB5",
+						"OC6_out AFTER attB5",
+						"pC-HSL_out AFTER attB5",
+						"DAPG_out AFTER attB5",
+						"OHC12_out AFTER attB5",
+						"ALL_FORWARD"
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"P1_PhlF_a AFTER L2",
+								"P1_PhlF_a BEFORE L3",
+								"P1_PhlF_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"P1_PhlF_a AFTER L2",
+								"P1_PhlF_a BEFORE L3",
+								"P1_PhlF_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"P1_PhlF_b AFTER L2",
+								"P1_PhlF_b BEFORE L3",
+								"P1_PhlF_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"P1_PhlF_b AFTER L2",
+								"P1_PhlF_b BEFORE L3",
+								"P1_PhlF_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"Q1_QacR_a AFTER L2",
+								"Q1_QacR_a BEFORE L3",
+								"Q1_QacR_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Q1_QacR_a AFTER L2",
+								"Q1_QacR_a BEFORE L3",
+								"Q1_QacR_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Q1_QacR_b AFTER L2",
+								"Q1_QacR_b BEFORE L3",
+								"Q1_QacR_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"Q1_QacR_b AFTER L2",
+								"Q1_QacR_b BEFORE L3",
+								"Q1_QacR_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"A1_AmtR_a AFTER L2",
+								"A1_AmtR_a BEFORE L3",
+								"A1_AmtR_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"A1_AmtR_a AFTER L2",
+								"A1_AmtR_a BEFORE L3",
+								"A1_AmtR_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"A1_AmtR_b AFTER L2",
+								"A1_AmtR_b BEFORE L3",
+								"A1_AmtR_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"A1_AmtR_b AFTER L2",
+								"A1_AmtR_b BEFORE L3",
+								"A1_AmtR_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"B3_BM3R1_a AFTER L2",
+								"B3_BM3R1_a BEFORE L3",
+								"B3_BM3R1_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"B3_BM3R1_a AFTER L2",
+								"B3_BM3R1_a BEFORE L3",
+								"B3_BM3R1_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"B3_BM3R1_b AFTER L2",
+								"B3_BM3R1_b BEFORE L3",
+								"B3_BM3R1_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"B3_BM3R1_b AFTER L2",
+								"B3_BM3R1_b BEFORE L3",
+								"B3_BM3R1_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"F2_AmeRs_a AFTER L2",
+								"F2_AmeRs_a BEFORE L3",
+								"F2_AmeRs_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"F2_AmeRs_a AFTER L2",
+								"F2_AmeRs_a BEFORE L3",
+								"F2_AmeRs_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"F2_AmeRs_b AFTER L2",
+								"F2_AmeRs_b BEFORE L3",
+								"F2_AmeRs_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"F2_AmeRs_b AFTER L2",
+								"F2_AmeRs_b BEFORE L3",
+								"F2_AmeRs_a BEFORE L2"
+							]
+						}
+					]
+				},
+				{
+					"function": "OR",
+					"rules": [
+						{
+							"function": "AND",
+							"rules": [
+								"E1_BetI_a AFTER L2",
+								"E1_BetI_a BEFORE L3",
+								"E1_BetI_b AFTER L3"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"E1_BetI_a AFTER L2",
+								"E1_BetI_a BEFORE L3",
+								"E1_BetI_b BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"E1_BetI_b AFTER L2",
+								"E1_BetI_b BEFORE L3",
+								"E1_BetI_a BEFORE L2"
+							]
+						},
+						{
+							"function": "AND",
+							"rules": [
+								"E1_BetI_b AFTER L2",
+								"E1_BetI_b BEFORE L3",
+								"E1_BetI_a BEFORE L2"
+							]
+						}
+					]
+				}
+			]
+		}
+	},
+	{
+		"collection": "device_rules",
+		"rules": {
+			"function": "AND",
+			"rules": [
+				"ALL_FORWARD"
+			]
+		}
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pLambda",
+		"dnasequence": "TTCTTTCAGGCCGGGtaacaccgtgcgtgttgactattttacctctggcggtgataat"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "Lambda",
+		"dnasequence": "atgagcacaaaaaagaaaccattaacacaagagcagcttgaggacgcacgtcgccttaaagcaatttatgaaaaaaagaaaaatgaacttggcttatcccaggaatctgtcgcagacaagatggggatggggcagtcaggcgttggtgctttatttaatggcatcaatgcattaaatgcttataacgccgcattgcttgcaaaaattctcaaagttagcgttgaagaatttagcccttcaatcgccagagaaatctacgagatgtatgaagcggttagtatgcagccgtcacttagaagtgagtatgagtaccctgttttttctcatgttcaggcagggatgttctcacctgagcttagaacctttaccaaaggtgatgcggagagatgggtaagcacaaccaaaaaagccagtgattctgcattctggcttgaggttgaaggtaattccatgaccgcaccaacaggctccaagccaagctttcctgacggaatgttaattctcgttgaccctgagcaggctgttgagccaggtgatttctgcatagccagacttgggggtgatgagtttaccttcaagaaactgatcagggatagcggtcaggtgtttttacaaccactaaacccacagtacccaatgatcccatgcaatgagagttgttccgttgtggggaaagttatcgctagtcagtggcctgaagagacgtttggcTGA"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R1",
+		"dnasequence": "AACATCACACGTTAGCCTCTAC"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R2",
+		"dnasequence": "AACATCCCTCGTTAGCCTCTTC"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "RiboJ54",
+		"dnasequence": "aggggtcagttgatgtgctttcaactctgatgagtcagtgatgacgaaaccccctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "Ret0",
+		"dnasequence": "GCAGACAAAAAAAATGGCGCACAATGTGCGCCATTTTTCACTTCACAGGTACTATTGTTTTGAATTGAAAAGGGCGCTTCGGCGCCCTTTTTGCATTTGTTGACGGCATATATTTGTATATCGAAGCGCCCTGATGGGCGCTTTTTTTATTTAATCGATAACCAGA"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pP22",
+		"dnasequence": "GATGAGGCGGTCAGGaataaacttgactaaagattcctttagtagataatttaagtgttctttaatttc"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "P22",
+		"dnasequence": "ATGGGAGAGCGTATCCGTGCGCGCCGTAAAAAATTAAAAATCCGCCAGGCAGCGTTAGGCAAGATGGTCGGTGTTTCGAATGTAGCGATCTCTCAGTGGGAGCGTAGCGAAACTGAACCGAATGGAGAAAATTTATTGGCTTTATCTAAGGCACTGCAGTGTAGTCCGGACTACTTGTTGAAAGGTGATCTGAGTCAAACAAACGTCGCGTACCATTCTCGCCATGAACCACGTGGCTCTTATCCTCTGATTAGCTGGGTGTCTGCGGGGCAGTGGATGGAGGCGGTCGAACCGTATCACAAGCGTGCAATCGAGAATTGGCATGATACGACTGTAGACTGTAGCGAGGATTCGTTCTGGTTGGATGTTCAAGGGGATAGCATGACCGCACCCGCCGGATTAAGCATCCCCGAAGGCATGATTATTTTGGTCGATCCGGAAGTGGAGCCTCGCAACGGCAAACTTGTCGTGGCTAAGTTGGAAGGCGAGAATGAGGCGACGTTTAAGAAACTTGTCATGGATGCCGGACGTAAGTTTTTGAAACCCTTAAATCCGCAATATCCGATGATCGAGATCAATGGAAACTGCAAAATTATCGGTGTAGTAGTTGATGCCAAGCTGGCTAACTTACCGTAG"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R3",
+		"dnasequence": "ACTTTTAGCTAAAGGAATGATTG"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "RiboJ71",
+		"dnasequence": "AGTTGTCAGCCACTGTGCTTGTGGCTCTGATGAGACGGTGACGTCGAAACAACCTCTACAAATAATTTTGTTTAA"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "IlvGEDA",
+		"dnasequence": "TAGAGATCAAGCCTTAACGAACTAAGACCCCCGCACCGAAAGGTCCGGGGGTTTTTTTTGACCTTAAAAACATAACCGAGGAGCAGACA"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pTP901",
+		"dnasequence": "GCCACAAGCTCGAAAagttcatgaaacgtgaacttgacagctagctcagtcctaggtataaagttcatgaaacgtgaact"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "TP901",
+		"dnasequence": "ATGAAGACTGACACATCAAATCGCTTAAAGCAGATCATGGCTGAGCGCAACCTTAAACAAGTGGATATCCTGAATCTTAGCATCCCTTTTCAAAAAAAATTCGGGATCAAATTGAGCAAGTCCACCCTTTCGCAATACGTCAACTCGGTACAATCCCCAGACCAGAACCGTATTTACCTGTTAGCCAAGACCTTGGGGGTAAGTGAAGCATGGTTGATGGGATTCGACGTTCCAATGGTGGAATCCTCGAAGATTGAGAATGATTCAGAGAACATTGAGGAGACGATCACCGTCATGAAGAAGCTGGAAGAGCCGCGTCAGAAAGTGGTCTTGGATACAGCAAAAATTCAGTTAAAGGAGCAGGATGAACAGAATAAGGTAAAGCAGATCGAGGACTATCGCTTATCCGACGAATATTTGGAGGAGCAGATCAGCAAGGCGTCGGCTTACGGAGGGGGGCAACTTAACGATAATGATAAGGAATTTTTCAAACGTCTGCTGAAAAACACCCTTAAGGAGAAAATTGACAAAGGCGATCTTTGA"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R4",
+		"dnasequence": "GCTGGTACTGCTCGAGTATCTT"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "RiboJ69",
+		"dnasequence": "AGCTGTCAAGGCGTGTGCTTCGCCTTCTGATGAGCCCGTGAGGGCGAAACAGCCTCTACAAATAATTTTGTTTAA"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "RpoC",
+		"dnasequence": "GTAATCGTTAATCCGCAAATAACGTAAAAACCCGCTTCGGCGGGTTTTTTTATGGGGGGAGTTTAGGGAAAGAGCATTTGTCA"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pR1t",
+		"dnasequence": "GAGAGCTAACTTTATaacttgacaaattggatagttttaggtataataacttgacaaattggatagtt"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "R1t",
+		"dnasequence": "ATGAAGAAGATTCGCCTTCCCGAAATGATTGACTACTTCCGTAAGGAAAACGGCTGGACTATGAAAGAGTTTGGTGAAAAATTAGGGAAGAGTGAGAGCGCTATTAGCAAGTGGATCAAGGGGGTACGCTCCCCTATGGTAGAGGATTTTGACAAGATGGTGAATTTATTTAACACTGACCCAGAAACCCTGATGTATGGTGCGTCAGATTTATCTACGACGTTGAGCGAAATCAATAAGATTTCGAGCCAACTTGAGGAACCGCGCCAGAAGGTTGTACTGAATACGGCAAATAATCAGCTTGACGAACAAAATCAGGAAAAGAAAAAGGAATCTAAAGTCATCCCTATTAACAAAATCCCAGATGACTTACCACCCTACATTAGTCGCAAAATTCTGGAAAATTTTGTAATGCCGACTAACACTATGGAATACGAAGCTGATGAAGATATGGTGGACGTACCCATCCTTGGGCGCATCGCGGCGGGCCTTCCGCTTGACGCGGTAGAAAACTTTGATGGAACGCGCCCAGTCCCTGCACATTTCCTTTCGAGTGCCCGTGATTACTATTGGCTTATGGTGGACGGCCATTCTATGGAACCTAAGATTCCGTACGGAGCATACGTCTTGATCGAAGCCGTCCCCGATGTGAGCGATGGGACCATTGGTGCCGTCTTATTCCATGATGATTGTCAGGCGACGCTGAAAAAGGTATATCACGAGATCGACTGTTTGCGCTTAGTCTCAATTAACAAAGAATTTAAGGACCAATTCGCCACGCAAGATAATCCAGCTGCAGTGATTGGTCAAGCAGTTAAGGTTGAAATCGACTTGTAA"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R5",
+		"dnasequence": "TATTTTTAATAAATAGGGTT"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "BydvJ",
+		"dnasequence": "agggtgtctcaaggtgcgtaccttgactgatgagtccgaaaggacgaaacacccctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "ECK120029600",
+		"dnasequence": "TTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "ElvJ",
+		"dnasequence": "agccccatagggtggtgtgtaccacccctgatgagtccaaaaggacgaaatggggcctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pTuc",
+		"dnasequence": "AGTCTGGGAGGTACTtttcttgacaaaccacgaaaagtggactataatta"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "Tuc2009",
+		"dnasequence": "ATGGTTATCGAACAAATCAACAAGTACGTTGGAAGCAAGATTAAGGATTATCGTAAATCATTTGGACTTTCCCAGGAAGAATTGGCTAAAAAAATTGGAGTCGGCAAAACCACTATCTCTAATTATGAAGTAGGGATCCGCTCACCAAAAAAGCCTCAGCTTATTAAATTATCCGAGGTGTTCGATGTAGCAATTGATGATTTTTTTCCTCAGACTGATAGTACACGCATGAACGTGTCTAGCATCCTGTCCGAAATCAACAAGATTTCCTCCCAGCTTGAAGAACCGCGCCAAAAGATCGTGCTTAATACCGCTACCAACCAACTTGATGAGCAGAATCAAGAAAAGAAAAAGGAAAGTAAGGTCATTCCTATCAATAAGATCCCTGACGATCTTCCACCTTACATTTCCCGCAAAATTTTAGAGAATTTTATTATGCCTTCCAATACGATGGAATATGAACCCGACGAGGACATGGTAGACGTTCCGATTTTGGGGCGTATTGCCGCCGGGTTACCACTGGATGCGGTCGAAAACTTCGATGGAACCCGTCCCGTACCAGCCCATTTCTTATCAAGTGCCCGTGATTACTACTGGTTAATGGTAGACGGTCACAGTATGGAACCGAAGATTCCTTATGGAGCCTACGTGCTGATTGAGGCGGTTCCCGATGTGTCAGACGGTACTATTGGTGCTGTACTTTTCCAAGATGACTGCCAGGCCACGTTAAAGAAGGTATATCACGAGATCGACTGTTTACGCCTGGTGTCCATTAACAAAGAGTTTAAGGATCAGTTTGCCACGCAAGACAATCCTGCTGCTGTTATCGGGCAGGCAGTGAAAGTAGAAATCGATTTGTAA"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R6",
+		"dnasequence": "AGAATATTATTGAAGATAATAGGA"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pVP585",
+		"dnasequence": "GGTGCAGTTTTGTGCgattgcaaaatttgcatttacttttattatcttttttgataaaaact"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "VP585",
+		"dnasequence": "atgaaggaaaataagaggatgatagaaatagatattggcccggtattaaagcgcatccgttatgagcgagggctaacgctacaaaagctgtcacggcttacggatgacaaagtgctaccaagcaacatttcccgcatcgagagtgcgggcgctggcgctacgcttaaaaccttgaccaccttggcgaatgcgctggggacttctccttctgacattcttcgtgaagctgagggcggtgataaggtgatcaccaagccgcagcaagtcctttatgtacctgttttgtcttgggttcaggctggcacctggactgaatcaccagagcagcctgccgatggtgactatgatgaatgggtagaggcaccaagaggcgcatccaggaaggctttcggccttcgagttcaaggggatagtatgcaagcccctatcggcaagtcgttcccggaaggatgctgcatagttgttgacccaaccaaacaagcagataaccgctcgtttgttgttgctcgcctggcagacacaggagagcacacgttcaagcagctgatcattgacgggccgcaccaatatctaaagccgctaaacccaagttaccgaaccatagaagtgaacagcgaagtacacgtctgcggggtcgttttagcatggggtgaagggtacacggtgaacggtatttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R16",
+		"dnasequence": "CGGATCTAGTAGGTACAGTGCAATC"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "SarJ",
+		"dnasequence": "gactgtcgccggatgtgtatccgacctgacgatggcccaaaagggccgaaacagtcctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "DT19",
+		"dnasequence": "TTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAACTCGGTACCAAAGACGAACAATAAGACGCTGAAAAGCGTCTTTTTTCGTTTTGGTCC"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pPhage186",
+		"dnasequence": "TTGTTACCCATACTGtttcgataaaacctatttactatctctcaattgggagatatattttggctaaaccca"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "Phage186",
+		"dnasequence": "atgagaatagattctttaggatggagcaacgtggatgtacttgaccgcatctgcgaggcgtacggattttcgcagaaaattcaattagctaaccacttcgatatcgcgtccagctcattgtcaaacaggtacacccgaggcgctatctcctatgactttgcggctcactgtgcccttgaaacaggtgctaatctccagtggttacttaccggagaaggagaagcatttgtaaataacagagaatcgagcgacgcaaaaaggattgagggattcacattaagtgaagaaatcctcaaatccgataaacaattgagtgttgatgcccaatttttcacaaaaccgctcacagatgggatggctatccgttccgaggggaaaatttattttgtggacaagcaagcatcattgtctgacggcttatggctagtcgacattgagggagcaataagcattcgagagttaacaaaactaccgggtagaaaactacatgttgcaggcgggaaggttcctttcgaatgcggcattgatgatattaaaacgttggggcgtgtggtgggtgtatacagcgaggttaactaa"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R7",
+		"dnasequence": "AAGAGGCGACGTAACATCCTGGAGGCAAGTAATAACT"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "RiboJ10",
+		"dnasequence": "agcgctcaacgggtgtgcttcccgttctgatgagtccgtgaggacgaaagcgcctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "DT83",
+		"dnasequence": "AGCGTCAAAAGGCCGGATTTTCCGGCCTTTTTTATTAGGCAGCATGCTGCCAGGTGATCCCCCTGGCCACCTCTTTT"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "p933W",
+		"dnasequence": "ATTGTCAGAAATGGCacttgcaaaaactttcagttcaaccataatacgtactgaaagtacgaaaaagg"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "933W",
+		"dnasequence": "atggttcagaatgaaaaagtgcgcaaagaattcgcccagcggctagcgcaagcctgtaaagaagctggtcttgatgaacatggtaggggaatggctatagcccgtgccctttctctttcgtccaaaggcgttagcaaatggtttaatgctgagtctttaccgcgtcaggaaaaaatgaatgcgcttgcgaaatttctaaacgttgatgttgtttggcttcagcacggcacttcgttaaatggagcgaatgatgaagatactctttcatttgttggcaaattaaaaaaagggttagtgcgcgtggttggtgaggcaattcttggtgttgatggtgccatcgagatgaccgaagaacgcgatgggtggctcaaaatttatagcgatgatccagatgcctttggtctgcgtgtgaaaggagacagcatgtggcccagaataaaatcaggagaatatgtactcattgagcctaacaccaaagtattcccgggtgatgaggtgtttgtcagaaccgttgaaggacacaacatgattaaggttcttggctatgacagagatggagaataccaatttacaagcattaaccaggatcacaggcctataacgttgccttatcatcaagtagcaaaggtggagtatgtagctggtattctgaagcaatctcgccatctggatgacatcgaggcaagggagtggctgaaaagttcgtga"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R8",
+		"dnasequence": "GCACTACGGAATTAAGCGCTCAA"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R9",
+		"dnasequence": "GCACTACGGCATTAAGCGCTCAA"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "PlmJ",
+		"dnasequence": "agtcataagtctgggctaagcccactgatgagtcgctgaaatgcgacgaaacttatgacctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "DT36",
+		"dnasequence": "GATCTAACTAAAAAGGCCGCTCTGCGGCCTTTTTTCTTTTCACTGTAACAACGGAAACCGGCCATTGCGCCGGTTTTTTTTGGCCT"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pL5",
+		"dnasequence": "TGTTAATGTAATCTGcttgacagccacctcagtcctaggtactgtgctagcttgacagccacc"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "L5",
+		"dnasequence": "atgagcggcaaaatccaacacaaagcagtggttccggcccctagccgaataccactcactctcagcgagatcgaagatcttcgcaggaaggggtttaatcagaccgaaatcgcagagctgtatggcgtgactcgacaagcggtgtcgtggcacaagaaaacctacggaggacggttgaccaccaggcagatcgtccagcagaactggccgtgggacacgcggaaacctcacgataagtcgaaggcttttcagaggctccgggatcacggcgagtacatgcgagtgggtagcttccgcacgatgtccgaagataagaagaagcgcctattgtcgtggtggaagatgctccgcgacgacgacttagtgctcgagttcgacccatccatcgagccctacgaaggtatggccggcggcgggttcaggtacgtcccccgaggcatcgaggatgacgatctcctgatccgggtgaacgagcacaccaacctcaccgccgagggtgaactcctctggtcgtggccagacgacatcgaggagcttctctcggagccctaa"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R10",
+		"dnasequence": "CAATTATAAGGCCTGACGCGT"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "RiboJ60",
+		"dnasequence": "ctgaagtcgtcaagtgctgtgcttgcacttctgatgaggcagtgatgccgaaacgacctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "L3S2P11",
+		"dnasequence": "ctcggtaccaaattccagaaaagagacgctttcgagcgtcttttttcgttttggtcc"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pN15",
+		"dnasequence": "ACGTTAAAACCCACTaaattatacctagctttaattttcacttattgattataataatccc"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "N15",
+		"dnasequence": "atgattaagggtatgaaaacacgaggcgaacgactgaaagcacgccgtttagagctgaaactgacgctgaagcaagtggcagaagctgtaggaatctctcttccgggcgtccaaaacttagaacgtggcgacgtgatgccgtcgctggagatcgggctatcgctggcaaaatgcctgcgtaagcccgtgcaatggatactgtatggcactgaatctgatccagaccgcgttcctgttattggtacgacagaaaccggaccggatagagactggcagcctggagaacctgccaacacagagcgattcctgccgttcgtgagtcaacggaacaccgtttacgcactgacggtcgggaaccagattcagcgaaactaccagccgggagacgttatcctggtcgattcttcacttacgcttgtaccgggtgaggatgtactggtttgtgataataacggcgagatcacaattcaacgattagcccgttatgacgagcagcattactaccttgatagtgctaactctcaacgggttatccatgataaaagtgatcttcaatttgtgcaccaagtagtcggtacgatcaaatcgttcatggttgagggtagatga"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R11",
+		"dnasequence": "CAAGGGAGCAGGAAGAGACTTCGTAAACTGCG"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "ScmJ",
+		"dnasequence": "agcgctgtctgtacttgtatcagtacactgacgagtccctaaaggacgaaacaccgcctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "DT42",
+		"dnasequence": "AGTTAACCAAAAAGGGGGGATTTTATCTCCCCTTTAATTTTTCCTCGCAGATAGCAAAAAAGCGCCTTTAGGGCGCTTTTTTACATTGGTGG"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pP2hd",
+		"dnasequence": "AACTACTACGCAAAAttcaacttctccgaaacgtctattgacataattactccgattgcgtaatttcttg"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pP2",
+		"dnasequence": "ATGATTGGCGACTCGgtttagatctcattgacatggtgtttagatctcaagtactgttagtttagatgtacaattttgttagtttagat"
+	},
+	{
+		"collection": "parts",
+		"type": "promoter",
+		"name": "pWphi",
+		"dnasequence": "TCCTATAAGGACACGcatttgacagtaacctattggtgacttatattcccgtcaaaaggttgtgtattggtgacctt"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "P2hd",
+		"dnasequence": "atgtcaatagacgtttcggagaagttgaagctaatccgtgaatctgaaaggttaaaccgtaaagaattcagtgaattaactggtgtagcctacagctcactttcgagctatgagagccggtcaaaaaacgctggagttgaagccataatgaaggtcttacaacatcctagatttactaaatatactttgtggttcatgactgatcaggtagctccagaagccgggcaaattgcgcccgctctcgcacactttgggcaaaacgaaacaacgtcgccccactccggtcaaaagactggttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "P2",
+		"dnasequence": "atgtcaaacacgataagcgagaagatagtcttaatgcgaaaatcagagtatttgagcagacaacaacttgctgatttaacaggggttccgtatggcacgctgagttactatgaaagtggtcgttcaacacctccaacagatgtcatgatgaacatcctgcagaccccacaattcaccaaatacactttatggttcatgaccaatcagatcgctcctgagtccgggcaaattgcgcccgctctcgcacactttgggcaaaacgaaacaacgtcgccccactccggtcaaaagactggttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "cds",
+		"name": "Wphi",
+		"dnasequence": "atgcagacattcgaaaaactgaaagcgattaggaaagcagaaggcttaacacaggcgaaattcagcgaaattagcgggatagctctaggaacagtcaaaaattacgaaagtgggcataaagaccctggtctgagcatcgttatgcgagtcacaaatacgcctttatttaaaaaatatacgctctggttaatgactggtgatacgtcaccacaagctggtcagatcgcgccggctctcgcacacattgggcaaaaaccaacagaatcagaccactccgaaaaacagactggttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R12",
+		"dnasequence": "TTATCTTAGGTACAGGGCACATAA"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R13",
+		"dnasequence": "CAGGTTATAAGGCCTGCAGCGT"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R14",
+		"dnasequence": "TTTTTCTCCACTACGATGGTAAT"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R15",
+		"dnasequence": "TTTGTCCCTTCCACTAGGCTGGTAAT"
+	},
+	{
+		"collection": "parts",
+		"type": "rbs",
+		"name": "R17",
+		"dnasequence": "TGCCACTTACATTAGCGTTTTTGA"
+	},
+	{
+		"collection": "parts",
+		"type": "ribozyme",
+		"name": "RiboJ64",
+		"dnasequence": "aggagtcaattaatgtgcttttaattctgatgagacggtgacgtcgaaactccctctacaaataattttgtttaa"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "DT56",
+		"dnasequence": "TACCACCGTCAAAAAAAACGGCGCTTTTTAGCGCCGTTTTTATTTTTCAACCTTCCAGGCATCAAATAAAACGAAAGGCTCAGTCGAAAGACTGGGCCTTTCGTTTTATCTGTTGTTTGTCGGTGAACGCTCTC"
+	},
+	{
+		"collection": "parts",
+		"type": "terminator",
+		"name": "DT86",
+		"dnasequence": "TAATCATTCTTAGCGTGACCGGGAAGTCGGTCACGCTACCTCTTCTGAAGAAACAGCAAACAATCCAAAACGCCGCGTTCAGCGGCGTTTTTTCTGCTTTTCT"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "F_scar",
+		"dnasequence": "CGCT"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "E_scar",
+		"dnasequence": "GCTT"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "D_scar",
+		"dnasequence": "AGGT"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "C_scar",
+		"dnasequence": "AATG"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "B_scar",
+		"dnasequence": "TACG"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "A_scar",
+		"dnasequence": "GGAG"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "Y_scar",
+		"dnasequence": "ATTG"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "X_scar",
+		"dnasequence": "TGTC"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "V_scar",
+		"dnasequence": "TCTG"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "U_scar",
+		"dnasequence": "GGGC"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "R_scar",
+		"dnasequence": "GTAA"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "Q_scar",
+		"dnasequence": "GAGT"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "P_scar",
+		"dnasequence": "CCTA"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "O_scar",
+		"dnasequence": "ATGC"
+	},
+	{
+		"collection": "parts",
+		"type": "scar",
+		"name": "G_scar",
+		"dnasequence": "ATAG"
+	}
+]

@@ -7,7 +7,7 @@ import numpy as np
 import logging
 
 
-def get_table_values(table, col_name, input_cnt):
+def get_table_values(table, col_name, input_cnt, next_node=None, conversions=None):
     bar_values: dict[str:float] = {}
 
     col_index = None
@@ -24,13 +24,16 @@ def get_table_values(table, col_name, input_cnt):
                 elif v == 1:
                     bar_label += '+\n'
             elif i == col_index:
-                bar_values[bar_label] = v
+                if next_node and conversions:  # if CM, apply unit_conversion to first bar plot
+                    bar_values[bar_label] = v * conversions[next_node]
+                else:                          # otherwise it would have already been applied
+                    bar_values[bar_label] = v
                 break
 
     return bar_values
 
 
-def plot_bars(filepath, plot_name, best_graph, table, units):
+def plot_bars(filepath, plot_name, best_graph, table, units, convs):
     input_cnt = len(best_graph.inputs)
     output_cnt = len(best_graph.outputs)
 
@@ -54,11 +57,11 @@ def plot_bars(filepath, plot_name, best_graph, table, units):
     for k, o in outputs_dict.items():
         if prev_node := o['prev_node']:
             outputs_dict[k]['name'] = prev_node
-            outputs_dict[k]['scores_pre_HR'] = get_table_values(table, prev_node, input_cnt)
-            outputs_dict[k]['scores_post_HR'] = get_table_values(table, k, input_cnt)
+            outputs_dict[k]['scores_pre_HR']  = get_table_values(table, prev_node, input_cnt, k, convs)
+            outputs_dict[k]['scores_post_HR'] = get_table_values(table, k,         input_cnt)
         else:
             outputs_dict[k]['name'] = k
-            outputs_dict[k]['scores_pre_HR'] = get_table_values(table, k, input_cnt)
+            outputs_dict[k]['scores_pre_HR']  = get_table_values(table, k,         input_cnt)
 
     # fig = plt.subplots()
     px = 1 / plt.rcParams['figure.dpi']
