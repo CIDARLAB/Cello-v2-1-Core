@@ -4,6 +4,214 @@
 		"signal_carrier_units": "RNAP/s",
 		"normalization_instructions": "The values are converted from RPUG (from the Eco2C1G3T1 UCF) to RNAP/s with the following conversion factor: RPU = 0.019 RNAP/s (see 10.15252/msb.20209584).  Note: change unit conversion factors accordingly if using a different or modified UCF."
 	},
+
+
+
+
+
+	{
+		"collection": "output_devices",
+		"name": "BFP_reporter",
+		"model": "BFP_reporter_model",
+		"structure": "BFP_reporter_structure"
+	},
+	{
+		"collection": "models",
+		"name": "BFP_reporter_model",
+		"functions": {
+			"response_function": "linear_response",
+			"input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "unit_conversion",
+				"value": 0.019,
+				"description": "Unit conversion"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "BFP_reporter_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "BFP_reporter_a",
+				"components": [
+					"#in1",
+					"BFP_reporter_cassette"
+				]
+			},
+			{
+				"name": "BFP_reporter_b",
+				"components": [
+					"#in2",
+					"BFP_reporter_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "BFP_reporter_cassette",
+		"type": "cassette",
+		"dnasequence": "GCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGaaagaggagaaaTACTAGATGGTGTCTAAGGGCGAAGAGCTGATTAAGGAGAACATGCACATGAAGCTGTACATGGAGGGCACCGTGGACAACCATCACTTCAAGTGCACATCCGAGGGCGAAGGCAAGCCCTACGAGGGCACCCAGACCATGCGCATCAAGGTGGTCGAGGGCGGCCCTCTCCCCTTCGCCTTCGACATCCTGGCTACTAGCTTCCTCTACGGCAGCAAGACCTTCATCAACCACACCCAGGGCATCCCCGACTTCTTCAAGCAGTCCTTCCCTGAGGGCTTCACATGGGAGCGCGTCACCACATACGAGGACGGGGGCGTGCTGACCGCTACCCAGGACACCAGCCTCCAGGACGGCTGCCTCATCTACAACGTCAAGATCCGGGGGGTGAACTTCACATCCAACGGCCCTGTGATGCAGAAGAAAACACTCGGCTGGGAGGCCTTCACCGAAACCCTGTACCCCGCTGACGGCGGCCTGGAAGGCCGTAACGACATGGCCCTGAAGCTCGTGGGCGGGAGCCATCTGATCGCAAACGCCAAGACCACATATCGTTCCAAGAAACCCGCTAAGAACCTCAAGATGCCTGGCGTCTACTATGTGGACTACCGCCTGGAACGTATCAAGGAGGCCAACAACGAAACGTACGTCGAGCAGCACGAGGTGGCAGTGGCCCGGTACTGCGACCTCCCTAGCAAACTGGGGCACAAGCTTAATTAAAGGAAACACAGAAAAAAGCCCGCACCTGACAGTGCGGGCTTTTTTTTTCGACCAAAGG"
+	},
+
+
+
+
+
+	{
+		"collection": "output_devices",
+		"name": "RFP_reporter",
+		"model": "RFP_reporter_model",
+		"structure": "RFP_reporter_structure"
+	},
+	{
+		"collection": "models",
+		"name": "RFP_reporter_model",
+		"functions": {
+			"response_function": "linear_response",
+			"input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "unit_conversion",
+				"value": 0.019,
+				"description": "Unit conversion"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "RFP_reporter_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "RFP_reporter_a",
+				"components": [
+					"#in1",
+					"RFP_reporter_cassette"
+				]
+			},
+			{
+				"name": "RFP_reporter_b",
+				"components": [
+					"#in2",
+					"RFP_reporter_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "RFP_reporter_cassette",
+		"type": "cassette",
+		"dnasequence": "agaagtcaattaatgtgcttttaattctgatgagtcggtgacgacgaaacttcctctacaaataattttgtttaaTACTAGAGAAAGAGGGGAAATACTAGATGGCTTCCTCCGAAGACGTTATCAAAGAGTTCATGCGTTTCAAAGTTCGTATGGAAGGTTCCGTTAACGGTCACGAGTTCGAAATCGAAGGTGAAGGTGAAGGTCGTCCGTACGAAGGTACCCAGACCGCTAAACTGAAAGTTACCAAAGGTGGTCCGCTGCCGTTCGCTTGGGACATCCTGTCCCCGCAGTTCCAGTACGGTTCCAAAGCTTACGTTAAACACCCGGCTGACATCCCGGACTACCTGAAACTGTCCTTCCCGGAAGGTTTCAAATGGGAACGTGTTATGAACTTCGAAGACGGTGGTGTTGTTACCGTTACCCAGGACTCCTCCCTGCAAGACGGTGAGTTCATCTACAAAGTTAAACTGCGTGGTACCAACTTCCCGTCCGACGGTCCGGTTATGCAGAAAAAAACCATGGGTTGGGAAGCTTCCACCGAACGTATGTACCCGGAAGACGGTGCTCTGAAAGGTGAAATCAAAATGCGTCTGAAACTGAAAGACGGTGGTCACTACGACGCTGAAGTTAAAACCACCTACATGGCTAAAAAACCGGTTCAGCTGCCGGGTGCTTACAAAACCGACATCAAACTGGACATCACCTCCCACAACGAAGACTACACCATCGTTGAACAGTACGAACGTGCTGAAGGTCGTCACTCCACCGGTGCTTAAGATGTGGGGTCCGATCTAACTAAAAAGGCCgctCTGCGGCCTTTTTTCTTTTCACT"
+	},
+
+
+
+
+
+	{
+		"collection": "output_devices",
+		"name": "YFP_reporter",
+		"model": "YFP_reporter_model",
+		"structure": "YFP_reporter_structure"
+	},
+	{
+		"collection": "models",
+		"name": "YFP_reporter_model",
+		"functions": {
+			"response_function": "linear_response",
+			"input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "unit_conversion",
+				"value": 0.019,
+				"description": "Unit conversion"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "YFP_reporter_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "YFP_reporter_a",
+				"components": [
+					"#in1",
+					"YFP_reporter_cassette"
+				]
+			},
+			{
+				"name": "YFP_reporter_b",
+				"components": [
+					"#in2",
+					"YFP_reporter_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"name": "YFP_reporter_cassette",
+		"type": "cassette",
+		"dnasequence": "AGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGAAAGAGGAGAAATACTAGATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACAGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCTTCGGCTACGGCCTGCAATGCTTCGCCCGCTACCCCGACCACATGAAGCTGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCAATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTTAGCTACCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAAGCTCATGTATGTGTCTACGCGAGATTCTCGCCCGAGAACTTCTGCAAGGCACTGCTCTTGGCT"
+	},
+	{
+		"collection": "functions",
+		"name": "linear_response",
+		"equation": "c * x",
+		"variables": [
+			{
+				"name": "x",
+				"map": "#//model/functions/input_composition"
+			}
+		],
+		"parameters": [
+			{
+				"name": "c",
+				"map": "#//model/parameters/unit_conversion"
+			}
+		]
+	},
+
+
+	
+
+
 	{
 		"collection": "output_devices",
 		"name": "OC6_out",
@@ -75,6 +283,78 @@
 		"type": "cassette",
 		"name": "sLux_cassette",
 		"dnasequence": "agcgctcaacgggtgtgcttcccgttctgatgagtccgtgaggacgaaagcgcctctacaaataattttgtttaacggttccaaagccagatactaaggaggtcccAcATGactataatgataaaaaaatcggattttttggcaattccatcggaggagtataaaggtattctaagccttcgttatcaagtgtttaagcaaagacttgagtgggacttagttgtagaaaataaccttgaatcagatgagtatgataactcaaatgcagaatatatttatgcttgtgatgatactgaaaatgtaagtggatgctggcgtttattacctacaacaggtgattatatgctgaaaagtgtttttcctgaattgcttggtcaacagagtgctcccaaagatcctaatatagtcgaattaagtcgttttgctgtaggtaaaaatagctcaaagataaataactctgctagtgaaattacaatgaaactatttgaagctatatataaacacgctgttagtcaaggtattacagaatatgtaacagtaacatcaacagcaatagagcgatttttaaagcgtattaaagttccttgtcatcgtattggagacaaagaaattcatgtattaggtgatactaaatcggttgtattgtctatgcctattaatgaacagtttaaaaaagcagtcttaaattaatagCTTATTCCATAACAAAGCCGGGTAATTCCCGGCTTTGTTGTATCTGAACAATAAATGGATGCCCTGCGTAAGCGGGGCATTTTTCTTCCT"
+	},
+	{
+		"collection": "output_devices",
+		"name": "OHC12_out",
+		"model": "OHC12_out_model",
+		"structure": "OHC12_out_structure",
+		"description": "comms_device"
+	},
+	{
+		"collection": "models",
+		"name": "OHC12_out_model",
+		"functions": {
+            "response_function": "Hill_response",
+            "input_composition": "linear_input_composition"
+		},
+		"parameters": [
+			{
+				"name": "ymax",
+				"value": 0.0646,
+				"description": "Maximal transcription (3.4 RPU * 0.019 for conversion to RNAP/s)"
+			},
+			{
+				"name": "ymin",
+				"value": 0.00019,
+				"description": "Minimal transcription (0.01 RPU * 0.019 for conversion to RNAP/s)"
+			},
+			{
+				"name": "kd",
+				"value": 0.3,
+				"description": "Dissociation equilibrium constant"
+			},
+			{
+				"name": "n",
+				"value": 3.9,
+				"description": "Cooperativety"
+			},
+			{
+				"name": "unit_conversion",
+				"value": 0.102,
+				"description": "Unit conversion"
+			}
+		]
+	},
+	{
+		"collection": "structures",
+		"name": "OHC12_out_structure",
+		"inputs": [
+			{
+				"name": "in1",
+				"part_type": "promoter"
+			},
+			{
+				"name": "in2",
+				"part_type": "promoter"
+			}
+		],
+		"devices": [
+			{
+				"name": "OHC12_out_a",
+				"components": [
+					"#in1",
+					"#in2",
+					"sCin_cassette"
+				]
+			}
+		]
+	},
+	{
+		"collection": "parts",
+		"type": "cassette",
+		"name": "sCin_cassette",
+		"dnasequence": "gctgtcaccggatgtgctttccggtctgatgagtccgtgaggacgaaacagcctctacaaataattttgtttaatggttccaaagccagatactaaggaggtcccAATGttcgttatcatccaggctcacgaataccagaaatacgctgctgttctggaccagatgttccgtctgcgtaaaaaagttttcgctgacaccctgtgctgggacgttccggttatcggtccgtacgaacgtgactcctacgactccctggctccggcttacctggtttggtgcaacgactcccgtacccgtctgtacggtggtatgcgtctgatgccgaccaccggtccgaccctgctgtacgacgttttccgtgaaaccttcccggacgctgctgacctgatcgctccgggtatctgggaaggtacccgtatgtgcatcgacgaagaagctatcgctaaagacttcccggaaatcgacgctggtcgtgctttctccatgatgctgctggctctgtgcgaatgcgctctggaccacggtatccacaccatgatctccaactacgaaccgtacctgaaacgtgtttacaaacgtgctggtgctgaagttgaagaactgggtcgtgctgacggttacggtaaatacccggtttgctgcggtgctttcgaagtttccgaccgtgttctgcgtaaaatgcgtgctgctctgggtctgaccctgccgctgtacgttcgtcacgttccggctcgttccgttgttacccagttcctggaaatggctgcttaatagccaggcatcaaataaaacgaaaggctcagtcgaaagactgggcctttcgttttatctgttgtttgtcggtgaacgctctctactagagtcacactggctcaccttcgggtgggcctttctgcgtttata"
 	},
 	{
 		"collection": "output_devices",
@@ -220,6 +500,11 @@
 		"name": "sPhl_cassette",
 		"dnasequence": "actcttcctttttcaatattattgaagcatttatcagggttattgtctcatgagcggatacatatttgaatgtatttagaaaaataaacaaataggggttccgcgTACATCAGAGATTTTGAGACACAaGTACNNNNNNNNNNNNNNNNNNNNCGTAagctgtcaccggatgtgctttccggtctgatgagtccgtgaggacgaaacagcctctacaaataattttgtttaaGTGAAAGAACGGAATCTGGAGGATGTACACATGAATAAGGTAGGAATTGTGAGCTATGGCGCGGGTATCCCGGTCTGCCGGCTCAAGGTGGACGACGTGATCCAGGTGTGGAAAAACACCGATCTGAGTTTGGTAAAGGGCCAATTGGGCGTTATTGAAAGGGCCGTCCTGCAACCCGACGAAGATGTCATAACCTTGGGTGTCCTCGCCGCCCAACGCGCGCTGGACAAGGCACCACCTTGTTCCCTCGAAGCGCTTTATCTCGGCACCTGCACCAATCCTTATGACTCCCGGGCCTCGGCCGCAATCATCCTGGAAATGCTCGGCTGCGGCTATGACGCCTTTTGCGCAGACGTGCAGTTTGCCGGCAAATCAGGCACCAGCGCCCTCCAGATCGCATACGCCTTGGTAGCGTCGGGCATGGTGGGCAACGCTTTGGCGGTGGGTGCCGATACGATCAACCGCAACACCGCCCCCGGTGACTTGACGGAGTCCTATGCCGGAGCCGGGGCCGCGGCCTTGCTGTTGGGGACAGAAAATGTGATCGCGCATTTTGACGCAAGTTTTTCTTGCGCGGCGGATGTCGCTGACAACATCAGGCCTCAAGGGGACCGCTATATCCGCTCGGGAATGGGATTGGGCTCGGACAAGAACAGTATCGGCCTCGAGGACCAGACTCGCCGCGCCGCCTCGGGATTGATGGCCAAGATCCATGCGCAAGCCGATGATTTCGATTACGTCGTTTTCCAACAAAACCTGGTGTCGACCCCCTACTCTCTCGGCAAGCACCTGGGATTCACGAAGGCCCAAATCGAACCTGGCATCTACGCCCAGAGTGTCGGCGATGCTGGAGCCGCGAGTCCTTTACTGGGCTTGGTCAACGTACTCGATCAAGCGCGTCCTGGCGAAAGAATCCTGGTGGTTTCCTATGGCTTCGGTGCGGGCAGCGATGCCATCGCCTTGACCGTCACCGATGCCATCGAAGCCTATCAAAAGACCAACGTTCCGCTGCGCACGCAGCTGGAGGATAAGTACTACGTGGATTACGGGACGTCGATCAAGTACGAGTTCAAATACTTGCGGCCCGACTATGCCCTGACGGCCTATCTCTGATTCCAATCATCCAGCAAGGAGCACCTTTTTATGTGCGCACGACGCGTTGCTATCGTTTCGGCTGCCTATACCCCTAAACCTGGCAGTTCCAGAGTTCGCCAGACTTTCAAGGAGATGATCGTCGAGTCCGCCTACCAGGCACTCAACGCCATCAAGATGCACCCTCGCGAACTTCAGGCAGTTGCCTATGGGTACCATGGTGAAGGTATTTCTGAATACGGAGGTCTGGGCCCAACCATCTCCGATGCCTTGGGGATCAGCCCTGCCCCCACGTTCATGAGTACGGCCAACTGCACCAGCAGTTCGGTGTCTTTCCAGATGGCTCACCAAATGGTCGCCTCAGGTGAATACGACATCGTTCTGTGTGGCGGCTTTGAAAAAATGACCGATCACTTCAACTATGCCGAGTACATTGGCTCGAGCACTGAATGTGAATACGATTATTTTCTAGGCATCTCTCACACAGACGCCTTCGCCCTGGCGACCGCCGAATATTTTGAAAAGTACGGCTATGCAGGACGCGAAGCGGATGTATTGGCCACTTTCGGGCGGCAGATGCGCATTTATGCCCATAACACTCCCACGGCTACCCGTTATGGCGTGCCGATCCCGTCTCTCGAAACACTCAAAAGCAGCGAAGCATGCGGCTCCATGCTGGCCTGGGGTGAAGCCAGCGGTTGCGCCATCCTGGTTGCCGAACACCTTGTGCACCGCTACACGACCCAACCGGTATTTGTCCGTGGCTGTGCCTACACCGGTGTGTCGCATTATTTCGGCACGCGCTATCACAACCCGACGTTGCAATTTCCGGGGCTGCCAAAAGATGTCGGCATGGCGGTTTCCGCCAACTCGCTGGCCTGCGCCGAAATCGCCTACAAAAAAGCCGGTATCACCGCAAAGGATATCGATGTGGCGCAAGTCTACGACTTGCTGGGCGCCGGGTTGATTCAAATGGAGTCCATGGGCGTATGTGGTCCAGGCCAGGCAGGCGACTTTGTATTGGAAGGCGGCATAGCCCTTGATGGGCAACTTCCCCTGAACACTGACGGCGGCAACATCGGACGCGGCCACGCTTCCGGTTGCGATGGGATTTTGCACATTACTGAATTGTTCCGGCAGCTTCGCGGCGAGTCCAACAATCAAGTCAAAGGCGCGCGTATTGGCGTCTCGCAAAACCTGGGCGGTTACGCCGCGCACAACAGCGTCATTGTGCTTTCCAACGATTAAGGAGCCGACCATGTCCCTTTACCCTGAACAAATTCACCGCATGACCACCGCCAGCATGTTGCGCGAATGGCGCGAACACGGTGGCAAATACCGCCTCGAAGGCAGCCGATGCCAGGACTGCGAAGAAATCTTCTTCCCTCGGCGCACAGTTTGCGGTGCGTGCAACTCGTTGAATGTAGAACCGTATCGCTGCGCGCGCACCGGCACTATCCAGGTCAGCGCACACGCCGAGAACCCCATTCTTGCGGCCATGGGCTACGGCGAAACCGTGCCCCGCTTCATGGCGATGGTGCGCCTGGATGATGGTCTGGTGATTGCCTCGGAAATAGTTGACGTCATCGATCCGCGACAAGTCGTCAGCGGTGCGCCCGTGCGCATGGTCATTCGAAAACATGTCCGGGAAAGTAACTTGGCCTGGCAATATGCCTATAAGTTTGTATTGGTGAAATAACAAACTTAGACGCCGCCATACCCCGCGTTATCGATAACAACAGTCAAGTTTTTGGCCTCCAAGCCCGTTGCTTTGATTCTGTCTTTCAGAGTCCAGCTTTGCTGTTATTGCCTTAAACATGTTTCTAACTTTATTGGCTTTTAGCCGAGGACTTGTCATGTCTACTCTTTGCAAACCCAGTCTGCTGTTCCCGCAATATAAGATCACCCAGCAACAAATGATCGAGCATCTAGAGCAGTTGCATGATGATCACCCGAGAATGGCTCTTGCCAAACGCATGATTCAAAACACACAGGTGAACGAACGATACTTGGTCCTGCCCATTGATGAACTGGCGGTGCATACCGGCTTCACCCATCGCAGCATTGTTTATGAGCGCGAGGCCCGCCGCATGTCATCCATCGCGGCGCGCCAAGCCATCGAGAATGCCGGGCTGACCACCGACGACATTCGAATGGTCGCTGTGACATCGTGCACGGGTTTCATGATGCCTTCGCTGACGGCCCACTTGATCAACGACCTGGGCCTGCGAACATCGACCGTACAACTGCCTATCGCTCAATTGGGATGCGTGGCAGGCGCTGCGGCGATCAATCGAGCCAATGACTTCGCCAGCCTGGCGCCGGACAACCATGTGCTCATCGTCTCCCTGGAGTTCTCGTCGCTCTGCTATCAACCCCAGGACACCAAGTTGCACGCATTCATCTCAGCGGCATTATTCGGCGATGCGGTATCAGCCTGCGTAATGCGAGCCGACGATCAGGCGTCTGGTTTCAAGATCGCCAAGACGGGGTCTTACTTCCTGCCTGATAGCGAGCACTATATTAAATACGACGTCAAAGACAGTGGCTTTCACTTCACCCTGGACAAGGCGGTCATGAACTCCATTAAAGATGTCGCACCCATGATGGAGGAATTGAACTACGAAACCTTCAATCAACATTGCGCTCAAAATGACTTTTTCATCTTCCATACAGGCGGACGGAAAATTCTTGATGAACTGGTCCTGCAATTGGACTTGGAACCCGGCAGGGTCGCGCAATCCCGCGACAGTTTGAGCGAAGCCGGGAACATCGCCAGCGTGGTGGTTTTCGATGTGCTCAAGCGCCAGTTCGACAGCGGACCTGTCAATGGCGCGACGGGCATGTTGGCGGCCTTCGGCCCGGGTTTCACCGCTGAAATGGCCGTGGGCAAGTGGGTCGCCTGAcaaataaaacgaaaggctcagtcgaaagactgggcctttcgttttatctgttgtttgtcggtgaacgctctctactagagtcacactggctcaccttcgggtgggcctttctgcgtttataAGGTGCTTCCTCGCTCACTGactcgctgcacgaggcagacctcagcgctagcggagtgtatactggcttactatgttggcactgatgagggtgtcagtgaagtgcttcatgtggcaggagaaaaaaggctgcaccggtgcgtcagcagaatatgtgatacaggatatattccgcttcctcgctcactgactcgctacgctcggtcgttcgactgcggcgagcggaaatggcttacgaacggggcggagatttcctggaagatgccaggaagatacttaacagggaagtgagagggccgcggcaaagccgtttttccataggctccgcccccctgacaagcatcacgaaatctgacgctcaaatcagtggtggcgaaacccgacaggactataaagataccaggcgtttccccCtggcggctccctcgtgcgctctcctgttcctgcctttcggtttaccggtgtcattccgctgttatggccgcgtttgtctcattccacgcctgacactcagttccgggtaggcagttcgctccaagctggactgtatgcacgaaccccccgttcagtccgaccgctgcgccttatccggtaactatcgtcttgagtccaacccggaaagacatgcaaaagcaccactggcagcagccactggtaattgatttagaggagttagtcttgaagtcatgcgccggttaaggctaaactgaaaggacaagttttggtgactgcgctcctccaagccagttacctcggttcaaagagttggtagctcagagaaccttcgaaaaaccgccctgcaaggcggttttttcgttttcagagcaagagattacgcgcagaccaaaacgatctcaagaagatcatcttattaaATTCTCACCAATAAAAAACGCCCGGCGGCAACCGAGCGTTCTGAACAAATCCAGATGGAGTTCTGAGGTCATTACTGGATCTATCAACAGGAGTCCAAGCGAGCTTTAGAAAAACTCATCGAGgttaggtggcggtacttgggtcgatatcaaagtgcatcacttcttcccgtatgcccaactttgtatagagagccactgcgggatcgtcaccgtaatctgcttgcacgtagatcacataagcaccaagcgcgttggcctcatgcttgaggagattgatgagcgcggtggcaatgccctgcctccggtgctcgccggagactgcgagatcatagatatagatctcactacgcggctgctcaaacttgggcagaacgtaagccgcgagagcgccaacaaccgcttcttggtcgaaggcagcaagcgcgatgaatgtcttactacggagcaagttcccgaggtaatcggagtccggctgatgttgggagtaggtggctacgtctccgaactcacgaccgaaaagatcaagagcagtccgcatggatttgacttggtcagggccgagcctacatgtgcgaatgatgcccatacttgagccacctaactttgttttagggcgactgccctgctgcgtaacatcgttgctgctgcgtaacatcgttgctgctccataacatcaaacatcgacccacggcgtaacgcgcttgctgcttggatgcccgaggcatagactgtacaaaaaaacagtcataacaagccatgaaaaccgccactgcgccgttaccaccgctgcgttcggtcaaggttctggaccagttgcgtgagcgcatacgctacttgcattacagtttacgaaccgaacaggcttatgtcaattcggttgaatactcat"
 	},
+
+
+
+
+
 	{
 		"collection": "functions",
 		"name": "Hill_response",
@@ -259,5 +544,32 @@
 				"map": "#//structure/inputs/in1/model/functions/response_function"
 			}
 		]
+	},
+
+
+
+
+
+	{
+        "collection": "circuit_rules",
+        "rules": {
+            "function": "AND",
+            "rules": [
+					"OC6_out_a AFTER attB5",
+					"OHC12_out_a AFTER attB5",
+					"DAPG_out_a AFTER attB5",
+					"pC-HSL_out_a AFTER attB5",
+					"ALL_FORWARD"
+            ]
+        }
+    },
+	{
+		"collection": "device_rules",
+		"rules": {
+			"function": "AND",
+			"rules": [
+				"ALL_FORWARD"
+			]
+		}
 	}
 ]
